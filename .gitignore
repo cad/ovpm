@@ -1,0 +1,72 @@
+compress
+data_import/
+*.db
+*.py[cod]
+production.conf
+credentialsrc
+
+# C extensions
+.#*
+*.c
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+var
+sdist
+develop-eggs
+.installed.cfg
+
+*_build
+*_static
+*_templates
+
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+htmlcov
+*.dat
+*.tfstate
+*.tfstate.backup
+
+# Docs
+doc/_build
+
+# Translations
+*.mo
+
+# Idea
+.idea
+
+# System
+.DS_Store
+
+# VIM swap files
+.*.swp
+
+# VIM temp files
+*~
+.venv
+.DS_Store
+*.log
+node_modules
+build
+*.node
+coverage
+*.orig
+.idea
+.cache
+sandbox
+test/out-fixtures/*
+test/watch-*.txt
+gulp.1
