@@ -1,4 +1,3 @@
-bindata.go
 compress
 data_import/
 *.db
