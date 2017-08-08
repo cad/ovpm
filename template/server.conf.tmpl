@@ -151,6 +151,7 @@ client-config-dir {{ .CCDPath }}
 # Then add this line to ccd/Thelonious:
 #   ifconfig-push 10.9.0.1 10.9.0.2
 
+crl-verify {{ .CRLPath }}
 # Suppose that you want to enable different
 # firewall access policies for different groups
 # of clients.  There are two methods:
