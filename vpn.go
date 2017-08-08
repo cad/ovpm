@@ -5,15 +5,50 @@ package ovpm
 import (
 	"bytes"
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/asaskevich/govalidator"
-	"github.com/google/uuid"
+	"math/big"
 	"net"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
+	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
 )
+
+// DBNetwork is database model for external networks on the VPN server.
+type DBNetwork struct {
+	gorm.Model
+	ServerID uint
+	Server   DBServer
+
+	Name        string
+	NetworkCIDR string
+}
+
+// DBServer is database model for storing VPN server related stuff.
+type DBServer struct {
+	gorm.Model
+	Name         string `gorm:"unique_index"` // Server name.
+	SerialNumber string
+
+	Hostname string // Server's ip address or FQDN
+	Port     string // Server's listening port
+	Cert     string // Server RSA certificate.
+	Key      string // Server RSA private key.
+	CACert   string // Root CA RSA certificate.
+	CAKey    string // Root CA RSA key.
+	Net      string // VPN network.
+	Mask     string // VPN network mask.
+	CRL      string // Certificate Revocation List
+}
+
+// CheckSerial takes a serial number and checks it against the current server's serial number.
+func (s *DBServer) CheckSerial(serialNo string) bool {
+	return serialNo == s.SerialNumber
+}
 
 type _VPNServerConfig struct {
 	CertPath     string
@@ -21,17 +56,22 @@ type _VPNServerConfig struct {
 	CACertPath   string
 	CAKeyPath    string
 	CCDPath      string
+	CRLPath      string
 	DHParamsPath string
 	Net          string
 	Mask         string
 	Port         string
 }
 
-// CreateServer generates keys and certs for a Root CA, and saves them in the database.
-func CreateServer(serverName string, hostname string, port string) error {
+// InitServer regenerates keys and certs for a Root CA, and saves them in the database.
+func InitServer(serverName string, hostname string, port string) error {
 	if CheckBootstrapped() {
-		return fmt.Errorf("server is already created")
+		if err := DeleteServer("default"); err != nil {
+			logrus.Errorf("server can not be deleted: %v", err)
+			return err
+		}
 	}
+
 	if !govalidator.IsHost(hostname) {
 		return fmt.Errorf("validation error: hostname:`%s` should be either an ip address or a FQDN", hostname)
 	}
@@ -47,7 +87,12 @@ func CreateServer(serverName string, hostname string, port string) error {
 	}
 	serialNumber := uuid.New().String()
 
-	serverInstance := Server{
+	// crl, err := MakeCRL([]*big.Int{})
+	// if err != nil {
+	// 	return fmt.Errorf("can not create server crl: %v", err)
+	// }
+
+	serverInstance := DBServer{
 		Name: serverName,
 
 		SerialNumber: serialNumber,
@@ -73,7 +118,7 @@ func CreateServer(serverName string, hostname string, port string) error {
 	}
 	// Sign all users in the db with the new server
 	for _, user := range users {
-		err := SignUser(user.Username)
+		err := user.Sign()
 		logrus.Infof("user certificate changed for %s, you should run: $ ovpm user export-config --user %s", user.Username, user.Username)
 		if err != nil {
 			logrus.Errorf("can not sign user %s: %v", user.Username, err)
@@ -89,21 +134,21 @@ func DeleteServer(serverName string) error {
 		return fmt.Errorf("server not found")
 	}
 
-	db.Unscoped().Delete(&Server{})
+	db.Unscoped().Delete(&DBServer{})
+	db.Unscoped().Delete(&DBRevoked{})
 	return nil
 }
 
-// DumpUserOVPNConf combines a specially generated config for the client with CA's and Client's certs and Clients key then dumps them to the specified path.
-func DumpUserOVPNConf(username, outPath string) error {
+func sDumpUserOVPNConf(username string) (string, error) {
 	var result bytes.Buffer
 	user, err := GetUser(username)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	server, err := GetServerInstance()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	params := struct {
@@ -121,38 +166,47 @@ func DumpUserOVPNConf(username, outPath string) error {
 	}
 	data, err := Asset("template/client.ovpn.tmpl")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	t, err := template.New("client.ovpn").Parse(string(data))
 	if err != nil {
-		return fmt.Errorf("can not parse client.ovpn.tmpl template: %s", err)
+		return "", fmt.Errorf("can not parse client.ovpn.tmpl template: %s", err)
 	}
 
 	err = t.Execute(&result, params)
 	if err != nil {
-		return fmt.Errorf("can not render client.ovpn: %s", err)
+		return "", fmt.Errorf("can not render client.ovpn: %s", err)
 	}
 
+	return result.String(), nil
+}
+
+// DumpUserOVPNConf combines a specially generated config for the client with CA's and Client's certs and Clients key then dumps them to the specified path.
+func DumpUserOVPNConf(username, outPath string) error {
+	result, err := sDumpUserOVPNConf(username)
+	if err != nil {
+		return err
+	}
 	// Wite rendered content into openvpn server conf.
-	return emitToFile(outPath, result.String(), 0)
+	return emitToFile(outPath, result, 0)
 
 }
 
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
 func Emit() error {
 	// Check dependencies
-	if !checkOpenVPNBinary() {
-		return fmt.Errorf("openvpn binary can not be found! you should install OpenVPN on this machine")
+	if !checkOpenVPNExecutable() {
+		return fmt.Errorf("openvpn executable can not be found! you should install OpenVPN on this machine")
 	}
 
-	if !checkOpenSSLBinary() {
-		return fmt.Errorf("openssl binary can not be found! you should install openssl on this machine")
+	if !checkOpenSSLExecutable() {
+		return fmt.Errorf("openssl executable can not be found! you should install openssl on this machine")
 
 	}
 
-	if !checkIptablesBinary() {
-		return fmt.Errorf("iptables binary can not be found")
+	if !checkIptablesExecutable() {
+		return fmt.Errorf("iptables executable can not be found")
 	}
 
 	if !CheckBootstrapped() {
@@ -191,6 +245,10 @@ func Emit() error {
 		return fmt.Errorf("can not emit iptables conf: %s", err)
 	}
 
+	if err := emitCRL(); err != nil {
+		return fmt.Errorf("can not emit crl: %s", err)
+	}
+
 	logrus.Info("changes are applied to the filesystem")
 
 	return nil
@@ -211,6 +269,15 @@ func emitToFile(filePath, content string, mode uint) error {
 }
 
 func emitServerConf() error {
+	serverInstance, err := GetServerInstance()
+	if err != nil {
+		return fmt.Errorf("can not retrieve server: %v", err)
+	}
+	port := DefaultVPNPort
+	if serverInstance.Port != "" {
+		port = serverInstance.Port
+	}
+
 	var result bytes.Buffer
 
 	server := _VPNServerConfig{
@@ -219,10 +286,11 @@ func emitServerConf() error {
 		CACertPath:   DefaultCACertPath,
 		CAKeyPath:    DefaultCAKeyPath,
 		CCDPath:      DefaultVPNCCDPath,
+		CRLPath:      DefaultCRLPath,
 		DHParamsPath: DefaultDHParamsPath,
 		Net:          DefaultServerNetwork,
 		Mask:         DefaultServerNetMask,
-		Port:         DefaultVPNPort,
+		Port:         port,
 	}
 	data, err := Asset("template/server.conf.tmpl")
 	if err != nil {
@@ -244,8 +312,8 @@ func emitServerConf() error {
 }
 
 // GetServerInstance returns the default server from the database.
-func GetServerInstance() (*Server, error) {
-	var server Server
+func GetServerInstance() (*DBServer, error) {
+	var server DBServer
 	db.First(&server)
 	if db.NewRecord(server) {
 		return nil, fmt.Errorf("can not retrieve server from db")
@@ -255,7 +323,7 @@ func GetServerInstance() (*Server, error) {
 
 // CheckBootstrapped checks if there is a default server in the database or not.
 func CheckBootstrapped() bool {
-	var server Server
+	var server DBServer
 	db.First(&server)
 	if db.NewRecord(server) {
 		return false
@@ -281,6 +349,23 @@ func emitServerCert() error {
 
 	// Write rendered content into the cert file.
 	return emitToFile(DefaultCertPath, server.Cert, 0)
+}
+
+func emitCRL() error {
+	var revokedDBItems []*DBRevoked
+	db.Find(&revokedDBItems)
+	var revokedCertSerials []*big.Int
+	for _, item := range revokedDBItems {
+		bi := big.NewInt(0)
+		bi.SetString(item.SerialNumber, 16)
+		revokedCertSerials = append(revokedCertSerials, bi)
+	}
+	crl, err := MakeCRL(revokedCertSerials)
+	if err != nil {
+		return fmt.Errorf("can not emit crl: %v", err)
+	}
+
+	return emitToFile(DefaultCRLPath, crl, 0)
 }
 
 func emitCACert() error {
@@ -375,35 +460,35 @@ func emitIptables() error {
 	return nil
 }
 
-func checkOpenVPNBinary() bool {
+func checkOpenVPNExecutable() bool {
 	cmd := exec.Command("which", "openvpn")
 	output, err := cmd.Output()
 	if err != nil {
 		logrus.Errorf("openvpn is not installed: %s  ✘", err)
 		return false
 	}
-	logrus.Infof("openvpn binary detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Infof("openvpn executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
 }
 
-func checkOpenSSLBinary() bool {
+func checkOpenSSLExecutable() bool {
 	cmd := exec.Command("which", "openssl")
 	output, err := cmd.Output()
 	if err != nil {
 		logrus.Errorf("openssl is not installed: %s  ✘", err)
 		return false
 	}
-	logrus.Infof("openssl binary detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Infof("openssl executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
 }
 
-func checkIptablesBinary() bool {
+func checkIptablesExecutable() bool {
 	cmd := exec.Command("which", "iptables")
 	output, err := cmd.Output()
 	if err != nil {
 		logrus.Errorf("iptables is not installed: %s  ✘", err)
 		return false
 	}
-	logrus.Infof("iptables binary detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Infof("iptables executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
 }

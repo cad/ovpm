@@ -2,13 +2,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
+	"github.com/cad/ovpm/pb"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
-	"os"
-	"time"
 )
 
 var action string
@@ -23,6 +25,10 @@ func main() {
 			Name:  "verbose",
 			Usage: "verbose output",
 		},
+		cli.StringFlag{
+			Name:  "daemon-port",
+			Usage: "port number for OVPM daemon to call",
+		},
 	}
 	app.Before = func(c *cli.Context) error {
 		logrus.SetLevel(logrus.WarnLevel)
@@ -30,6 +36,7 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 		return nil
+
 	}
 	app.Commands = []cli.Command{
 		{
@@ -41,12 +48,20 @@ func main() {
 					Usage: "List VPN users.",
 					Action: func(c *cli.Context) error {
 						action = "user:list"
-						server, err := ovpm.GetServerInstance()
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+						vpnSvc := pb.NewVPNServiceClient(conn)
+
+						server, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
 						if err != nil {
+							logrus.Errorf("can not get server status: %v", err)
 							os.Exit(1)
 							return err
 						}
-						users, err := ovpm.GetAllUsers()
+
+						resp, err := userSvc.List(context.Background(), &pb.UserListRequest{})
 						if err != nil {
 							logrus.Errorf("users can not be fetched: %v", err)
 							os.Exit(1)
@@ -55,8 +70,8 @@ func main() {
 						table := tablewriter.NewWriter(os.Stdout)
 						table.SetHeader([]string{"#", "username", "created at", "valid crt"})
 						//table.SetBorder(false)
-						for i, user := range users {
-							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.CreatedAt.Format(time.UnixDate), fmt.Sprintf("%t", server.CheckSerial(user.ServerSerialNumber))}
+						for i, user := range resp.Users {
+							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
 							table.Append(data)
 						}
 						table.Render()
@@ -86,13 +101,19 @@ func main() {
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
 						}
-						user, err := ovpm.CreateUser(username, password)
+
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+
+						response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password})
 						if err != nil {
 							logrus.Errorf("user can not be created '%s': %v", username, err)
 							os.Exit(1)
 							return err
 						}
-						logrus.Infof("user created: %s", user.Username)
+						logrus.Infof("user created: %s", response.Users[0].Username)
 						return nil
 					},
 				},
@@ -113,7 +134,13 @@ func main() {
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
 						}
-						err := ovpm.DeleteUser(username)
+
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+
+						_, err := userSvc.Delete(context.Background(), &pb.UserDeleteRequest{Username: username})
 						if err != nil {
 							logrus.Errorf("user can not be deleted '%s': %v", username, err)
 							os.Exit(1)
@@ -140,7 +167,14 @@ func main() {
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
 						}
-						err := ovpm.SignUser(username)
+
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+						pb.NewVPNServiceClient(conn)
+
+						_, err := userSvc.Renew(context.Background(), &pb.UserRenewRequest{Username: username})
 						if err != nil {
 							logrus.Errorf("can't renew user cert '%s': %v", username, err)
 							os.Exit(1)
@@ -175,7 +209,16 @@ func main() {
 						if output == "" {
 							output = username + ".ovpn"
 						}
-						err := ovpm.DumpUserOVPNConf(username, output)
+
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+						pb.NewVPNServiceClient(conn)
+
+						res, err := userSvc.GenConfig(context.Background(), &pb.UserGenConfigRequest{Username: username})
+						emitToFile(output, res.ClientConfig, 0)
+
 						if err != nil {
 							logrus.Errorf("user config can not be exported %s: %v", username, err)
 							return err
@@ -208,7 +251,11 @@ func main() {
 					Name:  "status",
 					Usage: "Show VPN status.",
 					Action: func(c *cli.Context) error {
-						server, err := ovpm.GetServerInstance()
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						vpnSvc := pb.NewVPNServiceClient(conn)
+
+						res, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
 						if err != nil {
 							os.Exit(1)
 							return err
@@ -216,12 +263,12 @@ func main() {
 
 						table := tablewriter.NewWriter(os.Stdout)
 						table.SetHeader([]string{"attribute", "value"})
-						table.Append([]string{"Name", server.Name})
-						table.Append([]string{"Hostname", server.Hostname})
-						table.Append([]string{"Port", server.Port})
-						table.Append([]string{"Network", server.Net})
-						table.Append([]string{"Netmask", server.Mask})
-						table.Append([]string{"Created At", server.CreatedAt.Format(time.UnixDate)})
+						table.Append([]string{"Name", res.Name})
+						table.Append([]string{"Hostname", res.Hostname})
+						table.Append([]string{"Port", res.Port})
+						table.Append([]string{"Network", res.Net})
+						table.Append([]string{"Netmask", res.Mask})
+						table.Append([]string{"Created At", res.CreatedAt})
 						table.Render()
 
 						return nil
@@ -243,46 +290,48 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						action = "vpn:init"
-						if c.String("hostname") == "" {
+						hostname := c.String("hostname")
+						if hostname == "" {
 							logrus.Errorf("'hostname' is needed")
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
 
 						}
 
-						if ovpm.CheckBootstrapped() {
-							var response string
-							for {
-								fmt.Println("This operation will cause invalidation of existing user certificates.")
-								fmt.Println("After this opeartion, new client config files (.ovpn) should be generated for each existing user.")
-								fmt.Println()
-								fmt.Println("Are you sure ? (y/N)")
-								_, err := fmt.Scanln(&response)
-								if err != nil {
-									logrus.Fatal(err)
+						port := c.String("port")
+						if port == "" {
+							port = ovpm.DefaultVPNPort
+						}
+
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						vpnSvc := pb.NewVPNServiceClient(conn)
+
+						var response string
+						for {
+							fmt.Println("This operation will cause invalidation of existing user certificates.")
+							fmt.Println("After this opeartion, new client config files (.ovpn) should be generated for each existing user.")
+							fmt.Println()
+							fmt.Println("Are you sure ? (y/N)")
+							_, err := fmt.Scanln(&response)
+							if err != nil {
+								logrus.Fatal(err)
+								os.Exit(1)
+								return err
+							}
+							okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+							nokayResponses := []string{"n", "N", "no", "No", "NO"}
+							if stringInSlice(response, okayResponses) {
+								if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port}); err != nil {
+									logrus.Errorf("server can not be initialized: %v", err)
 									os.Exit(1)
 									return err
 								}
-								okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
-								nokayResponses := []string{"n", "N", "no", "No", "NO"}
-								if stringInSlice(response, okayResponses) {
-									if err := ovpm.DeleteServer("default"); err != nil {
-										logrus.Errorf("server can not be deleted: %v", err)
-										os.Exit(1)
-										return err
-									}
 
-									break
-								} else if stringInSlice(response, nokayResponses) {
-									return fmt.Errorf("user decided to cancel")
-								}
+								break
+							} else if stringInSlice(response, nokayResponses) {
+								return fmt.Errorf("user decided to cancel")
 							}
-
-						}
-						if err := ovpm.CreateServer("default", c.String("hostname"), c.String("port")); err != nil {
-							logrus.Errorf("server can not be created: %v", err)
-							fmt.Println(cli.ShowSubcommandHelp(c))
-							os.Exit(1)
 						}
 
 						return nil
@@ -293,7 +342,12 @@ func main() {
 					Usage: "Apply pending changes.",
 					Action: func(c *cli.Context) error {
 						action = "apply"
-						if err := ovpm.Emit(); err != nil {
+
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						vpnSvc := pb.NewVPNServiceClient(conn)
+
+						if _, err := vpnSvc.Apply(context.Background(), &pb.VPNApplyRequest{}); err != nil {
 							logrus.Errorf("can not apply configuration: %v", err)
 							os.Exit(1)
 							return err

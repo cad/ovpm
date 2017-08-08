@@ -16,6 +16,7 @@ const (
 	DefaultCACertPath   = varBasePath + "ca.crt"
 	DefaultCAKeyPath    = varBasePath + "ca.key"
 	DefaultDHParamsPath = varBasePath + "dh4096.pem"
+	DefaultCRLPath      = varBasePath + "crl.pem"
 
 	CrtExpireYears = 10
 	CrtKeyLength   = 2024

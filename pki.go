@@ -76,8 +76,8 @@ func CreateCA() (*CA, error) {
 		NotAfter:              now.Add(time.Duration(24*365) * time.Hour).UTC(),
 		BasicConstraintsValid: true,
 		IsCA:     true,
-		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		//ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
+		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		//ExtKeyUsage: []x509.ExtKeyUsage{x509.KeyUsageCertSign, x509.ExtKeyUsageClientAuth},
 	}
 
 	// Sign the certificate authority
@@ -118,6 +118,48 @@ func getCertFromPEM(pemCert string) (*x509.Certificate, error) {
 	var cert *x509.Certificate
 	cert, _ = x509.ParseCertificate(block.Bytes)
 	return cert, nil
+}
+
+func MakeCRL(revokedCertificateSerials []*big.Int) (string, error) {
+	ca, err := getCA()
+	if err != nil {
+		return "", err
+	}
+
+	caCrt, err := getCertFromPEM(ca.Cert)
+	if err != nil {
+		return "", err
+	}
+
+	block, _ := pem.Decode([]byte(ca.Key))
+	if block == nil {
+		return "", fmt.Errorf("failed to parse ca private key")
+	}
+
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse ca private key: %s", err)
+	}
+	var revokedCertList []pkix.RevokedCertificate
+	for _, serial := range revokedCertificateSerials {
+		revokedCert := pkix.RevokedCertificate{
+			SerialNumber:   serial,
+			RevocationTime: time.Now().UTC(),
+		}
+		revokedCertList = append(revokedCertList, revokedCert)
+	}
+	crl, err := caCrt.CreateCRL(rand.Reader, priv, revokedCertList, time.Now().UTC(), time.Now().Add(365*24*60*time.Minute).UTC())
+	if err != nil {
+		return "", err
+	}
+
+	crlPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "X509 CRL",
+		Bytes: crl,
+	})
+
+	return string(crlPem[:]), nil
+
 }
 
 func createCert(commonName string, ca *CA, server bool) (*Cert, error) {
@@ -192,7 +234,7 @@ type basicConstraints struct {
 }
 
 func getCA() (*CA, error) {
-	server := Server{}
+	server := DBServer{}
 	db.First(&server)
 	if db.NewRecord(&server) {
 		return nil, fmt.Errorf("can not retrieve server from db")
