@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package pb;
+
+message VPNStatusRequest {}
+message VPNInitRequest {
+  string Hostname = 1;
+  string Port = 2;
+}
+message VPNApplyRequest {}
+
+service VPNService {
+  rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {}
+  rpc Init (VPNInitRequest) returns (VPNInitResponse) {}
+  rpc Apply (VPNApplyRequest) returns (VPNApplyResponse) {}
+}
+
+message VPNStatusResponse {
+  string Name = 1;
+  string SerialNumber = 2;
+  string Hostname = 3;
+  string Port = 4;
+  string Cert = 5;
+  string CACert = 6;
+  string Net = 7;
+  string Mask = 8;
+  string CreatedAt = 9;
+}
+message VPNInitResponse {}
+message VPNApplyResponse {}
