@@ -15,6 +15,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/bindata"
+	"github.com/cad/ovpm/pki"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -47,8 +48,8 @@ type DBServer struct {
 }
 
 // CheckSerial takes a serial number and checks it against the current server's serial number.
-func (s *DBServer) CheckSerial(serialNo string) bool {
-	return serialNo == s.SerialNumber
+func (s *DBServer) CheckSerial(serial string) bool {
+	return serial == s.SerialNumber
 }
 
 type _VPNServerConfig struct {
@@ -64,10 +65,11 @@ type _VPNServerConfig struct {
 	Port         string
 }
 
-// Initialize regenerates keys and certs for a Root CA, and saves them in the database.
-func Initialize(serverName string, hostname string, port string) error {
+// Init regenerates keys and certs for a Root CA, and saves them in the database.
+func Init(hostname string, port string) error {
+	serverName := "default"
 	if IsInitialized() {
-		if err := DeInitialize("default"); err != nil {
+		if err := Deinit(); err != nil {
 			logrus.Errorf("server can not be deleted: %v", err)
 			return err
 		}
@@ -77,12 +79,12 @@ func Initialize(serverName string, hostname string, port string) error {
 		return fmt.Errorf("validation error: hostname:`%s` should be either an ip address or a FQDN", hostname)
 	}
 
-	ca, err := NewCA()
+	ca, err := pki.NewCA()
 	if err != nil {
 		return fmt.Errorf("can not create ca creds: %s", err)
 	}
 
-	srv, err := NewServerCertHolder(ca)
+	srv, err := pki.NewServerCertHolder(ca)
 	if err != nil {
 		return fmt.Errorf("can not create server cert creds: %s", err)
 	}
@@ -97,8 +99,8 @@ func Initialize(serverName string, hostname string, port string) error {
 		Key:          srv.Key,
 		CACert:       ca.Cert,
 		CAKey:        ca.Key,
-		Net:          DefaultServerNetwork,
-		Mask:         DefaultServerNetMask,
+		Net:          _DefaultServerNetwork,
+		Mask:         _DefaultServerNetMask,
 	}
 
 	db.Create(&serverInstance)
@@ -123,8 +125,8 @@ func Initialize(serverName string, hostname string, port string) error {
 	return nil
 }
 
-// DeInitialize deletes the server with the given serverName from the database and frees the allocated resources.
-func DeInitialize(serverName string) error {
+// Deinit deletes the server with the given serverName from the database and frees the allocated resources.
+func Deinit() error {
 	if !IsInitialized() {
 		return fmt.Errorf("server not found")
 	}
@@ -179,25 +181,25 @@ func DumpsClientConfig(username string) (string, error) {
 }
 
 // DumpClientConfig generates .ovpn file for the given vpn user and dumps it to outPath.
-func DumpClientConfig(username, outPath string) error {
+func DumpClientConfig(username, path string) error {
 	result, err := DumpsClientConfig(username)
 	if err != nil {
 		return err
 	}
 	// Wite rendered content into openvpn server conf.
-	return emitToFile(outPath, result, 0)
+	return emitToFile(path, result, 0)
 
 }
 
 // GetSystemCA returns the system CA from the database if available.
-func GetSystemCA() (*CA, error) {
+func GetSystemCA() (*pki.CA, error) {
 	server := DBServer{}
 	db.First(&server)
 	if db.NewRecord(&server) {
 		return nil, fmt.Errorf("server record does not exists in db")
 	}
-	return &CA{
-		CertHolder: CertHolder{
+	return &pki.CA{
+		CertHolder: pki.CertHolder{
 			Cert: server.CACert,
 			Key:  server.CAKey,
 		},
@@ -266,10 +268,10 @@ func Emit() error {
 	return nil
 }
 
-func emitToFile(filePath, content string, mode uint) error {
-	file, err := os.Create(filePath)
+func emitToFile(path, content string, mode uint) error {
+	file, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("Cannot create file %s: %v", filePath, err)
+		return fmt.Errorf("Cannot create file %s: %v", path, err)
 
 	}
 	if mode != 0 {
@@ -293,15 +295,15 @@ func emitServerConf() error {
 	var result bytes.Buffer
 
 	server := _VPNServerConfig{
-		CertPath:     DefaultCertPath,
-		KeyPath:      DefaultKeyPath,
-		CACertPath:   DefaultCACertPath,
-		CAKeyPath:    DefaultCAKeyPath,
-		CCDPath:      DefaultVPNCCDPath,
-		CRLPath:      DefaultCRLPath,
-		DHParamsPath: DefaultDHParamsPath,
-		Net:          DefaultServerNetwork,
-		Mask:         DefaultServerNetMask,
+		CertPath:     _DefaultCertPath,
+		KeyPath:      _DefaultKeyPath,
+		CACertPath:   _DefaultCACertPath,
+		CAKeyPath:    _DefaultCAKeyPath,
+		CCDPath:      _DefaultVPNCCDPath,
+		CRLPath:      _DefaultCRLPath,
+		DHParamsPath: _DefaultDHParamsPath,
+		Net:          _DefaultServerNetwork,
+		Mask:         _DefaultServerNetMask,
 		Port:         port,
 	}
 	data, err := bindata.Asset("template/server.conf.tmpl")
@@ -320,7 +322,7 @@ func emitServerConf() error {
 	}
 
 	// Wite rendered content into openvpn server conf.
-	return emitToFile(DefaultVPNConfPath, result.String(), 0)
+	return emitToFile(_DefaultVPNConfPath, result.String(), 0)
 }
 
 // GetServerInstance returns the default server from the database.
@@ -350,7 +352,7 @@ func emitServerKey() error {
 	}
 
 	// Write rendered content into key file.
-	return emitToFile(DefaultKeyPath, server.Key, 0600)
+	return emitToFile(_DefaultKeyPath, server.Key, 0600)
 }
 
 func emitServerCert() error {
@@ -360,7 +362,7 @@ func emitServerCert() error {
 	}
 
 	// Write rendered content into the cert file.
-	return emitToFile(DefaultCertPath, server.Cert, 0)
+	return emitToFile(_DefaultCertPath, server.Cert, 0)
 }
 
 func emitCRL() error {
@@ -376,12 +378,12 @@ func emitCRL() error {
 	if err != nil {
 		return fmt.Errorf("can not emit CRL: %v", err)
 	}
-	crl, err := NewCRL(revokedCertSerials, systemCA)
+	crl, err := pki.NewCRL(revokedCertSerials, systemCA)
 	if err != nil {
 		return fmt.Errorf("can not emit crl: %v", err)
 	}
 
-	return emitToFile(DefaultCRLPath, crl, 0)
+	return emitToFile(_DefaultCRLPath, crl, 0)
 }
 
 func emitCACert() error {
@@ -391,7 +393,7 @@ func emitCACert() error {
 	}
 
 	// Write rendered content into the ca cert file.
-	return emitToFile(DefaultCACertPath, server.CACert, 0)
+	return emitToFile(_DefaultCACertPath, server.CACert, 0)
 }
 
 func emitCAKey() error {
@@ -401,7 +403,7 @@ func emitCAKey() error {
 	}
 
 	// Write rendered content into the ca key file.
-	return emitToFile(DefaultCAKeyPath, server.CAKey, 0600)
+	return emitToFile(_DefaultCAKeyPath, server.CAKey, 0600)
 }
 
 func emitCCD() error {
@@ -411,9 +413,9 @@ func emitCCD() error {
 	}
 
 	// Create and write rendered ccd data.
-	os.Mkdir(DefaultVPNCCDPath, 0755)
-	clientsNetMask := net.IPMask(net.ParseIP(DefaultServerNetMask))
-	clientsNetPrefix := net.ParseIP(DefaultServerNetwork)
+	os.Mkdir(_DefaultVPNCCDPath, 0755)
+	clientsNetMask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
+	clientsNetPrefix := net.ParseIP(_DefaultServerNetwork)
 	clientNet := clientsNetPrefix.Mask(clientsNetMask).To4()
 
 	counter := 2
@@ -423,7 +425,7 @@ func emitCCD() error {
 		params := struct {
 			IP      string
 			NetMask string
-		}{IP: clientNet.String(), NetMask: DefaultServerNetMask}
+		}{IP: clientNet.String(), NetMask: _DefaultServerNetMask}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
@@ -439,7 +441,7 @@ func emitCCD() error {
 			return fmt.Errorf("can not render ccd file %s: %s", user.Username, err)
 		}
 
-		err = emitToFile(DefaultVPNCCDPath+user.Username, result.String(), 0)
+		err = emitToFile(_DefaultVPNCCDPath+user.Username, result.String(), 0)
 		if err != nil {
 			return err
 		}
@@ -465,7 +467,7 @@ func emitDHParams() error {
 		return fmt.Errorf("can not render dh4096.pem file: %s", err)
 	}
 
-	err = emitToFile(DefaultDHParamsPath, result.String(), 0)
+	err = emitToFile(_DefaultDHParamsPath, result.String(), 0)
 	if err != nil {
 		return err
 	}

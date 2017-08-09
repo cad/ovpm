@@ -128,7 +128,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 }
 
 func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
-	if err := ovpm.Initialize("default", req.Hostname, req.Port); err != nil {
+	if err := ovpm.Init(req.Hostname, req.Port); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
