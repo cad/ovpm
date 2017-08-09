@@ -1,4 +1,5 @@
 //go:generate go-bindata template/
+
 package main
 
 import (
@@ -359,7 +360,6 @@ func main() {
 		},
 	}
 	app.Run(os.Args)
-	ovpm.CloseDB()
 }
 
 func stringInSlice(a string, list []string) bool {

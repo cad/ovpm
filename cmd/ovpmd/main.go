@@ -1,4 +1,5 @@
 //go:generate go-bindata template/
+
 package main
 
 import (
@@ -37,6 +38,11 @@ func main() {
 		if c.GlobalBool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
+		ovpm.SetupDB()
+		return nil
+	}
+	app.After = func(c *cli.Context) error {
+		ovpm.CeaseDB()
 		return nil
 	}
 	app.Action = func(c *cli.Context) error {
@@ -56,7 +62,6 @@ func main() {
 		return nil
 	}
 	app.Run(os.Args)
-	ovpm.CloseDB()
 }
 
 func stringInSlice(a string, list []string) bool {

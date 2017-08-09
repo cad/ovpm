@@ -6,6 +6,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
+	"github.com/cad/ovpm/pki"
 	"github.com/jinzhu/gorm"
 )
 
@@ -35,9 +36,9 @@ type DBRevoked struct {
 	SerialNumber string
 }
 
-func (u *DBUser) setPassword(newPassword string) error {
+func (u *DBUser) setPassword(password string) error {
 	// TODO(cad): Use a proper password hashing algorithm here.
-	u.Password = newPassword
+	u.Password = password
 	return nil
 }
 
@@ -80,7 +81,7 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 		return nil, err
 	}
 
-	clientCert, err := NewClientCertHolder(username, ca)
+	clientCert, err := pki.NewClientCertHolder(username, ca)
 	if err != nil {
 		return nil, fmt.Errorf("can not create client cert %s: %v", username, err)
 	}
@@ -118,7 +119,7 @@ func (u *DBUser) Delete() error {
 		// user is not found
 		return fmt.Errorf("user is not initialized: %s", u.Username)
 	}
-	crt, err := readCertFromPEM(u.Cert)
+	crt, err := pki.ReadCertFromPEM(u.Cert)
 	if err != nil {
 		return fmt.Errorf("can not get user's certificate: %v", err)
 	}
@@ -136,8 +137,8 @@ func (u *DBUser) Delete() error {
 }
 
 // ResetPassword resets the users password into the provided password.
-func (u *DBUser) ResetPassword(newPassword string) error {
-	err := u.setPassword(newPassword)
+func (u *DBUser) ResetPassword(password string) error {
+	err := u.setPassword(password)
 	if err != nil {
 		// user password can not be updated
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
@@ -159,7 +160,7 @@ func (u *DBUser) Sign() error {
 		return err
 	}
 
-	clientCert, err := NewClientCertHolder(u.Username, ca)
+	clientCert, err := pki.NewClientCertHolder(u.Username, ca)
 	if err != nil {
 		return fmt.Errorf("can not create client cert %s: %v", u.Username, err)
 	}

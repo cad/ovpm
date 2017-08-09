@@ -1,4 +1,5 @@
-package ovpm
+// Package pki contains bits and pieces to work with OpenVPN PKI related operations.
+package pki
 
 import (
 	"crypto/rand"
@@ -14,10 +15,15 @@ import (
 	"time"
 )
 
+const (
+	_CrtExpireYears = 10
+	_CrtKeyLength   = 2024
+)
+
 // CertHolder encapsulates a public certificate and the corresponding private key.
 type CertHolder struct {
-	Cert string
-	Key  string // Private Key
+	Cert string // PEM Encoded Certificate
+	Key  string // PEM Encoded Private Key
 }
 
 // CA is a special type of CertHolder that also has a CSR in it.
@@ -30,7 +36,12 @@ type CA struct {
 //
 // This will generate a public/private RSA keypair and a authority certificate signed by itself.
 func NewCA() (*CA, error) {
-	key, err := rsa.GenerateKey(rand.Reader, CrtKeyLength)
+	type basicConstraints struct {
+		IsCA       bool `asn1:"optional"`
+		MaxPathLen int  `asn1:"optional,default:-1"`
+	}
+
+	key, err := rsa.GenerateKey(rand.Reader, _CrtKeyLength)
 	if err != nil {
 		return nil, fmt.Errorf("private key cannot be created: %s", err)
 	}
@@ -116,9 +127,9 @@ func NewClientCertHolder(username string, ca *CA) (*CertHolder, error) {
 	return newCert(username, ca, false)
 }
 
-// NewCRL takes in a list of certificate serial numbers and a CA then makes a PEM encoded CRL and returns it as a string.
-func NewCRL(revokedCertificateSerials []*big.Int, ca *CA) (string, error) {
-	caCrt, err := readCertFromPEM(ca.Cert)
+// NewCRL takes in a list of certificate serial numbers to-be-revoked and a CA then makes a PEM encoded CRL and returns it as a string.
+func NewCRL(serials []*big.Int, ca *CA) (string, error) {
+	caCrt, err := ReadCertFromPEM(ca.Cert)
 	if err != nil {
 		return "", err
 	}
@@ -133,7 +144,7 @@ func NewCRL(revokedCertificateSerials []*big.Int, ca *CA) (string, error) {
 		return "", fmt.Errorf("failed to parse ca private key: %s", err)
 	}
 	var revokedCertList []pkix.RevokedCertificate
-	for _, serial := range revokedCertificateSerials {
+	for _, serial := range serials {
 		revokedCert := pkix.RevokedCertificate{
 			SerialNumber:   serial,
 			RevocationTime: time.Now().UTC(),
@@ -154,7 +165,16 @@ func NewCRL(revokedCertificateSerials []*big.Int, ca *CA) (string, error) {
 
 }
 
-func newCert(commonName string, ca *CA, server bool) (*CertHolder, error) {
+// ReadCertFromPEM decodes a PEM encoded string into a x509.Certificate.
+func ReadCertFromPEM(s string) (*x509.Certificate, error) {
+	block, _ := pem.Decode([]byte(s))
+	var cert *x509.Certificate
+	cert, _ = x509.ParseCertificate(block.Bytes)
+	return cert, nil
+}
+
+// newCert generates a private key and a certificate, that is signed by the given CA.
+func newCert(cn string, ca *CA, server bool) (*CertHolder, error) {
 	// Get CA private key
 	block, _ := pem.Decode([]byte(ca.Key))
 	if block == nil {
@@ -166,7 +186,7 @@ func newCert(commonName string, ca *CA, server bool) (*CertHolder, error) {
 		return nil, fmt.Errorf("failed to parse ca private key: %s", err)
 	}
 
-	caCert, err := readCertFromPEM(ca.Cert)
+	caCert, err := ReadCertFromPEM(ca.Cert)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ca cert: %v", err)
 	}
@@ -187,7 +207,7 @@ func newCert(commonName string, ca *CA, server bool) (*CertHolder, error) {
 		NotAfter:     time.Now().AddDate(5, 0, 0),
 		SerialNumber: serial,
 		Subject: pkix.Name{
-			CommonName:   commonName,
+			CommonName:   cn,
 			Organization: []string{"Innovation"},
 		},
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
@@ -218,16 +238,4 @@ func newCert(commonName string, ca *CA, server bool) (*CertHolder, error) {
 		Key:  string(priKeyPem[:]),
 		Cert: string(certPem[:]),
 	}, nil
-}
-
-type basicConstraints struct {
-	IsCA       bool `asn1:"optional"`
-	MaxPathLen int  `asn1:"optional,default:-1"`
-}
-
-func readCertFromPEM(pemCert string) (*x509.Certificate, error) {
-	block, _ := pem.Decode([]byte(pemCert))
-	var cert *x509.Certificate
-	cert, _ = x509.ParseCertificate(block.Bytes)
-	return cert, nil
 }

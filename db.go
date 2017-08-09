@@ -10,21 +10,25 @@ import (
 
 var db *gorm.DB
 
-// CloseDB closes the database.
-func CloseDB() {
-	db.Close()
-}
-
-func init() {
+// SetupDB prepares database for use.
+//
+// It should be run at the start of the program.
+func SetupDB() {
 	var err error
-	db, err = gorm.Open("sqlite3", DefaultDBPath)
+	db, err = gorm.Open("sqlite3", _DefaultDBPath)
 	if err != nil {
-		logrus.Fatalf("couldn't open sqlite database %s: %v", DefaultDBPath, err)
+		logrus.Fatalf("couldn't open sqlite database %s: %v", _DefaultDBPath, err)
 	}
 
 	db.AutoMigrate(&DBUser{})
 	db.AutoMigrate(&DBNetwork{})
 	db.AutoMigrate(&DBServer{})
 	db.AutoMigrate(&DBRevoked{})
+}
 
+// CeaseDB closes the database.
+//
+// It should be run at the exit of the program.
+func CeaseDB() {
+	db.Close()
 }
