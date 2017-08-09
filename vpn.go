@@ -1,4 +1,4 @@
-//go:generate go-bindata -pkg ovpm template/
+//go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
 
 package ovpm
 
@@ -14,6 +14,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
+	"github.com/cad/ovpm/bindata"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -158,7 +159,7 @@ func sDumpUserOVPNConf(username string) (string, error) {
 		Key:      user.Key,
 		Cert:     user.Cert,
 	}
-	data, err := Asset("template/client.ovpn.tmpl")
+	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {
 		return "", err
 	}
@@ -302,7 +303,7 @@ func emitServerConf() error {
 		Mask:         DefaultServerNetMask,
 		Port:         port,
 	}
-	data, err := Asset("template/server.conf.tmpl")
+	data, err := bindata.Asset("template/server.conf.tmpl")
 	if err != nil {
 		return err
 	}
@@ -423,7 +424,7 @@ func emitCCD() error {
 			NetMask string
 		}{IP: clientNet.String(), NetMask: DefaultServerNetMask}
 
-		data, err := Asset("template/ccd.file.tmpl")
+		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
 			return err
 		}
@@ -448,7 +449,7 @@ func emitCCD() error {
 
 func emitDHParams() error {
 	var result bytes.Buffer
-	data, err := Asset("template/dh4096.pem.tmpl")
+	data, err := bindata.Asset("template/dh4096.pem.tmpl")
 	if err != nil {
 		return err
 	}

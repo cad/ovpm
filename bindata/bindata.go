@@ -7,7 +7,7 @@
 // template/server.conf.tmpl
 // DO NOT EDIT!
 
-package ovpm
+package bindata
 
 import (
 	"bytes"
