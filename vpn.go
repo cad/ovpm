@@ -76,22 +76,16 @@ func InitServer(serverName string, hostname string, port string) error {
 		return fmt.Errorf("validation error: hostname:`%s` should be either an ip address or a FQDN", hostname)
 	}
 
-	ca, err := CreateCA()
+	ca, err := NewCA()
 	if err != nil {
 		return fmt.Errorf("can not create ca creds: %s", err)
 	}
 
-	srv, err := CreateServerCert(ca)
+	srv, err := NewServerCertHolder(ca)
 	if err != nil {
 		return fmt.Errorf("can not create server cert creds: %s", err)
 	}
 	serialNumber := uuid.New().String()
-
-	// crl, err := MakeCRL([]*big.Int{})
-	// if err != nil {
-	// 	return fmt.Errorf("can not create server crl: %v", err)
-	// }
-
 	serverInstance := DBServer{
 		Name: serverName,
 
@@ -190,6 +184,22 @@ func DumpUserOVPNConf(username, outPath string) error {
 	}
 	// Wite rendered content into openvpn server conf.
 	return emitToFile(outPath, result, 0)
+
+}
+
+// GetSystemCA returns the system CA from the database if available.
+func GetSystemCA() (*CA, error) {
+	server := DBServer{}
+	db.First(&server)
+	if db.NewRecord(&server) {
+		return nil, fmt.Errorf("server record does not exists in db")
+	}
+	return &CA{
+		CertHolder: CertHolder{
+			Cert: server.CACert,
+			Key:  server.CAKey,
+		},
+	}, nil
 
 }
 
@@ -360,7 +370,11 @@ func emitCRL() error {
 		bi.SetString(item.SerialNumber, 16)
 		revokedCertSerials = append(revokedCertSerials, bi)
 	}
-	crl, err := MakeCRL(revokedCertSerials)
+	systemCA, err := GetSystemCA()
+	if err != nil {
+		return fmt.Errorf("can not emit CRL: %v", err)
+	}
+	crl, err := NewCRL(revokedCertSerials, systemCA)
 	if err != nil {
 		return fmt.Errorf("can not emit crl: %v", err)
 	}

@@ -14,21 +14,22 @@ import (
 	"time"
 )
 
-// CA represents x509 Certificate Authority.
+// CertHolder encapsulates a public certificate and the corresponding private key.
+type CertHolder struct {
+	Cert string
+	Key  string // Private Key
+}
+
+// CA is a special type of CertHolder that also has a CSR in it.
 type CA struct {
-	Cert string
-	Key  string // Private Key
-	CSR  string
+	CertHolder
+	CSR string
 }
 
-// Cert represents any certificate - key pair.
-type Cert struct {
-	Cert string
-	Key  string // Private Key
-}
-
-// CreateCA generates a certificate and a key-pair for the CA and returns them.
-func CreateCA() (*CA, error) {
+// NewCA returns a newly generated CA.
+//
+// This will generate a public/private RSA keypair and a authority certificate signed by itself.
+func NewCA() (*CA, error) {
 	key, err := rsa.GenerateKey(rand.Reader, CrtKeyLength)
 	if err != nil {
 		return nil, fmt.Errorf("private key cannot be created: %s", err)
@@ -96,37 +97,28 @@ func CreateCA() (*CA, error) {
 	}
 
 	return &CA{
-		Key:  privateKey.String(),
-		Cert: request.String(),
-		CSR:  string(csr),
+		CertHolder: CertHolder{
+			Key:  privateKey.String(),
+			Cert: request.String(),
+		},
+		CSR: string(csr),
 	}, nil
 
 }
 
-// CreateServerCert generates a x509 certificate and a key-pair for the server.
-func CreateServerCert(ca *CA) (*Cert, error) {
-	return createCert("localhost", ca, true)
+// NewServerCertHolder generates a x509 certificate and a key-pair for the server.
+func NewServerCertHolder(ca *CA) (*CertHolder, error) {
+	return newCert("localhost", ca, true)
 }
 
-// CreateClientCert generates a x509 certificate and a key-pair for the client.
-func CreateClientCert(username string, ca *CA) (*Cert, error) {
-	return createCert(username, ca, false)
+// NewClientCertHolder generates a x509 certificate and a key-pair for the client.
+func NewClientCertHolder(username string, ca *CA) (*CertHolder, error) {
+	return newCert(username, ca, false)
 }
 
-func getCertFromPEM(pemCert string) (*x509.Certificate, error) {
-	block, _ := pem.Decode([]byte(pemCert))
-	var cert *x509.Certificate
-	cert, _ = x509.ParseCertificate(block.Bytes)
-	return cert, nil
-}
-
-func MakeCRL(revokedCertificateSerials []*big.Int) (string, error) {
-	ca, err := getCA()
-	if err != nil {
-		return "", err
-	}
-
-	caCrt, err := getCertFromPEM(ca.Cert)
+// NewCRL takes in a list of certificate serial numbers and a CA then makes a PEM encoded CRL and returns it as a string.
+func NewCRL(revokedCertificateSerials []*big.Int, ca *CA) (string, error) {
+	caCrt, err := readCertFromPEM(ca.Cert)
 	if err != nil {
 		return "", err
 	}
@@ -162,7 +154,7 @@ func MakeCRL(revokedCertificateSerials []*big.Int) (string, error) {
 
 }
 
-func createCert(commonName string, ca *CA, server bool) (*Cert, error) {
+func newCert(commonName string, ca *CA, server bool) (*CertHolder, error) {
 	// Get CA private key
 	block, _ := pem.Decode([]byte(ca.Key))
 	if block == nil {
@@ -174,7 +166,7 @@ func createCert(commonName string, ca *CA, server bool) (*Cert, error) {
 		return nil, fmt.Errorf("failed to parse ca private key: %s", err)
 	}
 
-	caCert, err := getCertFromPEM(ca.Cert)
+	caCert, err := readCertFromPEM(ca.Cert)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ca cert: %v", err)
 	}
@@ -222,7 +214,7 @@ func createCert(commonName string, ca *CA, server bool) (*Cert, error) {
 		Bytes: cert,
 	})
 
-	return &Cert{
+	return &CertHolder{
 		Key:  string(priKeyPem[:]),
 		Cert: string(certPem[:]),
 	}, nil
@@ -233,15 +225,9 @@ type basicConstraints struct {
 	MaxPathLen int  `asn1:"optional,default:-1"`
 }
 
-func getCA() (*CA, error) {
-	server := DBServer{}
-	db.First(&server)
-	if db.NewRecord(&server) {
-		return nil, fmt.Errorf("can not retrieve server from db")
-	}
-	return &CA{
-		Cert: server.CACert,
-		Key:  server.CAKey,
-	}, nil
-
+func readCertFromPEM(pemCert string) (*x509.Certificate, error) {
+	block, _ := pem.Decode([]byte(pemCert))
+	var cert *x509.Certificate
+	cert, _ = x509.ParseCertificate(block.Bytes)
+	return cert, nil
 }

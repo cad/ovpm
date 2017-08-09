@@ -75,12 +75,12 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 	if !govalidator.IsAlphanumeric(username) {
 		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", username)
 	}
-	ca, err := getCA()
+	ca, err := GetSystemCA()
 	if err != nil {
 		return nil, err
 	}
 
-	clientCert, err := CreateClientCert(username, ca)
+	clientCert, err := NewClientCertHolder(username, ca)
 	if err != nil {
 		return nil, fmt.Errorf("can not create client cert %s: %v", username, err)
 	}
@@ -118,7 +118,7 @@ func (u *DBUser) Delete() error {
 		// user is not found
 		return fmt.Errorf("user is not initialized: %s", u.Username)
 	}
-	crt, err := getCertFromPEM(u.Cert)
+	crt, err := readCertFromPEM(u.Cert)
 	if err != nil {
 		return fmt.Errorf("can not get user's certificate: %v", err)
 	}
@@ -154,12 +154,12 @@ func (u *DBUser) Sign() error {
 	if !CheckBootstrapped() {
 		return fmt.Errorf("you first need to create server")
 	}
-	ca, err := getCA()
+	ca, err := GetSystemCA()
 	if err != nil {
 		return err
 	}
 
-	clientCert, err := CreateClientCert(u.Username, ca)
+	clientCert, err := NewClientCertHolder(u.Username, ca)
 	if err != nil {
 		return fmt.Errorf("can not create client cert %s: %v", u.Username, err)
 	}
