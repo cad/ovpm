@@ -10,6 +10,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
+	"github.com/cad/ovpm/api"
 	"github.com/cad/ovpm/pb"
 	"github.com/urfave/cli"
 )
@@ -48,8 +49,8 @@ func main() {
 			logrus.Fatalf("could not listen to port %s: %v", port, err)
 		}
 		s := grpc.NewServer()
-		pb.RegisterUserServiceServer(s, &ovpm.UserSvc{})
-		pb.RegisterVPNServiceServer(s, &ovpm.VPNSvc{})
+		pb.RegisterUserServiceServer(s, &api.UserService{})
+		pb.RegisterVPNServiceServer(s, &api.VPNService{})
 		logrus.Infof("OVPM is running :%s ...", port)
 		s.Serve(lis)
 		return nil

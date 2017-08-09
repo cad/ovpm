@@ -1,22 +1,23 @@
 //go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
 
-package ovpm
+package api
 
 import (
 	"os"
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
 	"golang.org/x/net/context"
 )
 
-type UserSvc struct{}
+type UserService struct{}
 
-func (s *UserSvc) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserResponse, error) {
+func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserResponse, error) {
 	var ut []*pb.UserResponse_User
 
-	users, err := GetAllUsers()
+	users, err := ovpm.GetAllUsers()
 	if err != nil {
 		logrus.Errorf("users can not be fetched: %v", err)
 		os.Exit(1)
@@ -33,9 +34,9 @@ func (s *UserSvc) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserRe
 	return &pb.UserResponse{Users: ut}, nil
 }
 
-func (s *UserSvc) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
+func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	var ut []*pb.UserResponse_User
-	user, err := CreateNewUser(req.Username, req.Password)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -49,9 +50,9 @@ func (s *UserSvc) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.Us
 	return &pb.UserResponse{Users: ut}, nil
 }
 
-func (s *UserSvc) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*pb.UserResponse, error) {
+func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*pb.UserResponse, error) {
 	var ut []*pb.UserResponse_User
-	user, err := GetUser(req.Username)
+	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +71,9 @@ func (s *UserSvc) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*pb.Us
 	return &pb.UserResponse{Users: ut}, nil
 }
 
-func (s *UserSvc) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.UserResponse, error) {
+func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.UserResponse, error) {
 	var ut []*pb.UserResponse_User
-	user, err := GetUser(req.Username)
+	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -91,12 +92,12 @@ func (s *UserSvc) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.User
 	return &pb.UserResponse{Users: ut}, nil
 }
 
-func (s *UserSvc) GenConfig(ctx context.Context, req *pb.UserGenConfigRequest) (*pb.UserGenConfigResponse, error) {
-	user, err := GetUser(req.Username)
+func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigRequest) (*pb.UserGenConfigResponse, error) {
+	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
 		return nil, err
 	}
-	configBlob, err := sDumpUserOVPNConf(user.GetUsername())
+	configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
 	if err != nil {
 		return nil, err
 	}
@@ -104,10 +105,10 @@ func (s *UserSvc) GenConfig(ctx context.Context, req *pb.UserGenConfigRequest) (
 	return &pb.UserGenConfigResponse{ClientConfig: configBlob}, nil
 }
 
-type VPNSvc struct{}
+type VPNService struct{}
 
-func (s *VPNSvc) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNStatusResponse, error) {
-	server, err := GetServerInstance()
+func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNStatusResponse, error) {
+	server, err := ovpm.GetServerInstance()
 	if err != nil {
 		return nil, err
 	}
@@ -126,15 +127,15 @@ func (s *VPNSvc) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNS
 	return &response, nil
 }
 
-func (s *VPNSvc) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
-	if err := InitServer("default", req.Hostname, req.Port); err != nil {
+func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
+	if err := ovpm.Initialize("default", req.Hostname, req.Port); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
 }
 
-func (s *VPNSvc) Apply(ctx context.Context, req *pb.VPNApplyRequest) (*pb.VPNApplyResponse, error) {
-	if err := Emit(); err != nil {
+func (s *VPNService) Apply(ctx context.Context, req *pb.VPNApplyRequest) (*pb.VPNApplyResponse, error) {
+	if err := ovpm.Emit(); err != nil {
 		logrus.Errorf("can not apply configuration: %v", err)
 		return nil, err
 	}

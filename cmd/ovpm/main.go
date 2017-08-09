@@ -48,7 +48,6 @@ func main() {
 					Usage: "List VPN users.",
 					Action: func(c *cli.Context) error {
 						action = "user:list"
-						//conn := getConn(c.String("port"))
 						conn := getConn(c.GlobalString("daemon-port"))
 						defer conn.Close()
 						userSvc := pb.NewUserServiceClient(conn)

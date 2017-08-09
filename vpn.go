@@ -64,10 +64,10 @@ type _VPNServerConfig struct {
 	Port         string
 }
 
-// InitServer regenerates keys and certs for a Root CA, and saves them in the database.
-func InitServer(serverName string, hostname string, port string) error {
-	if CheckBootstrapped() {
-		if err := DeleteServer("default"); err != nil {
+// Initialize regenerates keys and certs for a Root CA, and saves them in the database.
+func Initialize(serverName string, hostname string, port string) error {
+	if IsInitialized() {
+		if err := DeInitialize("default"); err != nil {
 			logrus.Errorf("server can not be deleted: %v", err)
 			return err
 		}
@@ -123,9 +123,9 @@ func InitServer(serverName string, hostname string, port string) error {
 	return nil
 }
 
-// DeleteServer deletes the server with the given serverName from the database.
-func DeleteServer(serverName string) error {
-	if !CheckBootstrapped() {
+// DeInitialize deletes the server with the given serverName from the database and frees the allocated resources.
+func DeInitialize(serverName string) error {
+	if !IsInitialized() {
 		return fmt.Errorf("server not found")
 	}
 
@@ -134,7 +134,8 @@ func DeleteServer(serverName string) error {
 	return nil
 }
 
-func sDumpUserOVPNConf(username string) (string, error) {
+// DumpsClientConfig generates .ovpn file for the given vpn user and returns it as a string.
+func DumpsClientConfig(username string) (string, error) {
 	var result bytes.Buffer
 	user, err := GetUser(username)
 	if err != nil {
@@ -177,9 +178,9 @@ func sDumpUserOVPNConf(username string) (string, error) {
 	return result.String(), nil
 }
 
-// DumpUserOVPNConf combines a specially generated config for the client with CA's and Client's certs and Clients key then dumps them to the specified path.
-func DumpUserOVPNConf(username, outPath string) error {
-	result, err := sDumpUserOVPNConf(username)
+// DumpClientConfig generates .ovpn file for the given vpn user and dumps it to outPath.
+func DumpClientConfig(username, outPath string) error {
+	result, err := DumpsClientConfig(username)
 	if err != nil {
 		return err
 	}
@@ -220,7 +221,7 @@ func Emit() error {
 		return fmt.Errorf("iptables executable can not be found")
 	}
 
-	if !CheckBootstrapped() {
+	if !IsInitialized() {
 		return fmt.Errorf("you should create a server first. e.g. $ ovpm vpn create-server")
 	}
 
@@ -332,8 +333,8 @@ func GetServerInstance() (*DBServer, error) {
 	return &server, nil
 }
 
-// CheckBootstrapped checks if there is a default server in the database or not.
-func CheckBootstrapped() bool {
+// IsInitialized checks if there is a default server in the database or not.
+func IsInitialized() bool {
 	var server DBServer
 	db.First(&server)
 	if db.NewRecord(server) {

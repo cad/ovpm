@@ -65,7 +65,7 @@ func GetAllUsers() ([]*DBUser, error) {
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
 func CreateNewUser(username, password string) (*DBUser, error) {
-	if !CheckBootstrapped() {
+	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
 	// Validate user input.
@@ -151,7 +151,7 @@ func (u *DBUser) ResetPassword(newPassword string) error {
 // This is often used to sign users when the current CA is changed while there are
 // still  existing users in the database.
 func (u *DBUser) Sign() error {
-	if !CheckBootstrapped() {
+	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 	ca, err := GetSystemCA()
