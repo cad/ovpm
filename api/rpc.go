@@ -15,6 +15,7 @@ import (
 type UserService struct{}
 
 func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserResponse, error) {
+	logrus.Debug("rpc call: user list")
 	var ut []*pb.UserResponse_User
 
 	users, err := ovpm.GetAllUsers()
@@ -35,6 +36,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 }
 
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
+	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
 	user, err := ovpm.CreateNewUser(req.Username, req.Password)
 	if err != nil {
@@ -51,6 +53,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 }
 
 func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*pb.UserResponse, error) {
+	logrus.Debugf("rpc call: user delete: %s", req.Username)
 	var ut []*pb.UserResponse_User
 	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
@@ -72,6 +75,7 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 }
 
 func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.UserResponse, error) {
+	logrus.Debugf("rpc call: user renew cert: %s", req.Username)
 	var ut []*pb.UserResponse_User
 	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
@@ -93,6 +97,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 }
 
 func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigRequest) (*pb.UserGenConfigResponse, error) {
+	logrus.Debugf("rpc call: user genconfig: %s", req.Username)
 	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
 		return nil, err
@@ -108,6 +113,7 @@ func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigReques
 type VPNService struct{}
 
 func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNStatusResponse, error) {
+	logrus.Debugf("rpc call: vpn status")
 	server, err := ovpm.GetServerInstance()
 	if err != nil {
 		return nil, err
@@ -128,6 +134,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 }
 
 func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
+	logrus.Debugf("rpc call: vpn init")
 	if err := ovpm.Init(req.Hostname, req.Port); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
@@ -135,10 +142,10 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 }
 
 func (s *VPNService) Apply(ctx context.Context, req *pb.VPNApplyRequest) (*pb.VPNApplyResponse, error) {
+	logrus.Debugf("rpc call: vpn apply")
 	if err := ovpm.Emit(); err != nil {
 		logrus.Errorf("can not apply configuration: %v", err)
 		return nil, err
 	}
-	logrus.Info("changes applied")
 	return &pb.VPNApplyResponse{}, nil
 }

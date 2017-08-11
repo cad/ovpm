@@ -172,8 +172,10 @@ func (p *Process) setState(state State) {
 func (p *Process) transitionTo(state State) {
 	if p.permittable(state) {
 		p.stateChangeCond.L.Lock()
-		logrus.Infof("transition: '%s' -> '%s'", p.state, state)
-		logrus.Debug(p.out.String())
+		logrus.WithField("cmd", p.executable).Debugf("transition: '%s' -> '%s'", p.state, state)
+		if p.out.Len() > 0 {
+			logrus.Debugf("STDOUT(err): %s", p.out.String())
+		}
 		p.setState(state)
 		go p.run(state)()
 		p.stateChangeCond.L.Unlock()
@@ -183,6 +185,7 @@ func (p *Process) transitionTo(state State) {
 	logrus.Errorf("transition to '%s' from '%s' is not permitted!", p.state, state)
 	return
 }
+
 func (p *Process) newCommand() *exec.Cmd {
 	cmd := exec.Command(p.executable)
 	cmd.Stdout = p.out
@@ -207,6 +210,7 @@ func (p *Process) newCommand() *exec.Cmd {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Credential: &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}}
 	return cmd
 }
+
 func (p *Process) run(state State) func() {
 	switch state {
 	case STOPPED:
@@ -224,11 +228,11 @@ func (p *Process) run(state State) func() {
 				p.cmd = p.newCommand()
 				p.lock.Unlock()
 
-				logrus.Infof("starting the process")
+				logrus.Debugf("running %s", p.executable)
 				err = p.cmd.Start()
 				if err != nil {
-					logrus.Warnf("process can not be started: %v", err)
-					logrus.Infof("retrying... (%d/%d)", i, p.maxRetry)
+					logrus.Debugf("process can not be started: %v", err)
+					logrus.Debugf("retrying... (%d/%d)", i, p.maxRetry)
 					continue
 				}
 				break
@@ -240,7 +244,7 @@ func (p *Process) run(state State) func() {
 			}
 
 			// Process started successfully.
-			logrus.Info("process is started")
+			logrus.Debugf("process is started %s PID %d", p.executable, p.cmd.Process.Pid)
 
 			// Process Observer
 			go func() {
@@ -253,7 +257,6 @@ func (p *Process) run(state State) func() {
 				p.done <- err
 				close(p.done)
 			}()
-			logrus.Info("observer goroutine launched")
 			p.transitionTo(RUNNING)
 		}
 	case RUNNING:
@@ -287,7 +290,7 @@ func (p *Process) run(state State) func() {
 			for i := uint(1); i <= p.maxRetry; i++ {
 				select {
 				case <-time.After(3 * time.Second):
-					logrus.Infof("retrying... (%d/%d)", i, p.maxRetry)
+					logrus.Debugf("retrying... (%d/%d)", i, p.maxRetry)
 					err := p.cmd.Process.Signal(os.Interrupt)
 					if err != nil {
 						logrus.Errorf("interrupt signal returned error: %v", err)
@@ -297,7 +300,7 @@ func (p *Process) run(state State) func() {
 						gracefullyStopped = true
 						break
 					}
-					logrus.Errorf("process stopped with error: %v", err)
+					logrus.Debugf("process stopped with error: %v", err)
 					break
 
 				}
@@ -312,17 +315,16 @@ func (p *Process) run(state State) func() {
 				}
 				<-p.done
 			}
-			logrus.Info("process stopped")
+			logrus.Debugf("process stopped %s", p.executable)
 			p.transitionTo(STOPPED)
 		}
 	case FAILED:
 		return func() {
-			logrus.Fatal("process operation failed state")
+			logrus.Fatalf("failed to launch process: %s", p.executable)
 		}
 	case EXITED:
 		return func() {
-			logrus.Errorln("process exited unexpectedly")
-			logrus.Printf("out: %s", p.out.String())
+			logrus.Errorf("process exited unexpectedly: %s", p.executable)
 			os.Exit(1)
 		}
 	default: // UNKNOWN

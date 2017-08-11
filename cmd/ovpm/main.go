@@ -32,7 +32,7 @@ func main() {
 		},
 	}
 	app.Before = func(c *cli.Context) error {
-		logrus.SetLevel(logrus.WarnLevel)
+		logrus.SetLevel(logrus.InfoLevel)
 		if c.GlobalBool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
@@ -180,7 +180,7 @@ func main() {
 							os.Exit(1)
 							return err
 						}
-						logrus.Infof("user certs renewed: '%s'", username)
+						logrus.Infof("user cert renewed: '%s'", username)
 						return nil
 					},
 				},
@@ -217,30 +217,15 @@ func main() {
 						pb.NewVPNServiceClient(conn)
 
 						res, err := userSvc.GenConfig(context.Background(), &pb.UserGenConfigRequest{Username: username})
-						emitToFile(output, res.ClientConfig, 0)
-
 						if err != nil {
 							logrus.Errorf("user config can not be exported %s: %v", username, err)
 							return err
 						}
-						fmt.Printf("exported to %s", output)
+						emitToFile(output, res.ClientConfig, 0)
+						logrus.Infof("exported to %s", output)
 						return nil
 					},
 				},
-				// {
-				// 	Name:  "lock",
-				// 	Usage: "Lock VPN user",
-				// 	Action: func(c *cli.Context) error {
-				// 		return nil
-				// 	},
-				// },
-				// {
-				// 	Name:  "unlock",
-				// 	Usage: "Unlock VPN user",
-				// 	Action: func(c *cli.Context) error {
-				// 		return nil
-				// 	},
-				// },
 			},
 		},
 		{
@@ -327,7 +312,7 @@ func main() {
 									os.Exit(1)
 									return err
 								}
-
+								logrus.Info("ovpm server initialized")
 								break
 							} else if stringInSlice(response, nokayResponses) {
 								return fmt.Errorf("user decided to cancel")
@@ -352,7 +337,7 @@ func main() {
 							os.Exit(1)
 							return err
 						}
-						logrus.Info("changes applied")
+						logrus.Info("changes applied; OpenVPN restarted")
 						return nil
 					},
 				},

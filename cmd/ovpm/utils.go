@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"github.com/Sirupsen/logrus"
 
 	"google.golang.org/grpc"
 )
@@ -29,7 +30,7 @@ func getConn(port string) *grpc.ClientConn {
 
 	conn, err := grpc.Dial(fmt.Sprintf(":%s", port), grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
+		logrus.Fatalf("fail to dial: %v", err)
 	}
 	return conn
 

@@ -127,7 +127,7 @@ func (u *DBUser) Delete() error {
 		SerialNumber: crt.SerialNumber.Text(16),
 	})
 	db.Unscoped().Delete(&u)
-
+	logrus.Infof("user deleted: %s", u.GetUsername())
 	err = Emit()
 	if err != nil {
 		return err
@@ -144,6 +144,7 @@ func (u *DBUser) ResetPassword(password string) error {
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
 	}
 	db.Save(u)
+	logrus.Infof("user password reset: %s", u.GetUsername())
 	return nil
 }
 
@@ -175,6 +176,7 @@ func (u *DBUser) Sign() error {
 	u.ServerSerialNumber = server.SerialNumber
 
 	db.Save(&u)
+	logrus.Infof("user renewed cert: %s", u.GetUsername())
 	return nil
 }
 

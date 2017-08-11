@@ -123,6 +123,7 @@ func Init(hostname string, port string) error {
 			continue
 		}
 	}
+	logrus.Infof("server initialized")
 	return nil
 }
 
@@ -279,10 +280,10 @@ func Emit() error {
 		return fmt.Errorf("can not emit crl: %s", err)
 	}
 
-	logrus.Info("changes are applied to the filesystem")
+	logrus.Info("configurations emitted to the filesystem")
 
 	RestartVPNProc()
-	logrus.Info("OpenVPN process is restarted")
+	logrus.Info("OpenVPN process is restarting")
 
 	return nil
 }
@@ -503,7 +504,7 @@ func checkOpenVPNExecutable() bool {
 		logrus.Error("openvpn is not installed ✘")
 		return false
 	}
-	logrus.Infof("openvpn executable detected: %s  ✔", executable)
+	logrus.Debugf("openvpn executable detected: %s  ✔", executable)
 	return true
 }
 
@@ -511,10 +512,10 @@ func getOpenVPNExecutable() string {
 	cmd := exec.Command("which", "openvpn")
 	output, err := cmd.Output()
 	if err != nil {
-		logrus.Infof("openvpn is not installed: %s  ✘", err)
+		logrus.Errorf("openvpn is not installed: %s  ✘", err)
 		return ""
 	}
-	logrus.Infof("openvpn executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Debugf("openvpn executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return strings.TrimSpace(string(output[:]))
 }
 
@@ -525,7 +526,7 @@ func checkOpenSSLExecutable() bool {
 		logrus.Errorf("openssl is not installed: %s  ✘", err)
 		return false
 	}
-	logrus.Infof("openssl executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Debugf("openssl executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
 }
 
@@ -536,7 +537,7 @@ func checkIptablesExecutable() bool {
 		logrus.Errorf("iptables is not installed: %s  ✘", err)
 		return false
 	}
-	logrus.Infof("iptables executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
+	logrus.Debugf("iptables executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
 }
 
