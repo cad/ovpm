@@ -58,6 +58,7 @@ func main() {
 		pb.RegisterUserServiceServer(s, &api.UserService{})
 		pb.RegisterVPNServiceServer(s, &api.VPNService{})
 		logrus.Infof("OVPM is running :%s ...", port)
+		ovpm.RestartVPNProc()
 		s.Serve(lis)
 		return nil
 	}

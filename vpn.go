@@ -208,13 +208,19 @@ func GetSystemCA() (*pki.CA, error) {
 
 }
 
+// vpnProc represents the OpenVPN process that is managed by the ovpm supervisor globally OpenVPN.
+var vpnProc *supervisor.Process
+
 // RestartVPNProc restarts the OpenVPN process.
 func RestartVPNProc() {
-	p, err := supervisor.NewProcess(getOpenVPNExecutable(), varBasePath, []string{"--config", _DefaultVPNConfPath})
-	if err != nil {
-		logrus.Errorf("can not create process: %v", err)
+	if !IsInitialized() {
+		logrus.Error("can not launch OpenVPN because system is not initialized")
+		return
 	}
-	p.Restart()
+	if vpnProc == nil {
+		panic(fmt.Sprintf("vpnProc is not initialized!"))
+	}
+	vpnProc.Restart()
 }
 
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
@@ -532,4 +538,12 @@ func checkIptablesExecutable() bool {
 	}
 	logrus.Infof("iptables executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
 	return true
+}
+
+func init() {
+	var err error
+	vpnProc, err = supervisor.NewProcess(getOpenVPNExecutable(), varBasePath, []string{"--config", _DefaultVPNConfPath})
+	if err != nil {
+		logrus.Errorf("can not create process: %v", err)
+	}
 }
