@@ -188,7 +188,7 @@ func (p *Process) newCommand() *exec.Cmd {
 	cmd.Stdout = p.out
 	cmd.Stderr = p.out
 	cmd.Dir = p.wdir
-	cmd.Args = p.args
+	cmd.Args = append([]string{p.executable}, p.args...)
 
 	currUsr, err := user.Current()
 	if err != nil {
