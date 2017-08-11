@@ -16,6 +16,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"
+	"github.com/cad/ovpm/supervisor"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -207,6 +208,15 @@ func GetSystemCA() (*pki.CA, error) {
 
 }
 
+// RestartVPNProc restarts the OpenVPN process.
+func RestartVPNProc() {
+	p, err := supervisor.NewProcess(getOpenVPNExecutable(), varBasePath, []string{"--config", _DefaultVPNConfPath})
+	if err != nil {
+		logrus.Errorf("can not create process: %v", err)
+	}
+	p.Restart()
+}
+
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
 func Emit() error {
 	// Check dependencies
@@ -264,6 +274,9 @@ func Emit() error {
 	}
 
 	logrus.Info("changes are applied to the filesystem")
+
+	RestartVPNProc()
+	logrus.Info("OpenVPN process is restarted")
 
 	return nil
 }
@@ -479,14 +492,24 @@ func emitIptables() error {
 }
 
 func checkOpenVPNExecutable() bool {
+	executable := getOpenVPNExecutable()
+	if executable == "" {
+		logrus.Error("openvpn is not installed ✘")
+		return false
+	}
+	logrus.Infof("openvpn executable detected: %s  ✔", executable)
+	return true
+}
+
+func getOpenVPNExecutable() string {
 	cmd := exec.Command("which", "openvpn")
 	output, err := cmd.Output()
 	if err != nil {
-		logrus.Errorf("openvpn is not installed: %s  ✘", err)
-		return false
+		logrus.Infof("openvpn is not installed: %s  ✘", err)
+		return ""
 	}
 	logrus.Infof("openvpn executable detected: %s  ✔", strings.TrimSpace(string(output[:])))
-	return true
+	return strings.TrimSpace(string(output[:]))
 }
 
 func checkOpenSSLExecutable() bool {
