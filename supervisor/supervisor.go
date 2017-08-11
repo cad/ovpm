@@ -69,16 +69,17 @@ var tt = []transition{
 
 // Process represents a unix process to be supervised.
 type Process struct {
-	lock       *sync.RWMutex
-	state      State
-	maxRetry   uint
-	cmd        *exec.Cmd
-	executable string
-	wdir       string
-	args       []string
-	done       chan error
-	stop       chan bool
-	out        *bytes.Buffer
+	lock            *sync.RWMutex
+	state           State
+	maxRetry        uint
+	cmd             *exec.Cmd
+	executable      string
+	wdir            string
+	args            []string
+	done            chan error
+	stop            chan bool
+	out             *bytes.Buffer
+	stateChangeCond *sync.Cond
 	// stdin     io.WriteCloser
 	// stdoutLog Logger
 	// stderrLog Logger
@@ -96,6 +97,7 @@ func NewProcess(executable string, dir string, args []string) (*Process, error) 
 	p.wdir = dir
 	p.args = args
 	p.lock = &sync.RWMutex{}
+	p.stateChangeCond = sync.NewCond(&sync.RWMutex{})
 	p.state = STOPPED
 	p.done = make(chan error)
 	p.stop = make(chan bool)
@@ -110,6 +112,15 @@ func isExist(executable string) bool {
 		return true
 	}
 	return false
+}
+
+// waitFor blocks until the FSM transitions to the given state.
+func (p *Process) waitFor(state State) {
+	for p.state != state {
+		p.stateChangeCond.L.Lock()
+		p.stateChangeCond.Wait()
+		p.stateChangeCond.L.Unlock()
+	}
 }
 
 // Start will run the process.
@@ -127,6 +138,7 @@ func (p *Process) Restart() {
 	if p.state == RUNNING {
 		p.Stop()
 	}
+	p.waitFor(STOPPED)
 	p.Start()
 }
 
@@ -141,6 +153,8 @@ func (p *Process) IsRunning() bool {
 }
 
 func (p *Process) permittable(state State) bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 	for _, t := range tt {
 		if p.state == t.currState && t.nextState == state {
 			return true
@@ -157,10 +171,13 @@ func (p *Process) setState(state State) {
 
 func (p *Process) transitionTo(state State) {
 	if p.permittable(state) {
+		p.stateChangeCond.L.Lock()
 		logrus.Infof("transition: '%s' -> '%s'", p.state, state)
 		logrus.Debug(p.out.String())
 		p.setState(state)
-		go p.process(state)()
+		go p.run(state)()
+		p.stateChangeCond.L.Unlock()
+		p.stateChangeCond.Broadcast()
 		return
 	}
 	logrus.Errorf("transition to '%s' from '%s' is not permitted!", p.state, state)
@@ -187,11 +204,10 @@ func (p *Process) newCommand() *exec.Cmd {
 	if err != nil {
 		panic(fmt.Sprintf("can not convert string to int %s: %v", currUsr.Gid, err))
 	}
-	fmt.Printf("%++v", cmd)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Credential: &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}}
 	return cmd
 }
-func (p *Process) process(state State) func() {
+func (p *Process) run(state State) func() {
 	switch state {
 	case STOPPED:
 		return func() {
