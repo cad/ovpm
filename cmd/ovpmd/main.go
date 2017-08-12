@@ -4,8 +4,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -50,19 +54,67 @@ func main() {
 		if port == "" {
 			port = "9090"
 		}
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-		if err != nil {
-			logrus.Fatalf("could not listen to port %s: %v", port, err)
-		}
-		s := grpc.NewServer()
-		pb.RegisterUserServiceServer(s, &api.UserService{})
-		pb.RegisterVPNServiceServer(s, &api.VPNService{})
-		logrus.Infof("OVPM is running :%s ...", port)
-		ovpm.RestartVPNProc()
-		s.Serve(lis)
+		s := newServer(port)
+		s.start()
+		s.waitForInterrupt()
+		s.stop()
 		return nil
 	}
 	app.Run(os.Args)
+}
+
+type server struct {
+	port       string
+	lis        net.Listener
+	grpcServer *grpc.Server
+	signal     chan os.Signal
+	done       chan bool
+}
+
+func newServer(port string) *server {
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigs
+		fmt.Println()
+		fmt.Println(sig)
+		done <- true
+	}()
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+	if err != nil {
+		logrus.Fatalf("could not listen to port %s: %v", port, err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterUserServiceServer(s, &api.UserService{})
+	pb.RegisterVPNServiceServer(s, &api.VPNService{})
+	return &server{lis: lis, grpcServer: s, signal: sigs, done: done, port: port}
+}
+
+func (s *server) start() {
+	logrus.Infof("OVPM is running :%s ...", s.port)
+	go s.grpcServer.Serve(s.lis)
+	ovpm.RestartVPNProc()
+}
+
+func (s *server) stop() {
+	logrus.Info("OVPM is shutting down ...")
+	s.grpcServer.Stop()
+	ovpm.StopVPNProc()
+}
+
+func (s *server) waitForInterrupt() {
+	<-s.done
+	go timeout(8 * time.Second)
+}
+
+func timeout(interval time.Duration) {
+	time.Sleep(interval)
+	log.Println("Timeout! Killing the main thread...")
+	os.Exit(-1)
 }
 
 func stringInSlice(a string, list []string) bool {

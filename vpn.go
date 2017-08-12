@@ -224,6 +224,18 @@ func RestartVPNProc() {
 	vpnProc.Restart()
 }
 
+// StopVPNProc stops the OpenVPN process.
+func StopVPNProc() {
+	if !vpnProc.IsRunning() {
+		logrus.Error("OpenVPN is already stopped")
+		return
+	}
+	if vpnProc == nil {
+		panic(fmt.Sprintf("vpnProc is not initialized!"))
+	}
+	vpnProc.Stop()
+}
+
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
 func Emit() error {
 	// Check dependencies
