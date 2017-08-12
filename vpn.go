@@ -68,6 +68,14 @@ type _VPNServerConfig struct {
 
 // Init regenerates keys and certs for a Root CA, and saves them in the database.
 func Init(hostname string, port string) error {
+	if port == "" {
+		port = DefaultVPNPort
+	}
+
+	if !govalidator.IsNumeric(port) {
+		return fmt.Errorf("validation error: port:`%s` should be numeric", hostname)
+	}
+
 	serverName := "default"
 	if IsInitialized() {
 		if err := Deinit(); err != nil {
@@ -410,7 +418,7 @@ func emitCRL() error {
 	if err != nil {
 		return fmt.Errorf("can not emit CRL: %v", err)
 	}
-	crl, err := pki.NewCRL(revokedCertSerials, systemCA)
+	crl, err := pki.NewCRL(systemCA, revokedCertSerials...)
 	if err != nil {
 		return fmt.Errorf("can not emit crl: %v", err)
 	}

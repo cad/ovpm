@@ -6,8 +6,9 @@ const (
 
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
-	etcBasePath    = "/etc/ovpm/"
-	varBasePath    = "/var/db/ovpm/"
+
+	etcBasePath = "/etc/ovpm/"
+	varBasePath = "/var/db/ovpm/"
 
 	_DefaultConfigPath   = etcBasePath + "ovpm.ini"
 	_DefaultDBPath       = varBasePath + "db.sqlite3"

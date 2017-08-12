@@ -42,6 +42,10 @@ func (u *DBUser) setPassword(password string) error {
 	return nil
 }
 
+func (u *DBUser) checkPassword(password string) bool {
+	return u.Password == password
+}
+
 // GetUser finds and returns the user with the given username from database.
 func GetUser(username string) (*DBUser, error) {
 	user := DBUser{}
@@ -81,7 +85,7 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 		return nil, err
 	}
 
-	clientCert, err := pki.NewClientCertHolder(username, ca)
+	clientCert, err := pki.NewClientCertHolder(ca, username)
 	if err != nil {
 		return nil, fmt.Errorf("can not create client cert %s: %v", username, err)
 	}
@@ -161,7 +165,7 @@ func (u *DBUser) Sign() error {
 		return err
 	}
 
-	clientCert, err := pki.NewClientCertHolder(u.Username, ca)
+	clientCert, err := pki.NewClientCertHolder(ca, u.Username)
 	if err != nil {
 		return fmt.Errorf("can not create client cert %s: %v", u.Username, err)
 	}

@@ -42,7 +42,7 @@ func main() {
 		if c.GlobalBool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
-		ovpm.SetupDB()
+		ovpm.SetupDB("sqlite3", "")
 		return nil
 	}
 	app.After = func(c *cli.Context) error {

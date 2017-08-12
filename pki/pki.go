@@ -70,7 +70,7 @@ func NewCA() (*CA, error) {
 	}
 
 	csr := pem.EncodeToMemory(&pem.Block{
-		Type: "CERTIFICATE REQUEST", Bytes: csrCertificate,
+		Type: PEMCSRBlockType, Bytes: csrCertificate,
 	})
 
 	// Serial number
@@ -100,10 +100,10 @@ func NewCA() (*CA, error) {
 
 	var request bytes.Buffer
 	var privateKey bytes.Buffer
-	if err := pem.Encode(&request, &pem.Block{Type: "CERTIFICATE", Bytes: certificate}); err != nil {
+	if err := pem.Encode(&request, &pem.Block{Type: PEMCertificateBlockType, Bytes: certificate}); err != nil {
 		return nil, err
 	}
-	if err := pem.Encode(&privateKey, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}); err != nil {
+	if err := pem.Encode(&privateKey, &pem.Block{Type: PEMRSAPrivateKeyBlockType, Bytes: x509.MarshalPKCS1PrivateKey(key)}); err != nil {
 		return nil, err
 	}
 
@@ -117,64 +117,18 @@ func NewCA() (*CA, error) {
 
 }
 
-// NewServerCertHolder generates a x509 certificate and a key-pair for the server.
+// NewServerCertHolder generates a RSA key-pair and a x509 certificate signed by the CA for the server.
 func NewServerCertHolder(ca *CA) (*CertHolder, error) {
-	return newCert("localhost", ca, true)
+	return newCert(ca, true, "localhost")
 }
 
-// NewClientCertHolder generates a x509 certificate and a key-pair for the client.
-func NewClientCertHolder(username string, ca *CA) (*CertHolder, error) {
-	return newCert(username, ca, false)
+// NewClientCertHolder generates a RSA key-pair and a x509 certificate signed by the CA for the client.
+func NewClientCertHolder(ca *CA, username string) (*CertHolder, error) {
+	return newCert(ca, false, username)
 }
 
-// NewCRL takes in a list of certificate serial numbers to-be-revoked and a CA then makes a PEM encoded CRL and returns it as a string.
-func NewCRL(serials []*big.Int, ca *CA) (string, error) {
-	caCrt, err := ReadCertFromPEM(ca.Cert)
-	if err != nil {
-		return "", err
-	}
-
-	block, _ := pem.Decode([]byte(ca.Key))
-	if block == nil {
-		return "", fmt.Errorf("failed to parse ca private key")
-	}
-
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse ca private key: %s", err)
-	}
-	var revokedCertList []pkix.RevokedCertificate
-	for _, serial := range serials {
-		revokedCert := pkix.RevokedCertificate{
-			SerialNumber:   serial,
-			RevocationTime: time.Now().UTC(),
-		}
-		revokedCertList = append(revokedCertList, revokedCert)
-	}
-	crl, err := caCrt.CreateCRL(rand.Reader, priv, revokedCertList, time.Now().UTC(), time.Now().Add(365*24*60*time.Minute).UTC())
-	if err != nil {
-		return "", err
-	}
-
-	crlPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "X509 CRL",
-		Bytes: crl,
-	})
-
-	return string(crlPem[:]), nil
-
-}
-
-// ReadCertFromPEM decodes a PEM encoded string into a x509.Certificate.
-func ReadCertFromPEM(s string) (*x509.Certificate, error) {
-	block, _ := pem.Decode([]byte(s))
-	var cert *x509.Certificate
-	cert, _ = x509.ParseCertificate(block.Bytes)
-	return cert, nil
-}
-
-// newCert generates a private key and a certificate, that is signed by the given CA.
-func newCert(cn string, ca *CA, server bool) (*CertHolder, error) {
+// newCert generates a RSA key-pair and a x509 certificate signed by the CA.
+func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 	// Get CA private key
 	block, _ := pem.Decode([]byte(ca.Key))
 	if block == nil {
@@ -208,7 +162,7 @@ func newCert(cn string, ca *CA, server bool) (*CertHolder, error) {
 		SerialNumber: serial,
 		Subject: pkix.Name{
 			CommonName:   cn,
-			Organization: []string{"Innovation"},
+			Organization: []string{"OVPM"},
 		},
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
@@ -225,12 +179,12 @@ func newCert(cn string, ca *CA, server bool) (*CertHolder, error) {
 	}
 
 	priKeyPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  PEMRSAPrivateKeyBlockType,
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
 
 	certPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  PEMCertificateBlockType,
 		Bytes: cert,
 	})
 
@@ -238,4 +192,50 @@ func newCert(cn string, ca *CA, server bool) (*CertHolder, error) {
 		Key:  string(priKeyPem[:]),
 		Cert: string(certPem[:]),
 	}, nil
+}
+
+// NewCRL takes in a list of certificate serial numbers to-be-revoked and a CA then makes a PEM encoded CRL and returns it as a string.
+func NewCRL(ca *CA, serials ...*big.Int) (string, error) {
+	caCrt, err := ReadCertFromPEM(ca.Cert)
+	if err != nil {
+		return "", err
+	}
+
+	block, _ := pem.Decode([]byte(ca.Key))
+	if block == nil {
+		return "", fmt.Errorf("failed to parse ca private key")
+	}
+
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse ca private key: %s", err)
+	}
+	var revokedCertList []pkix.RevokedCertificate
+	for _, serial := range serials {
+		revokedCert := pkix.RevokedCertificate{
+			SerialNumber:   serial,
+			RevocationTime: time.Now().UTC(),
+		}
+		revokedCertList = append(revokedCertList, revokedCert)
+	}
+	crl, err := caCrt.CreateCRL(rand.Reader, priv, revokedCertList, time.Now().UTC(), time.Now().Add(365*24*60*time.Minute).UTC())
+	if err != nil {
+		return "", err
+	}
+
+	crlPem := pem.EncodeToMemory(&pem.Block{
+		Type:  PEMx509CRLBlockType,
+		Bytes: crl,
+	})
+
+	return string(crlPem[:]), nil
+
+}
+
+// ReadCertFromPEM decodes a PEM encoded string into a x509.Certificate.
+func ReadCertFromPEM(s string) (*x509.Certificate, error) {
+	block, _ := pem.Decode([]byte(s))
+	var cert *x509.Certificate
+	cert, _ = x509.ParseCertificate(block.Bytes)
+	return cert, nil
 }
