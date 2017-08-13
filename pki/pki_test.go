@@ -13,14 +13,14 @@ import (
 )
 
 func TestNewCA(t *testing.T) {
-	// Initialize.
-	// Prepare.
+	// Initialize:
+	// Prepare:
 	ca, err := pki.NewCA()
 	if err != nil {
 		t.Fatalf("can not create CA in test: %v", err)
 	}
 
-	// Test.
+	// Test:
 	// Is CertHolder empty?
 	if ca.CertHolder == (pki.CertHolder{}) {
 		t.Errorf("returned ca.CertHolder can't be empty: %+v", ca.CertHolder)
@@ -52,10 +52,10 @@ func TestNewCA(t *testing.T) {
 
 // TestNewCertHolders tests pki.NewServerCertHolder and pki.NewClientCertHolder functions.
 func TestNewCertHolders(t *testing.T) {
-	// Initialize.
+	// Initialize:
 	ca, _ := pki.NewCA()
 
-	// Prepare.
+	// Prepare:
 	sch, err := pki.NewServerCertHolder(ca)
 	if err != nil {
 		t.Fatalf("can not create server cert holder: %v", err)
@@ -65,7 +65,7 @@ func TestNewCertHolders(t *testing.T) {
 		t.Fatalf("can not create client cert holder: %v", err)
 	}
 
-	// Test.
+	// Test:
 	var certholdertests = []struct {
 		name       string
 		certHolder *pki.CertHolder
@@ -102,12 +102,12 @@ func TestNewCertHolders(t *testing.T) {
 }
 
 func TestNewCRL(t *testing.T) {
-	// Initialize.
+	// Initialize:
 	max := 5
 	n := randomBetween(1, max)
 	ca, _ := pki.NewCA()
 
-	// Prepare.
+	// Prepare:
 	var certHolders []*pki.CertHolder
 	for i := 0; i < max; i++ {
 		username := fmt.Sprintf("user-%d", i)
@@ -115,7 +115,7 @@ func TestNewCRL(t *testing.T) {
 		certHolders = append(certHolders, ch)
 	}
 
-	// Test.
+	// Test:
 	// Create CRL that revokes first n certificates.
 	var serials []*big.Int
 	for i := 0; i < n; i++ {
@@ -168,12 +168,12 @@ func TestNewCRL(t *testing.T) {
 }
 
 func TestReadCertFromPEM(t *testing.T) {
-	// Initialize.
+	// Initialize:
 	ca, _ := pki.NewCA()
 
-	// Prepare.
+	// Prepare:
 
-	// Test.
+	// Test:
 	crt, err := pki.ReadCertFromPEM(ca.Cert)
 	if err != nil {
 		t.Fatalf("can not get cert from pem %+v", ca)
