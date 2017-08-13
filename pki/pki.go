@@ -156,9 +156,10 @@ func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 		return nil, err
 	}
 
+	now := time.Now()
 	tml := x509.Certificate{
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(5, 0, 0),
+		NotBefore:    now.Add(-10 * time.Minute).UTC(),
+		NotAfter:     now.Add(time.Duration(24*365) * time.Hour).UTC(),
 		SerialNumber: serial,
 		Subject: pkix.Name{
 			CommonName:   cn,
