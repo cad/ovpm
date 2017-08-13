@@ -10,7 +10,7 @@ OVPM allows you to manage an OpenVPN server from command line easily. With OVPM 
 Install OVPM:
 
 ```bash
-$ go get github.com/cad/ovpm/...
+$ go get -u github.com/cad/ovpm/...
 ```
 
 And run the server ovpmd:
