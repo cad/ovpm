@@ -88,7 +88,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 	}
 	ut = append(ut, &pbUser)
 
-	err = user.Sign()
+	err = user.Renew()
 	if err != nil {
 		return nil, err
 	}
