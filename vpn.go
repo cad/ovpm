@@ -218,7 +218,7 @@ func GetSystemCA() (*pki.CA, error) {
 }
 
 // vpnProc represents the OpenVPN process that is managed by the ovpm supervisor globally OpenVPN.
-var vpnProc *supervisor.Process
+var vpnProc supervisor.Supervisable
 
 // StartVPNProc starts the OpenVPN process.
 func StartVPNProc() {
@@ -229,7 +229,7 @@ func StartVPNProc() {
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
-	if vpnProc.IsRunning() {
+	if vpnProc.Status() == supervisor.RUNNING {
 		logrus.Error("OpenVPN is already started")
 		return
 	}
@@ -254,11 +254,12 @@ func StopVPNProc() {
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
-	if !vpnProc.IsRunning() {
-		logrus.Error("OpenVPN is already stopped")
+	if vpnProc.Status() != supervisor.RUNNING {
+		logrus.Error("OpenVPN is already not running")
 		return
 	}
 	vpnProc.Stop()
+
 }
 
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
@@ -320,7 +321,7 @@ func Emit() error {
 	logrus.Info("configurations emitted to the filesystem")
 
 	// If the OpenVPN is already running, restart it.
-	if vpnProc.IsRunning() {
+	if vpnProc.Status() == supervisor.RUNNING {
 		logrus.Info("OpenVPN process is restarting")
 		RestartVPNProc()
 	}

@@ -67,6 +67,14 @@ var tt = []transition{
 	transition{currState: STOPPING, nextState: STOPPING},
 }
 
+// Supervisable is an interface that represents a process.
+type Supervisable interface {
+	Start()
+	Stop()
+	Restart()
+	Status() State
+}
+
 // Process represents a unix process to be supervised.
 type Process struct {
 	lock            *sync.RWMutex
@@ -145,11 +153,6 @@ func (p *Process) Restart() {
 // Status returns the current state of the FSM.
 func (p *Process) Status() State {
 	return p.state
-}
-
-// IsRunning retunrs wether the process is running or not.
-func (p *Process) IsRunning() bool {
-	return p.state == RUNNING
 }
 
 func (p *Process) permittable(state State) bool {
