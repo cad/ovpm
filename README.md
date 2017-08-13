@@ -13,15 +13,34 @@ Install OVPM:
 $ go get -u github.com/cad/ovpm/...
 ```
 
-And run the server ovpmd:
+And verify the installation by running ovpmd:
 
 ```bash
-$ sudo ovpmd --version
+$ ovpmd --version
 
 ovpmd version 0.1.0
 ```
 
-In another terminal ovpm command line tool, ovpm:
+And also make sure openvpn is also installed on the host:
+
+```bash
+$ openvpn --version
+
+OpenVPN 2.4.3 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO]
+...
+
+```
+
+Now you can actually run the ovpmd server:
+
+```bash
+# Since ovpmd launches and supervises openvpn binary it needs root privileges.
+$ sudo ovpmd
+
+INFO[0000] OVPM is running :9090 ...                    
+```
+
+In another terminal you can use ovpm via the command line tool, ovpm:
 
 ```bash
 $ ovpm 
