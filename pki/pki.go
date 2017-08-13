@@ -164,11 +164,13 @@ func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 			CommonName:   cn,
 			Organization: []string{"OVPM"},
 		},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyAgreement,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
 	}
 
 	if server {
+		tml.KeyUsage = x509.KeyUsageDigitalSignature | x509.KeyUsageKeyAgreement | x509.KeyUsageKeyEncipherment
 		tml.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	}
 

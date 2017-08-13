@@ -5,6 +5,7 @@ dev tun
 proto udp
 remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
+remote-cert-tls server
 nobind
 persist-key
 persist-tun
