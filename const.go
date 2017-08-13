@@ -24,3 +24,7 @@ const (
 	_DefaultServerNetwork = "10.9.0.0"
 	_DefaultServerNetMask = "255.255.255.0"
 )
+
+// Testing is used to determine wether we are testing or running normally.
+// Set it to true when testing.
+var Testing = false

@@ -42,7 +42,8 @@ func (u *DBUser) setPassword(password string) error {
 	return nil
 }
 
-func (u *DBUser) checkPassword(password string) bool {
+// CheckPassword returns wether the given password is correct for the user.
+func (u *DBUser) CheckPassword(password string) bool {
 	return u.Password == password
 }
 
@@ -152,11 +153,11 @@ func (u *DBUser) ResetPassword(password string) error {
 	return nil
 }
 
-// Sign creates a key and a ceritificate signed by the current server's CA.
+// Renew creates a key and a ceritificate signed by the current server's CA.
 //
 // This is often used to sign users when the current CA is changed while there are
 // still  existing users in the database.
-func (u *DBUser) Sign() error {
+func (u *DBUser) Renew() error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}

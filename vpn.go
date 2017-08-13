@@ -124,7 +124,7 @@ func Init(hostname string, port string) error {
 	}
 	// Sign all users in the db with the new server
 	for _, user := range users {
-		err := user.Sign()
+		err := user.Renew()
 		logrus.Infof("user certificate changed for %s, you should run: $ ovpm user export-config --user %s", user.Username, user.Username)
 		if err != nil {
 			logrus.Errorf("can not sign user %s: %v", user.Username, err)
@@ -220,6 +220,23 @@ func GetSystemCA() (*pki.CA, error) {
 // vpnProc represents the OpenVPN process that is managed by the ovpm supervisor globally OpenVPN.
 var vpnProc *supervisor.Process
 
+// StartVPNProc starts the OpenVPN process.
+func StartVPNProc() {
+	if !IsInitialized() {
+		logrus.Error("can not launch OpenVPN because system is not initialized")
+		return
+	}
+	if vpnProc == nil {
+		panic(fmt.Sprintf("vpnProc is not initialized!"))
+	}
+	if vpnProc.IsRunning() {
+		logrus.Error("OpenVPN is already started")
+		return
+	}
+
+	vpnProc.Start()
+}
+
 // RestartVPNProc restarts the OpenVPN process.
 func RestartVPNProc() {
 	if !IsInitialized() {
@@ -234,12 +251,12 @@ func RestartVPNProc() {
 
 // StopVPNProc stops the OpenVPN process.
 func StopVPNProc() {
+	if vpnProc == nil {
+		panic(fmt.Sprintf("vpnProc is not initialized!"))
+	}
 	if !vpnProc.IsRunning() {
 		logrus.Error("OpenVPN is already stopped")
 		return
-	}
-	if vpnProc == nil {
-		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
 	vpnProc.Stop()
 }
@@ -302,13 +319,20 @@ func Emit() error {
 
 	logrus.Info("configurations emitted to the filesystem")
 
-	RestartVPNProc()
-	logrus.Info("OpenVPN process is restarting")
+	// If the OpenVPN is already running, restart it.
+	if vpnProc.IsRunning() {
+		logrus.Info("OpenVPN process is restarting")
+		RestartVPNProc()
+	}
 
 	return nil
 }
 
 func emitToFile(path, content string, mode uint) error {
+	// When testing don't emit files to the filesystem. Just pretend you did.
+	if Testing {
+		return nil
+	}
 	file, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("Cannot create file %s: %v", path, err)
