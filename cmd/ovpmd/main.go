@@ -97,7 +97,7 @@ func newServer(port string) *server {
 func (s *server) start() {
 	logrus.Infof("OVPM is running :%s ...", s.port)
 	go s.grpcServer.Serve(s.lis)
-	ovpm.RestartVPNProc()
+	ovpm.StartVPNProc()
 }
 
 func (s *server) stop() {
