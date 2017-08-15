@@ -586,7 +586,12 @@ func checkIptablesExecutable() bool {
 	return true
 }
 
+func ensureBaseDir() {
+	os.Mkdir(varBasePath, 0755)
+}
+
 func init() {
+	ensureBaseDir()
 	var err error
 	vpnProc, err = supervisor.NewProcess(getOpenVPNExecutable(), varBasePath, []string{"--config", _DefaultVPNConfPath})
 	if err != nil {
