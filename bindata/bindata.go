@@ -87,7 +87,7 @@ func templateCcdFileTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 74, mode: os.FileMode(436), modTime: time.Unix(1500555693, 0)}
+	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 74, mode: os.FileMode(420), modTime: time.Unix(1501822328, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -107,7 +107,7 @@ func templateClientOvpnTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 306, mode: os.FileMode(436), modTime: time.Unix(1502657766, 0)}
+	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 306, mode: os.FileMode(420), modTime: time.Unix(1502656204, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -127,7 +127,7 @@ func templateDh4096PemTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dh4096.pem.tmpl", size: 1468, mode: os.FileMode(436), modTime: time.Unix(1500555693, 0)}
+	info := bindataFileInfo{name: "template/dh4096.pem.tmpl", size: 1468, mode: os.FileMode(420), modTime: time.Unix(1501822328, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -147,7 +147,7 @@ func templateIptablesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/iptables.tmpl", size: 0, mode: os.FileMode(436), modTime: time.Unix(1500555693, 0)}
+	info := bindataFileInfo{name: "template/iptables.tmpl", size: 0, mode: os.FileMode(420), modTime: time.Unix(1501822328, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -167,7 +167,7 @@ func templateServerConfTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9585, mode: os.FileMode(436), modTime: time.Unix(1502270416, 0)}
+	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9585, mode: os.FileMode(420), modTime: time.Unix(1502173553, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
