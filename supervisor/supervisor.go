@@ -131,6 +131,11 @@ func (p *Process) waitFor(state State) {
 	}
 }
 
+// WaitFor blocks until the FSM transitions to the given state.
+func WaitFor(process *Process, state State) {
+	process.waitFor(state)
+}
+
 // Start will run the process.
 func (p *Process) Start() {
 	p.transitionTo(STARTING)

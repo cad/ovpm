@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/cad/ovpm.svg?branch=master)](https://travis-ci.org/cad/ovpm)
 [![codecov](https://codecov.io/gh/cad/ovpm/branch/master/graph/badge.svg)](https://codecov.io/gh/cad/ovpm)
+[![GoDoc](https://godoc.org/github.com/cad/ovpm?status.svg)](https://godoc.org/github.com/cad/ovpm)
 
 OVPM allows you to manage an OpenVPN server from command line easily. With OVPM you can create and run an OpenVPN server, add/remove vpn users, generate client .ovpn files for your users etc. 
 
