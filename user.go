@@ -16,6 +16,8 @@ type User interface {
 	GetUsername() string
 	GetServerSerialNumber() string
 	GetCert() string
+	GetIPNet() string
+	IsNoGW() bool
 }
 
 // DBUser is database model for VPN users.
@@ -29,6 +31,7 @@ type DBUser struct {
 	ServerSerialNumber string
 	Password           string
 	Key                string
+	NoGW               bool
 }
 
 // DBRevoked is a database model for revoked VPN users.
@@ -69,9 +72,11 @@ func GetAllUsers() ([]*DBUser, error) {
 }
 
 // CreateNewUser creates a new user with the given username and password in the database.
+// If nogw is true, then ovpm doesn't push vpn server as the default gw for the user.
+//
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
-func CreateNewUser(username, password string) (*DBUser, error) {
+func CreateNewUser(username, password string, nogw bool) (*DBUser, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -102,6 +107,7 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 		Cert:               clientCert.Cert,
 		Key:                clientCert.Key,
 		ServerSerialNumber: server.SerialNumber,
+		NoGW:               nogw,
 	}
 
 	db.Create(&user)
@@ -234,4 +240,9 @@ func (u *DBUser) GetIPNet() string {
 		Mask: mask,
 	}
 	return ipn.String()
+}
+
+// IsNoGW returns wether user is set to get the vpn server as their default gateway.
+func (u *DBUser) IsNoGW() bool {
+	return u.NoGW
 }
