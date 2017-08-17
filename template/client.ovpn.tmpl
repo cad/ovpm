@@ -6,6 +6,7 @@ proto udp
 remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
 remote-cert-tls server
+ns-cert-type server
 nobind
 persist-key
 persist-tun
