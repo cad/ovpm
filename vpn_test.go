@@ -9,9 +9,15 @@ import (
 
 var fs map[string]string
 
+func setupTestCase() {
+	// Initialize.
+	fs = make(map[string]string)
+	vpnProc.Stop()
+}
+
 func TestVPNInit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	// Prepare:
@@ -41,7 +47,7 @@ func TestVPNInit(t *testing.T) {
 
 func TestVPNDeinit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -92,7 +98,7 @@ func TestVPNDeinit(t *testing.T) {
 
 func TestVPNIsInitialized(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -115,7 +121,7 @@ func TestVPNIsInitialized(t *testing.T) {
 
 func TestVPNGetServerInstance(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -152,7 +158,7 @@ func TestVPNGetServerInstance(t *testing.T) {
 
 func TestVPNDumpsClientConfig(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -174,7 +180,7 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 
 func TestVPNDumpClientConfig(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -199,7 +205,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 
 func TestVPNGetSystemCA(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -231,7 +237,7 @@ func TestVPNGetSystemCA(t *testing.T) {
 
 func TestVPNStartVPNProc(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -265,7 +271,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 
 func TestVPNStopVPNProc(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -300,10 +306,6 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	// Test:
 
 	// Call restart.
-	// Isn't it stopped?
-	if vpnProc.Status() != supervisor.STOPPED {
-		t.Fatalf("expected state is STOPPED, got %s instead", vpnProc.Status())
-	}
 
 	RestartVPNProc()
 
@@ -323,7 +325,7 @@ func TestVPNRestartVPNProc(t *testing.T) {
 
 func TestVPNEmit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -373,9 +375,7 @@ func (f *fakeProcess) Status() supervisor.State {
 }
 
 func init() {
-	// Initialize.
-	fs = make(map[string]string)
-
+	Testing = true
 	// Monkeypatch emitToFile()
 	monkey.Patch(emitToFile, func(path, content string, mode uint) error {
 		fs[path] = content
