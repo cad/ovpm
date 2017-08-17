@@ -66,10 +66,10 @@ func main() {
 							return err
 						}
 						table := tablewriter.NewWriter(os.Stdout)
-						table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt"})
+						table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
 						//table.SetBorder(false)
 						for i, user := range resp.Users {
-							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.IPNet, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
+							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.IPNet, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
 							table.Append(data)
 						}
 						table.Render()
@@ -88,6 +88,10 @@ func main() {
 						cli.StringFlag{
 							Name:  "password, p",
 							Usage: "password for the vpn user",
+						},
+						cli.StringFlag{
+							Name:  "no-gw",
+							Usage: "don't push vpn server as default gateway for this user",
 						},
 					},
 					Action: func(c *cli.Context) error {

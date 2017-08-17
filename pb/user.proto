@@ -9,6 +9,7 @@ message UserListRequest {
 message UserCreateRequest {
   string Username = 1;
   string Password = 2;
+  bool NoGW = 3;
 }
 
 message UserDeleteRequest {
@@ -38,6 +39,7 @@ message UserResponse {
     string Cert = 3;
     string CreatedAt = 4;
     string IPNet = 5;
+    bool NoGW = 6;
   }
 
   repeated User users = 1;

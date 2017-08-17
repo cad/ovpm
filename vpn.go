@@ -169,12 +169,14 @@ func DumpsClientConfig(username string) (string, error) {
 		CA       string
 		Key      string
 		Cert     string
+		NoGW     bool
 	}{
 		Hostname: server.Hostname,
 		Port:     server.Port,
 		CA:       server.CACert,
 		Key:      user.Key,
 		Cert:     user.Cert,
+		NoGW:     user.NoGW,
 	}
 	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {

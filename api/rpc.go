@@ -28,6 +28,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			Username:           user.GetUsername(),
 			CreatedAt:          user.GetCreatedAt(),
 			IPNet:              user.GetIPNet(),
+			NoGW:               user.IsNoGW(),
 		})
 	}
 
@@ -37,7 +38,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW)
 	if err != nil {
 		return nil, err
 	}
