@@ -32,6 +32,12 @@ func TestVPNInit(t *testing.T) {
 		t.Fatalf("server is expected to be empty struct(new record) but it isn't %+v", server)
 	}
 
+	// Wrongfully initialize server.
+	err := Init("localhost", "asdf")
+	if err == nil {
+		t.Fatalf("error is expected to be not nil but it's nil instead")
+	}
+
 	// Initialize the server.
 	Init("localhost", "")
 
@@ -352,6 +358,30 @@ func TestVPNEmit(t *testing.T) {
 	}
 
 	// TODO(cad): Write test cases for ccd/ files as well.
+}
+
+func TestVPNemitToFile(t *testing.T) {
+	// Initialize:
+	// Prepare:
+	path := "/test/file"
+	content := "blah blah blah"
+
+	// Test:
+	// Is path exist?
+	if _, ok := fs[path]; ok {
+		t.Fatalf("key '%s' expected to be non-existent on fs, but it is instead", path)
+	}
+
+	// Emit the contents.
+	err := emitToFile(path, content, 0)
+	if err != nil {
+		t.Fatalf("expected  to be able to emit to the filesystem but we got this error instead: %v", err)
+	}
+
+	// Is the content on the filesystem correct?
+	if fs[path] != content {
+		t.Fatalf("content on the filesytem is expected to be same with '%s' but it's '%s' instead", content, fs[path])
+	}
 }
 
 type fakeProcess struct {

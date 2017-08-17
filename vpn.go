@@ -12,6 +12,8 @@ import (
 	"strings"
 	"text/template"
 
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/bindata"
@@ -19,7 +21,6 @@ import (
 	"github.com/cad/ovpm/supervisor"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 // DBNetwork is database model for external networks on the VPN server.
@@ -74,7 +75,7 @@ func Init(hostname string, port string) error {
 	}
 
 	if !govalidator.IsNumeric(port) {
-		return fmt.Errorf("validation error: port:`%s` should be numeric", hostname)
+		return fmt.Errorf("validation error: port:`%s` should be numeric", port)
 	}
 
 	serverName := "default"
@@ -591,6 +592,9 @@ func checkIptablesExecutable() bool {
 }
 
 func ensureBaseDir() {
+	if Testing {
+		return
+	}
 	os.Mkdir(varBasePath, 0755)
 }
 
