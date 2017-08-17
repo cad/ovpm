@@ -19,6 +19,7 @@ import (
 	"github.com/cad/ovpm/supervisor"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // DBNetwork is database model for external networks on the VPN server.
@@ -131,6 +132,7 @@ func Init(hostname string, port string) error {
 			continue
 		}
 	}
+	Emit()
 	logrus.Infof("server initialized")
 	return nil
 }
@@ -143,6 +145,7 @@ func Deinit() error {
 
 	db.Unscoped().Delete(&DBServer{})
 	db.Unscoped().Delete(&DBRevoked{})
+	Emit()
 	return nil
 }
 
@@ -233,8 +236,8 @@ func StartVPNProc() {
 		logrus.Error("OpenVPN is already started")
 		return
 	}
-
 	vpnProc.Start()
+	ensureNatEnabled()
 }
 
 // RestartVPNProc restarts the OpenVPN process.
@@ -320,10 +323,13 @@ func Emit() error {
 
 	logrus.Info("configurations emitted to the filesystem")
 
-	// If the OpenVPN is already running, restart it.
-	if vpnProc.Status() == supervisor.RUNNING {
-		logrus.Info("OpenVPN process is restarting")
-		RestartVPNProc()
+	for {
+		if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
+			logrus.Info("OpenVPN process is restarting")
+			RestartVPNProc()
+			break
+		}
+		time.Sleep(1 * time.Second)
 	}
 
 	return nil

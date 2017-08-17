@@ -322,25 +322,25 @@ func main() {
 						return nil
 					},
 				},
-				{
-					Name:  "apply",
-					Usage: "Apply pending changes.",
-					Action: func(c *cli.Context) error {
-						action = "apply"
+				// {
+				// 	Name:  "apply",
+				// 	Usage: "Apply pending changes.",
+				// 	Action: func(c *cli.Context) error {
+				// 		action = "apply"
 
-						conn := getConn(c.GlobalString("daemon-port"))
-						defer conn.Close()
-						vpnSvc := pb.NewVPNServiceClient(conn)
+				// 		conn := getConn(c.GlobalString("daemon-port"))
+				// 		defer conn.Close()
+				// 		vpnSvc := pb.NewVPNServiceClient(conn)
 
-						if _, err := vpnSvc.Apply(context.Background(), &pb.VPNApplyRequest{}); err != nil {
-							logrus.Errorf("can not apply configuration: %v", err)
-							os.Exit(1)
-							return err
-						}
-						logrus.Info("changes applied; OpenVPN restarted")
-						return nil
-					},
-				},
+				// 		if _, err := vpnSvc.Apply(context.Background(), &pb.VPNApplyRequest{}); err != nil {
+				// 			logrus.Errorf("can not apply configuration: %v", err)
+				// 			os.Exit(1)
+				// 			return err
+				// 		}
+				// 		logrus.Info("changes applied; OpenVPN restarted")
+				// 		return nil
+				// 	},
+				// },
 			},
 		},
 	}
