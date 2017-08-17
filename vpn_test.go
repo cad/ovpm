@@ -1,8 +1,10 @@
 package ovpm
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/bouk/monkey"
 	"github.com/cad/ovpm/supervisor"
 )
@@ -60,7 +62,7 @@ func TestVPNDeinit(t *testing.T) {
 	// Prepare:
 	// Initialize the server.
 	Init("localhost", "")
-	u, _ := CreateNewUser("user", "p")
+	u, _ := CreateNewUser("user", "p", false)
 	u.Delete()
 
 	// Test:
@@ -170,7 +172,7 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	Init("localhost", "")
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password")
+	user, _ := CreateNewUser("user", "password", false)
 
 	// Test:
 	clientConfigBlob, err := DumpsClientConfig(user.GetUsername())
@@ -192,10 +194,14 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	Init("localhost", "")
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password")
+	noGW := false
+	user, err := CreateNewUser("user", "password", noGW)
+	if err != nil {
+		t.Fatalf("can not create user: %v", err)
+	}
 
 	// Test:
-	err := DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
+	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
 	if err != nil {
 		t.Fatalf("expected to dump client config but we got error instead: %v", err)
 	}
@@ -207,6 +213,35 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	if len(clientConfigBlob) == 0 {
 		t.Fatal("expected the dump not empty but it's empty instead")
 	}
+
+	// Is noGW honored?
+	if strings.Contains(clientConfigBlob, "route-nopull") != noGW {
+		logrus.Info(clientConfigBlob)
+		t.Fatalf("client config generator doesn't honor NoGW")
+	}
+
+	user.Delete()
+
+	noGW = true
+	user, err = CreateNewUser("user", "password", noGW)
+	if err != nil {
+		t.Fatalf("can not create user: %v", err)
+	}
+
+	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
+	if err != nil {
+		t.Fatalf("expected to dump client config but we got error instead: %v", err)
+	}
+
+	// Read file.
+	clientConfigBlob = fs["/tmp/user.ovpn"]
+
+	// Is noGW honored?
+	if strings.Contains(clientConfigBlob, "route-nopull") != noGW {
+		logrus.Info(clientConfigBlob)
+		t.Fatalf("client config generator doesn't honor NoGW")
+	}
+
 }
 
 func TestVPNGetSystemCA(t *testing.T) {

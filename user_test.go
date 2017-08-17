@@ -19,9 +19,10 @@ func TestCreateNewUser(t *testing.T) {
 	// Prepare:
 	username := "testUser"
 	password := "testPasswd1234"
+	noGW := false
 
 	// Test:
-	user, err := ovpm.CreateNewUser(username, password)
+	user, err := ovpm.CreateNewUser(username, password, noGW)
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -63,6 +64,17 @@ func TestCreateNewUser(t *testing.T) {
 		t.Errorf("user.GetCert() is expected to return '%s' but it returns '%s' %+v", user.Cert, user.GetCert(), user)
 	}
 
+	user.Delete()
+
+	// Is NoGW attr working properly?
+	noGW = true
+	user, err = ovpm.CreateNewUser(username, password, noGW)
+	if err != nil {
+		t.Fatalf("user can not be created: %v", err)
+	}
+	if user.NoGW != noGW {
+		t.Fatalf("user.NoGW is expected to be %t but it's %t instead", noGW, user.NoGW)
+	}
 }
 
 func TestUserPasswordCorrect(t *testing.T) {
@@ -74,7 +86,7 @@ func TestUserPasswordCorrect(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false)
 
 	// Test:
 
@@ -93,7 +105,7 @@ func TestUserPasswordReset(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false)
 
 	// Test:
 
@@ -121,7 +133,7 @@ func TestUserDelete(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234")
+	user, _ := ovpm.CreateNewUser(username, "1234", false)
 
 	// Test:
 
@@ -160,7 +172,7 @@ func TestUserGet(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234")
+	user, _ := ovpm.CreateNewUser(username, "1234", false)
 
 	// Test:
 	// Is user fetchable?
@@ -189,7 +201,7 @@ func TestUserGetAll(t *testing.T) {
 	for i := 0; i < count; i++ {
 		username := fmt.Sprintf("user%d", i)
 		password := fmt.Sprintf("password%d", i)
-		user, _ := ovpm.CreateNewUser(username, password)
+		user, _ := ovpm.CreateNewUser(username, password, false)
 		users = append(users, user)
 	}
 
@@ -223,7 +235,7 @@ func TestUserRenew(t *testing.T) {
 	ovpm.Init("localhost", "")
 
 	// Prepare:
-	user, _ := ovpm.CreateNewUser("user", "1234")
+	user, _ := ovpm.CreateNewUser("user", "1234", false)
 
 	// Test:
 	// Re initialize the server.
