@@ -85,7 +85,7 @@ func NewCA() (*CA, error) {
 		SerialNumber:          serial,
 		Subject:               names,
 		NotBefore:             now.Add(-10 * time.Minute).UTC(),
-		NotAfter:              now.Add(time.Duration(24*365) * time.Hour).UTC(),
+		NotAfter:              now.Add(time.Duration(24*365*_CrtExpireYears) * time.Hour).UTC(),
 		BasicConstraintsValid: true,
 		IsCA:     true,
 		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
@@ -164,7 +164,7 @@ func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 	now := time.Now()
 	tml := x509.Certificate{
 		NotBefore:    now.Add(-10 * time.Minute).UTC(),
-		NotAfter:     now.Add(time.Duration(24*365) * time.Hour).UTC(),
+		NotAfter:     now.Add(time.Duration(24*365*_CrtExpireYears) * time.Hour).UTC(),
 		SerialNumber: serial,
 		Subject: pkix.Name{
 			CommonName:   cn,
