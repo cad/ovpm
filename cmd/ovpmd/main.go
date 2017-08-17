@@ -98,22 +98,6 @@ func (s *server) start() {
 	logrus.Infof("OVPM is running :%s ...", s.port)
 	go s.grpcServer.Serve(s.lis)
 	ovpm.StartVPNProc()
-
-	// Nat enablerer
-	go func() {
-		for {
-			err := ovpm.EnsureNatEnabled()
-			if err == nil {
-				logrus.Debug("nat is enabled")
-				return
-			}
-			logrus.Debugf("can not enable nat: %v", err)
-			// TODO(cad): employ a exponential back-off approach here
-			// instead of sleeping for the constant duration.
-			time.Sleep(1 * time.Second)
-		}
-
-	}()
 }
 
 func (s *server) stop() {

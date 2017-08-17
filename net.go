@@ -6,6 +6,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/coreos/go-iptables/iptables"
+	"time"
 )
 
 // routedInterface returns a network interface that can route IP
@@ -110,8 +111,27 @@ func routableIP(network string, ip net.IP) net.IP {
 	return nil
 }
 
-// EnsureNatEnabled is an idempotent command that ensures nat is enabled for the vpn server.
-func EnsureNatEnabled() error {
+// ensureNatEnabled launches a goroutine that constantly tries to enable nat.
+func ensureNatEnabled() {
+	// Nat enablerer
+	go func() {
+		for {
+			err := enableNat()
+			if err == nil {
+				logrus.Debug("nat is enabled")
+				return
+			}
+			logrus.Debugf("can not enable nat: %v", err)
+			// TODO(cad): employ a exponential back-off approach here
+			// instead of sleeping for the constant duration.
+			time.Sleep(1 * time.Second)
+		}
+
+	}()
+}
+
+// enableNat is an idempotent command that ensures nat is enabled for the vpn server.
+func enableNat() error {
 	rif := routedInterface("ip", net.FlagUp|net.FlagBroadcast)
 	if rif == nil {
 		return fmt.Errorf("can not get routable network interface")
