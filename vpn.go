@@ -1,4 +1,5 @@
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
+//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
 
 package ovpm
 
@@ -323,13 +324,15 @@ func Emit() error {
 
 	logrus.Info("configurations emitted to the filesystem")
 
-	for {
-		if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
-			logrus.Info("OpenVPN process is restarting")
-			RestartVPNProc()
-			break
+	if IsInitialized() {
+		for {
+			if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
+				logrus.Info("OpenVPN process is restarting")
+				RestartVPNProc()
+				break
+			}
+			time.Sleep(1 * time.Second)
 		}
-		time.Sleep(1 * time.Second)
 	}
 
 	return nil
