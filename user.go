@@ -2,6 +2,7 @@ package ovpm
 
 import (
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -213,4 +214,24 @@ func (u *DBUser) GetServerSerialNumber() string {
 // GetCreatedAt returns user's creation time.
 func (u *DBUser) GetCreatedAt() string {
 	return u.CreatedAt.Format(time.UnixDate)
+}
+
+// getIP returns user's vpn ip addr.
+func (u *DBUser) getIP() net.IP {
+	clientsNetMask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
+	clientsNetPrefix := net.ParseIP(_DefaultServerNetwork)
+	clientNet := clientsNetPrefix.Mask(clientsNetMask).To4()
+	clientNet[3] = byte(u.ID)
+	return clientNet
+}
+
+// GetIPNet returns user's vpn ip network. (e.g. 192.168.0.1/24)
+func (u *DBUser) GetIPNet() string {
+	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
+
+	ipn := net.IPNet{
+		IP:   u.getIP(),
+		Mask: mask,
+	}
+	return ipn.String()
 }

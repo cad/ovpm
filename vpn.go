@@ -1,4 +1,5 @@
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
+//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
 
 package ovpm
 
@@ -6,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -323,13 +323,15 @@ func Emit() error {
 
 	logrus.Info("configurations emitted to the filesystem")
 
-	for {
-		if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
-			logrus.Info("OpenVPN process is restarting")
-			RestartVPNProc()
-			break
+	if IsInitialized() {
+		for {
+			if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
+				logrus.Info("OpenVPN process is restarting")
+				RestartVPNProc()
+				break
+			}
+			time.Sleep(1 * time.Second)
 		}
-		time.Sleep(1 * time.Second)
 	}
 
 	return nil
@@ -485,18 +487,14 @@ func emitCCD() error {
 
 	// Create and write rendered ccd data.
 	os.Mkdir(_DefaultVPNCCDPath, 0755)
-	clientsNetMask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
-	clientsNetPrefix := net.ParseIP(_DefaultServerNetwork)
-	clientNet := clientsNetPrefix.Mask(clientsNetMask).To4()
 
 	counter := 2
 	for _, user := range users {
 		var result bytes.Buffer
-		clientNet[3] = byte(counter)
 		params := struct {
 			IP      string
 			NetMask string
-		}{IP: clientNet.String(), NetMask: _DefaultServerNetMask}
+		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {

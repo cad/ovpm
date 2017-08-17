@@ -1,5 +1,3 @@
-//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
-
 package api
 
 import (
@@ -29,6 +27,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
 			CreatedAt:          user.GetCreatedAt(),
+			IPNet:              user.GetIPNet(),
 		})
 	}
 
@@ -139,13 +138,4 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
-}
-
-func (s *VPNService) Apply(ctx context.Context, req *pb.VPNApplyRequest) (*pb.VPNApplyResponse, error) {
-	logrus.Debugf("rpc call: vpn apply")
-	if err := ovpm.Emit(); err != nil {
-		logrus.Errorf("can not apply configuration: %v", err)
-		return nil, err
-	}
-	return &pb.VPNApplyResponse{}, nil
 }

@@ -37,6 +37,7 @@ message UserResponse {
     string ServerSerialNumber = 2;
     string Cert = 3;
     string CreatedAt = 4;
+    string IPNet = 5;
   }
 
   repeated User users = 1;

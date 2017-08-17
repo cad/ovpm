@@ -1,5 +1,3 @@
-//go:generate go-bindata template/
-
 package main
 
 import (
@@ -68,10 +66,10 @@ func main() {
 							return err
 						}
 						table := tablewriter.NewWriter(os.Stdout)
-						table.SetHeader([]string{"#", "username", "created at", "valid crt"})
+						table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt"})
 						//table.SetBorder(false)
 						for i, user := range resp.Users {
-							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
+							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.IPNet, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
 							table.Append(data)
 						}
 						table.Render()
@@ -322,25 +320,6 @@ func main() {
 						return nil
 					},
 				},
-				// {
-				// 	Name:  "apply",
-				// 	Usage: "Apply pending changes.",
-				// 	Action: func(c *cli.Context) error {
-				// 		action = "apply"
-
-				// 		conn := getConn(c.GlobalString("daemon-port"))
-				// 		defer conn.Close()
-				// 		vpnSvc := pb.NewVPNServiceClient(conn)
-
-				// 		if _, err := vpnSvc.Apply(context.Background(), &pb.VPNApplyRequest{}); err != nil {
-				// 			logrus.Errorf("can not apply configuration: %v", err)
-				// 			os.Exit(1)
-				// 			return err
-				// 		}
-				// 		logrus.Info("changes applied; OpenVPN restarted")
-				// 		return nil
-				// 	},
-				// },
 			},
 		},
 	}
