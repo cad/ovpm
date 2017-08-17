@@ -62,7 +62,10 @@ func TestVPNDeinit(t *testing.T) {
 	// Prepare:
 	// Initialize the server.
 	Init("localhost", "")
-	u, _ := CreateNewUser("user", "p", false)
+	u, err := CreateNewUser("user", "p", false)
+	if err != nil {
+		t.Fatal(err)
+	}
 	u.Delete()
 
 	// Test:

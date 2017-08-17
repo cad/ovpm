@@ -487,26 +487,26 @@ func emitCCD() error {
 	if err != nil {
 		return err
 	}
+	if !Testing {
+		// Clean and then create and write rendered ccd data.
+		err = os.RemoveAll(_DefaultVPNCCDPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+			} else {
+				return err
+			}
+		}
 
-	// Clean and then create and write rendered ccd data.
-	err = os.RemoveAll(_DefaultVPNCCDPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-		} else {
-			return err
+		if _, err := os.Stat(_DefaultVPNCCDPath); err != nil {
+		}
+
+		err = os.Mkdir(_DefaultVPNCCDPath, 0755)
+		if err != nil {
+			if !os.IsExist(err) {
+				return err
+			}
 		}
 	}
-
-	if _, err := os.Stat(_DefaultVPNCCDPath); err != nil {
-	}
-
-	err = os.Mkdir(_DefaultVPNCCDPath, 0755)
-	if err != nil {
-		if !os.IsExist(err) {
-			return err
-		}
-	}
-
 	for _, user := range users {
 		var result bytes.Buffer
 		params := struct {
