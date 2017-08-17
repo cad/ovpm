@@ -66,10 +66,10 @@ func main() {
 							return err
 						}
 						table := tablewriter.NewWriter(os.Stdout)
-						table.SetHeader([]string{"#", "username", "created at", "valid crt"})
+						table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt"})
 						//table.SetBorder(false)
 						for i, user := range resp.Users {
-							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
+							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.IPNet, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber)}
 							table.Append(data)
 						}
 						table.Render()

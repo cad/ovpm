@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -488,18 +487,14 @@ func emitCCD() error {
 
 	// Create and write rendered ccd data.
 	os.Mkdir(_DefaultVPNCCDPath, 0755)
-	clientsNetMask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
-	clientsNetPrefix := net.ParseIP(_DefaultServerNetwork)
-	clientNet := clientsNetPrefix.Mask(clientsNetMask).To4()
 
 	counter := 2
 	for _, user := range users {
 		var result bytes.Buffer
-		clientNet[3] = byte(counter)
 		params := struct {
 			IP      string
 			NetMask string
-		}{IP: clientNet.String(), NetMask: _DefaultServerNetMask}
+		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {

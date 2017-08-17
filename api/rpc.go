@@ -27,6 +27,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
 			CreatedAt:          user.GetCreatedAt(),
+			IPNet:              user.GetIPNet(),
 		})
 	}
 
