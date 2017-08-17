@@ -156,6 +156,11 @@ func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 		return nil, err
 	}
 
+	val, err := asn1.Marshal(asn1.BitString{Bytes: []byte{0x80}, BitLength: 2}) // setting nsCertType to Client Type
+	if err != nil {
+		return nil, fmt.Errorf("can not marshal nsCertType: %v", err)
+	}
+
 	now := time.Now()
 	tml := x509.Certificate{
 		NotBefore:    now.Add(-10 * time.Minute).UTC(),
@@ -168,11 +173,23 @@ func newCert(ca *CA, server bool, cn string) (*CertHolder, error) {
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyAgreement,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
+		ExtraExtensions: []pkix.Extension{
+			{
+				Id:    asn1.ObjectIdentifier{2, 16, 840, 1, 113730, 1, 1},
+				Value: val,
+			},
+		},
 	}
 
 	if server {
 		tml.KeyUsage = x509.KeyUsageDigitalSignature | x509.KeyUsageKeyAgreement | x509.KeyUsageKeyEncipherment
 		tml.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
+		val, err := asn1.Marshal(asn1.BitString{Bytes: []byte{0x40}, BitLength: 2}) // setting nsCertType to Server Type
+		if err != nil {
+			return nil, fmt.Errorf("can not marshal nsCertType: %v", err)
+		}
+		tml.ExtraExtensions[0].Id = asn1.ObjectIdentifier{2, 16, 840, 1, 113730, 1, 1}
+		tml.ExtraExtensions[0].Value = val
 	}
 
 	// Sign with CA's private key
