@@ -18,10 +18,8 @@ It has these top-level messages:
 	UserGenConfigResponse
 	VPNStatusRequest
 	VPNInitRequest
-	VPNApplyRequest
 	VPNStatusResponse
 	VPNInitResponse
-	VPNApplyResponse
 */
 package pb
 
