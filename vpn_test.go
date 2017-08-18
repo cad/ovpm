@@ -443,7 +443,9 @@ func (f *fakeProcess) Status() supervisor.State {
 }
 
 func init() {
+	// Init
 	Testing = true
+	fs = make(map[string]string)
 	// Monkeypatch emitToFile()
 	monkey.Patch(emitToFile, func(path, content string, mode uint) error {
 		fs[path] = content

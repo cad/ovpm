@@ -46,7 +46,39 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		NoGW:               user.IsNoGW(),
 	}
+	ut = append(ut, &pbUser)
+
+	return &pb.UserResponse{Users: ut}, nil
+}
+
+func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*pb.UserResponse, error) {
+	logrus.Debugf("rpc call: user update: %s", req.Username)
+	var ut []*pb.UserResponse_User
+	user, err := ovpm.GetUser(req.Username)
+	if err != nil {
+		return nil, err
+	}
+	var noGW bool
+
+	switch req.Gwpref {
+	case pb.UserUpdateRequest_NOGW:
+		noGW = false
+	case pb.UserUpdateRequest_GW:
+		noGW = true
+	default:
+		noGW = user.NoGW
+
+	}
+
+	user.Update(req.Password, noGW)
+	pbUser := pb.UserResponse_User{
+		Username:           user.GetUsername(),
+		ServerSerialNumber: user.GetServerSerialNumber(),
+		NoGW:               user.IsNoGW(),
+	}
+
 	ut = append(ut, &pbUser)
 
 	return &pb.UserResponse{Users: ut}, nil

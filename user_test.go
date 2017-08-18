@@ -77,6 +77,43 @@ func TestCreateNewUser(t *testing.T) {
 	}
 }
 
+func TestUserUpdate(t *testing.T) {
+	// Initialize:
+	ovpm.Testing = true
+	ovpm.SetupDB("sqlite3", ":memory:")
+	defer ovpm.CeaseDB()
+	ovpm.Init("localhost", "")
+
+	// Prepare:
+	username := "testUser"
+	password := "testPasswd1234"
+	noGW := false
+
+	// Test:
+	user, err := ovpm.CreateNewUser(username, password, noGW)
+	if err != nil {
+		t.Fatalf("user can not be created: %v", err)
+	}
+
+	var updatetests = []struct {
+		password string
+		noGW     bool
+		ok       bool
+	}{
+		{"testpw", false, true},
+		{"123", false, true},
+		{"123", false, true},
+		{"", true, true},
+	}
+
+	for _, tt := range updatetests {
+		err := user.Update(tt.password, tt.noGW)
+		if (err == nil) != tt.ok {
+			t.Errorf("user is expected to be able to update but it gave us this error instead: %v", err)
+		}
+	}
+}
+
 func TestUserPasswordCorrect(t *testing.T) {
 	// Initialize:
 	ovpm.Testing = true

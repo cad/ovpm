@@ -12,6 +12,18 @@ message UserCreateRequest {
   bool NoGW = 3;
 }
 
+message UserUpdateRequest {
+  string Username = 1;
+  string Password = 2;
+  enum GWPref {
+    NOPREF = 0;
+    NOGW = 1;
+    GW = 2;
+  }
+  GWPref gwpref = 3;
+}
+
+
 message UserDeleteRequest {
   string Username = 1;
 }
@@ -27,6 +39,7 @@ message UserGenConfigRequest {
 service UserService {
   rpc List (UserListRequest) returns (UserResponse) {}
   rpc Create (UserCreateRequest) returns (UserResponse) {}
+  rpc Update (UserUpdateRequest) returns (UserResponse) {}
   rpc Delete (UserDeleteRequest) returns (UserResponse) {}
   rpc Renew (UserRenewRequest) returns (UserResponse) {}
   rpc GenConfig (UserGenConfigRequest) returns (UserGenConfigResponse) {}
