@@ -5,11 +5,12 @@ import (
 	"net"
 	"time"
 
+	passlib "gopkg.in/hlandau/passlib.v1"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/pki"
 	"github.com/jinzhu/gorm"
-	"gopkg.in/hlandau/passlib.v1"
 )
 
 // User represents the interface that is being used within the public api.
@@ -28,10 +29,10 @@ type DBUser struct {
 	Server   DBServer
 
 	Username           string `gorm:"unique_index"`
-	Cert               string
-	ServerSerialNumber string
+	Cert               string // not user writable
+	ServerSerialNumber string // not user writable
 	Hash               string
-	Key                string
+	Key                string // not user writable
 	NoGW               bool
 }
 
@@ -134,9 +135,32 @@ func CreateNewUser(username, password string, nogw bool) (*DBUser, error) {
 	return &user, nil
 }
 
+// Update updates the user's attributes and writes them to the database.
+//
+// How this method works is similiar to PUT semantics of REST. It sets the user record fields to the provided function arguments.
+func (u *DBUser) Update(password string, nogw bool) error {
+	if !IsInitialized() {
+		return fmt.Errorf("you first need to create server")
+	}
+
+	// If password is provided; set it. If not; leave it as it is.
+	if password != "" {
+		u.setPassword(password)
+	}
+
+	u.NoGW = nogw
+	db.Save(u)
+
+	err := Emit()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Delete deletes a user by the given username from the database.
 func (u *DBUser) Delete() error {
-	if db.NewRecord(&u) {
+	if db.NewRecord(u) {
 		// user is not found
 		return fmt.Errorf("user is not initialized: %s", u.Username)
 	}
@@ -147,7 +171,7 @@ func (u *DBUser) Delete() error {
 	db.Create(&DBRevoked{
 		SerialNumber: crt.SerialNumber.Text(16),
 	})
-	db.Unscoped().Delete(&u)
+	db.Unscoped().Delete(u)
 	logrus.Infof("user deleted: %s", u.GetUsername())
 	err = Emit()
 	if err != nil {
@@ -201,7 +225,7 @@ func (u *DBUser) Renew() error {
 	u.Key = clientCert.Key
 	u.ServerSerialNumber = server.SerialNumber
 
-	db.Save(&u)
+	db.Save(u)
 	err = Emit()
 	if err != nil {
 		return err

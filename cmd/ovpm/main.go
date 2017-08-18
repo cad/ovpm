@@ -89,7 +89,7 @@ func main() {
 							Name:  "password, p",
 							Usage: "password for the vpn user",
 						},
-						cli.StringFlag{
+						cli.BoolFlag{
 							Name:  "no-gw",
 							Usage: "don't push vpn server as default gateway for this user",
 						},
@@ -98,6 +98,7 @@ func main() {
 						action = "user:create"
 						username := c.String("username")
 						password := c.String("password")
+						noGW := c.Bool("no-gw")
 
 						if username == "" || password == "" {
 							fmt.Println(cli.ShowSubcommandHelp(c))
@@ -109,13 +110,91 @@ func main() {
 						defer conn.Close()
 						userSvc := pb.NewUserServiceClient(conn)
 
-						response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password})
+						response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW})
 						if err != nil {
 							logrus.Errorf("user can not be created '%s': %v", username, err)
 							os.Exit(1)
 							return err
 						}
 						logrus.Infof("user created: %s", response.Users[0].Username)
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "Update a VPN user.",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "username, u",
+							Usage: "username of the vpn user to update",
+						},
+						cli.StringFlag{
+							Name:  "password, p",
+							Usage: "new password for the vpn user",
+						},
+						cli.BoolFlag{
+							Name:  "no-gw",
+							Usage: "don't push vpn server as default gateway for this user",
+						},
+						cli.BoolFlag{
+							Name:  "gw",
+							Usage: "push vpn server as default gateway for this user",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						action = "user:update"
+						username := c.String("username")
+						password := c.String("password")
+						nogw := c.Bool("no-gw")
+						gw := c.Bool("gw")
+
+						if username == "" {
+							fmt.Println(cli.ShowSubcommandHelp(c))
+							os.Exit(1)
+						}
+
+						if !(password != "" || gw || nogw) {
+							fmt.Println("nothing is updated!")
+							fmt.Println()
+							fmt.Println(cli.ShowSubcommandHelp(c))
+							os.Exit(1)
+						}
+
+						var gwPref pb.UserUpdateRequest_GWPref
+
+						switch {
+						case gw && !nogw:
+							gwPref = pb.UserUpdateRequest_GW
+						case !gw && nogw:
+							gwPref = pb.UserUpdateRequest_NOGW
+						case gw && nogw:
+							// Ambigius.
+							fmt.Println("you can't use --gw together with --no-gw")
+							fmt.Println()
+							fmt.Println(cli.ShowSubcommandHelp(c))
+							os.Exit(1)
+						default:
+							gwPref = pb.UserUpdateRequest_NOPREF
+
+						}
+
+						//conn := getConn(c.String("port"))
+						conn := getConn(c.GlobalString("daemon-port"))
+						defer conn.Close()
+						userSvc := pb.NewUserServiceClient(conn)
+
+						response, err := userSvc.Update(context.Background(), &pb.UserUpdateRequest{
+							Username: username,
+							Password: password,
+							Gwpref:   gwPref,
+						})
+
+						if err != nil {
+							logrus.Errorf("user can not be updated '%s': %v", username, err)
+							os.Exit(1)
+							return err
+						}
+						logrus.Infof("user updated: %s", response.Users[0].Username)
 						return nil
 					},
 				},
