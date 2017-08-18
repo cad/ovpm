@@ -89,7 +89,6 @@ func TestUserPasswordCorrect(t *testing.T) {
 	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false)
 
 	// Test:
-
 	// Is user created with the correct password?
 	if !user.CheckPassword(initialPassword) {
 		t.Fatalf("user's password must be '%s', but CheckPassword fails +%v", initialPassword, user)
@@ -260,8 +259,8 @@ func areUsersEqual(user1, user2 *ovpm.DBUser) bool {
 		logrus.Infof("Username %v != %v", user1.Username, user2.Username)
 		return false
 	}
-	if user1.Password != user2.Password {
-		logrus.Infof("Password %v != %v", user1.Password, user2.Password)
+	if user1.Hash != user2.Hash {
+		logrus.Infof("Password %v != %v", user1.Hash, user2.Hash)
 		return false
 	}
 	if user1.ServerSerialNumber != user2.ServerSerialNumber {

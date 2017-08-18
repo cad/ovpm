@@ -9,6 +9,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/pki"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/hlandau/passlib.v1"
 )
 
 // User represents the interface that is being used within the public api.
@@ -29,7 +30,7 @@ type DBUser struct {
 	Username           string `gorm:"unique_index"`
 	Cert               string
 	ServerSerialNumber string
-	Password           string
+	Hash               string
 	Key                string
 	NoGW               bool
 }
@@ -41,14 +42,23 @@ type DBRevoked struct {
 }
 
 func (u *DBUser) setPassword(password string) error {
-	// TODO(cad): Use a proper password hashing algorithm here.
-	u.Password = password
+	hashedPassword, err := passlib.Hash(password)
+	if err != nil {
+		return fmt.Errorf("can not set password: %v", err)
+	}
+
+	u.Hash = hashedPassword
 	return nil
 }
 
 // CheckPassword returns wether the given password is correct for the user.
 func (u *DBUser) CheckPassword(password string) bool {
-	return u.Password == password
+	_, err := passlib.Verify(password, u.Hash)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+	return true
 }
 
 // GetUser finds and returns the user with the given username from database.
@@ -101,14 +111,13 @@ func CreateNewUser(username, password string, nogw bool) (*DBUser, error) {
 		return nil, fmt.Errorf("can not get server: %v", err)
 	}
 	user := DBUser{
-
 		Username:           username,
-		Password:           password,
 		Cert:               clientCert.Cert,
 		Key:                clientCert.Key,
 		ServerSerialNumber: server.SerialNumber,
 		NoGW:               nogw,
 	}
+	user.setPassword(password)
 
 	db.Create(&user)
 	if db.NewRecord(&user) {
