@@ -1,6 +1,7 @@
 # OVPM - OpenVPn Manager
 
 [![Build Status](https://travis-ci.org/cad/ovpm.svg?branch=master)](https://travis-ci.org/cad/ovpm)
+[![GitHub version](https://badge.fury.io/gh/cad%2Fovpm.svg)](https://badge.fury.io/gh/cad%2Fovpm)
 [![codecov](https://codecov.io/gh/cad/ovpm/branch/master/graph/badge.svg)](https://codecov.io/gh/cad/ovpm)
 [![GoDoc](https://godoc.org/github.com/cad/ovpm?status.svg)](https://godoc.org/github.com/cad/ovpm)
 
