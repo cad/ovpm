@@ -10,6 +10,7 @@ message UserCreateRequest {
   string Username = 1;
   string Password = 2;
   bool NoGW = 3;
+  uint32 HostID = 4;
 }
 
 message UserUpdateRequest {
@@ -21,6 +22,7 @@ message UserUpdateRequest {
     GW = 2;
   }
   GWPref gwpref = 3;
+  uint32 HostID = 4;
 }
 
 
@@ -53,6 +55,7 @@ message UserResponse {
     string CreatedAt = 4;
     string IPNet = 5;
     bool NoGW = 6;
+    uint32 HostID = 7;
   }
 
   repeated User users = 1;
