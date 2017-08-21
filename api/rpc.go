@@ -29,6 +29,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			CreatedAt:          user.GetCreatedAt(),
 			IPNet:              user.GetIPNet(),
 			NoGW:               user.IsNoGW(),
+			HostID:             user.GetHostID(),
 		})
 	}
 
@@ -38,7 +39,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +48,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		NoGW:               user.IsNoGW(),
+		HostID:             user.GetHostID(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -72,11 +74,12 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	}
 
-	user.Update(req.Password, noGW)
+	user.Update(req.Password, noGW, req.HostID)
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		NoGW:               user.IsNoGW(),
+		HostID:             user.GetHostID(),
 	}
 
 	ut = append(ut, &pbUser)
@@ -95,6 +98,7 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		HostID:             user.GetHostID(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -117,6 +121,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		HostID:             user.GetHostID(),
 	}
 	ut = append(ut, &pbUser)
 

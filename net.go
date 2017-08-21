@@ -1,12 +1,14 @@
 package ovpm
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/coreos/go-iptables/iptables"
-	"time"
 )
 
 // routedInterface returns a network interface that can route IP
@@ -156,4 +158,16 @@ func enableNat() error {
 	ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED, ESTABLISHED", "-j", "ACCEPT")
 	ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT")
 	return nil
+
+}
+
+func HostID2IP(hostid uint32) net.IP {
+	ip := make([]byte, 4)
+	binary.BigEndian.PutUint32(ip, hostid)
+	return net.IP(ip)
+}
+
+func IP2HostID(ip net.IP) uint32 {
+	hostid := binary.BigEndian.Uint32(ip)
+	return hostid
 }

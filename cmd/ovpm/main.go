@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -69,7 +70,11 @@ func main() {
 						table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
 						//table.SetBorder(false)
 						for i, user := range resp.Users {
-							data := []string{fmt.Sprintf("%v", i+1), user.Username, user.IPNet, user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
+							static := ""
+							if user.HostID != 0 {
+								static = "s"
+							}
+							data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
 							table.Append(data)
 						}
 						table.Render()
@@ -93,16 +98,34 @@ func main() {
 							Name:  "no-gw",
 							Usage: "don't push vpn server as default gateway for this user",
 						},
+						cli.StringFlag{
+							Name:  "static",
+							Usage: "ip address for the vpn user",
+						},
 					},
 					Action: func(c *cli.Context) error {
 						action = "user:create"
 						username := c.String("username")
 						password := c.String("password")
 						noGW := c.Bool("no-gw")
+						static := c.String("static")
 
 						if username == "" || password == "" {
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
+						}
+
+						var hostid uint32
+						if static != "" {
+							h := ovpm.IP2HostID(net.ParseIP(static).To4())
+							if h == 0 {
+								fmt.Println("--static flag takes a valid ipv4 address")
+								fmt.Println()
+								fmt.Println(cli.ShowSubcommandHelp(c))
+								os.Exit(1)
+							}
+
+							hostid = h
 						}
 
 						//conn := getConn(c.String("port"))
@@ -110,7 +133,7 @@ func main() {
 						defer conn.Close()
 						userSvc := pb.NewUserServiceClient(conn)
 
-						response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW})
+						response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid})
 						if err != nil {
 							logrus.Errorf("user can not be created '%s': %v", username, err)
 							os.Exit(1)
@@ -140,6 +163,10 @@ func main() {
 							Name:  "gw",
 							Usage: "push vpn server as default gateway for this user",
 						},
+						cli.StringFlag{
+							Name:  "static",
+							Usage: "ip address for the vpn user",
+						},
 					},
 					Action: func(c *cli.Context) error {
 						action = "user:update"
@@ -147,6 +174,7 @@ func main() {
 						password := c.String("password")
 						nogw := c.Bool("no-gw")
 						gw := c.Bool("gw")
+						static := c.String("static")
 
 						if username == "" {
 							fmt.Println(cli.ShowSubcommandHelp(c))
@@ -158,6 +186,19 @@ func main() {
 							fmt.Println()
 							fmt.Println(cli.ShowSubcommandHelp(c))
 							os.Exit(1)
+						}
+
+						var hostid uint32
+						if static != "" {
+							h := ovpm.IP2HostID(net.ParseIP(static).To4())
+							if h == 0 {
+								fmt.Println("--static flag takes a valid ipv4 address")
+								fmt.Println()
+								fmt.Println(cli.ShowSubcommandHelp(c))
+								os.Exit(1)
+							}
+
+							hostid = h
 						}
 
 						var gwPref pb.UserUpdateRequest_GWPref
@@ -187,6 +228,7 @@ func main() {
 							Username: username,
 							Password: password,
 							Gwpref:   gwPref,
+							HostID:   hostid,
 						})
 
 						if err != nil {
