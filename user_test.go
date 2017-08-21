@@ -2,6 +2,7 @@ package ovpm_test
 
 import (
 	"fmt"
+	"net"
 	"testing"
 
 	"github.com/Sirupsen/logrus"
@@ -22,7 +23,7 @@ func TestCreateNewUser(t *testing.T) {
 	noGW := false
 
 	// Test:
-	user, err := ovpm.CreateNewUser(username, password, noGW)
+	user, err := ovpm.CreateNewUser(username, password, noGW, 0)
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -68,7 +69,7 @@ func TestCreateNewUser(t *testing.T) {
 
 	// Is NoGW attr working properly?
 	noGW = true
-	user, err = ovpm.CreateNewUser(username, password, noGW)
+	user, err = ovpm.CreateNewUser(username, password, noGW, 0)
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -90,7 +91,7 @@ func TestUserUpdate(t *testing.T) {
 	noGW := false
 
 	// Test:
-	user, err := ovpm.CreateNewUser(username, password, noGW)
+	user, err := ovpm.CreateNewUser(username, password, noGW, 0)
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -107,7 +108,7 @@ func TestUserUpdate(t *testing.T) {
 	}
 
 	for _, tt := range updatetests {
-		err := user.Update(tt.password, tt.noGW)
+		err := user.Update(tt.password, tt.noGW, 0)
 		if (err == nil) != tt.ok {
 			t.Errorf("user is expected to be able to update but it gave us this error instead: %v", err)
 		}
@@ -123,7 +124,7 @@ func TestUserPasswordCorrect(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0)
 
 	// Test:
 	// Is user created with the correct password?
@@ -141,7 +142,7 @@ func TestUserPasswordReset(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0)
 
 	// Test:
 
@@ -169,7 +170,7 @@ func TestUserDelete(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234", false)
+	user, _ := ovpm.CreateNewUser(username, "1234", false, 0)
 
 	// Test:
 
@@ -208,7 +209,7 @@ func TestUserGet(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234", false)
+	user, _ := ovpm.CreateNewUser(username, "1234", false, 0)
 
 	// Test:
 	// Is user fetchable?
@@ -237,7 +238,7 @@ func TestUserGetAll(t *testing.T) {
 	for i := 0; i < count; i++ {
 		username := fmt.Sprintf("user%d", i)
 		password := fmt.Sprintf("password%d", i)
-		user, _ := ovpm.CreateNewUser(username, password, false)
+		user, _ := ovpm.CreateNewUser(username, password, false, 0)
 		users = append(users, user)
 	}
 
@@ -271,7 +272,7 @@ func TestUserRenew(t *testing.T) {
 	ovpm.Init("localhost", "")
 
 	// Prepare:
-	user, _ := ovpm.CreateNewUser("user", "1234", false)
+	user, _ := ovpm.CreateNewUser("user", "1234", false, 0)
 
 	// Test:
 	// Re initialize the server.
@@ -283,6 +284,44 @@ func TestUserRenew(t *testing.T) {
 	// Aren't users certificates different?
 	if user.Cert == fetchedUser.Cert {
 		t.Fatalf("fetched user's certificate is expected to be 'DIFFERENT' from the created user (since server is re initialized), but it's 'SAME' instead")
+	}
+}
+
+func TestUserIPAllocator(t *testing.T) {
+	// Initialize:
+	ovpm.Testing = true
+	ovpm.SetupDB("sqlite3", ":memory:")
+	defer ovpm.CeaseDB()
+	ovpm.Init("localhost", "")
+
+	// Prepare:
+
+	// Test:
+	var iptests = []struct {
+		username   string
+		gw         bool
+		hostid     uint32
+		expectedIP string
+		pass       bool
+	}{
+		{"user1", false, 0, "10.9.0.2/24", true},
+		{"user2", false, 0, "10.9.0.3/24", true},
+		{"user3", true, 0, "10.9.0.4/24", true},
+		{"user4", true, ovpm.IP2HostID(net.ParseIP("10.9.0.5").To4()), "10.9.0.5/24", true},
+		{"user5", true, ovpm.IP2HostID(net.ParseIP("192.168.1.1").To4()), "10.9.0.6/24", false},
+		{"user6", true, ovpm.IP2HostID(net.ParseIP("10.9.0.7").To4()), "10.9.0.7/24", true},
+		{"user7", true, 0, "10.9.0.8/24", true},
+	}
+	for _, tt := range iptests {
+		user, err := ovpm.CreateNewUser(tt.username, "pass", tt.gw, tt.hostid)
+		if (err == nil) == !tt.pass {
+			t.Fatalf("expected pass %t %s", tt.pass, err)
+		}
+		if user != nil {
+			if user.GetIPNet() != tt.expectedIP {
+				t.Fatalf("%s is expected to be %s", user.GetIPNet(), tt.expectedIP)
+			}
+		}
 	}
 }
 
