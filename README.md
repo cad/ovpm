@@ -20,7 +20,7 @@ $ curl -s https://packagecloud.io/install/repositories/cad/ovpm/script.rpm.sh | 
 $ sudo yum install ovpm
 ```
 
-### from source:
+### from Source (go get):
 
 Only dependency for ovpm is **OpenVPN>=2.3**.
 
