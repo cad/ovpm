@@ -1,16 +1,43 @@
+sudo: required
+services:
+  - docker
+
+cache:
+    directories:
+     - $HOME/.cache
+
 language: go
 go:
   - 1.8
   - tip
-
+go_import_path: github.com/cad/ovpm
+env:
+    matrix:
+      - OS=el DIST=7
+      - OS=fedora DIST=25
 
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y openvpn
   - go get -t -v ./...
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic .
+  - make docker-build
 
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+deploy:
+  # Deploy packages to PackageCloud
+  provider: packagecloud
+  username: ${PACKAGECLOUD_USER}
+  repository: ${PACKAGECLOUD_REPO}
+  token: ${PACKAGECLOUD_TOKEN}
+  dist: ${OS}/${DIST}
+  package_glob: rpm/*.{deb,rpm}
+  skip_cleanup: true
+  on:
+    tag: true
+    #branch: master
