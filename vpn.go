@@ -253,6 +253,7 @@ func RestartVPNProc() {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
 	vpnProc.Restart()
+	ensureNatEnabled()
 }
 
 // StopVPNProc stops the OpenVPN process.
