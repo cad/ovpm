@@ -7,12 +7,10 @@ message VPNInitRequest {
   string Hostname = 1;
   string Port = 2;
 }
-message VPNApplyRequest {}
 
 service VPNService {
   rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {}
   rpc Init (VPNInitRequest) returns (VPNInitResponse) {}
-  rpc Apply (VPNApplyRequest) returns (VPNApplyResponse) {}
 }
 
 message VPNStatusResponse {
@@ -27,4 +25,3 @@ message VPNStatusResponse {
   string CreatedAt = 9;
 }
 message VPNInitResponse {}
-message VPNApplyResponse {}

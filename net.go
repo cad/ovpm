@@ -1,8 +1,11 @@
 package ovpm
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
+
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/coreos/go-iptables/iptables"
@@ -110,8 +113,27 @@ func routableIP(network string, ip net.IP) net.IP {
 	return nil
 }
 
-// EnsureNatEnabled is an idempotent command that ensures nat is enabled for the vpn server.
-func EnsureNatEnabled() error {
+// ensureNatEnabled launches a goroutine that constantly tries to enable nat.
+func ensureNatEnabled() {
+	// Nat enablerer
+	go func() {
+		for {
+			err := enableNat()
+			if err == nil {
+				logrus.Debug("nat is enabled")
+				return
+			}
+			logrus.Debugf("can not enable nat: %v", err)
+			// TODO(cad): employ a exponential back-off approach here
+			// instead of sleeping for the constant duration.
+			time.Sleep(1 * time.Second)
+		}
+
+	}()
+}
+
+// enableNat is an idempotent command that ensures nat is enabled for the vpn server.
+func enableNat() error {
 	rif := routedInterface("ip", net.FlagUp|net.FlagBroadcast)
 	if rif == nil {
 		return fmt.Errorf("can not get routable network interface")
@@ -136,4 +158,16 @@ func EnsureNatEnabled() error {
 	ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED, ESTABLISHED", "-j", "ACCEPT")
 	ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT")
 	return nil
+
+}
+
+func HostID2IP(hostid uint32) net.IP {
+	ip := make([]byte, 4)
+	binary.BigEndian.PutUint32(ip, hostid)
+	return net.IP(ip)
+}
+
+func IP2HostID(ip net.IP) uint32 {
+	hostid := binary.BigEndian.Uint32(ip)
+	return hostid
 }

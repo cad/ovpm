@@ -1,4 +1,5 @@
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
+//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
 
 package ovpm
 
@@ -6,11 +7,12 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-	"net"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
+
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
@@ -73,7 +75,7 @@ func Init(hostname string, port string) error {
 	}
 
 	if !govalidator.IsNumeric(port) {
-		return fmt.Errorf("validation error: port:`%s` should be numeric", hostname)
+		return fmt.Errorf("validation error: port:`%s` should be numeric", port)
 	}
 
 	serverName := "default"
@@ -131,6 +133,7 @@ func Init(hostname string, port string) error {
 			continue
 		}
 	}
+	Emit()
 	logrus.Infof("server initialized")
 	return nil
 }
@@ -143,6 +146,7 @@ func Deinit() error {
 
 	db.Unscoped().Delete(&DBServer{})
 	db.Unscoped().Delete(&DBRevoked{})
+	Emit()
 	return nil
 }
 
@@ -165,12 +169,14 @@ func DumpsClientConfig(username string) (string, error) {
 		CA       string
 		Key      string
 		Cert     string
+		NoGW     bool
 	}{
 		Hostname: server.Hostname,
 		Port:     server.Port,
 		CA:       server.CACert,
 		Key:      user.Key,
 		Cert:     user.Cert,
+		NoGW:     user.NoGW,
 	}
 	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {
@@ -233,8 +239,8 @@ func StartVPNProc() {
 		logrus.Error("OpenVPN is already started")
 		return
 	}
-
 	vpnProc.Start()
+	ensureNatEnabled()
 }
 
 // RestartVPNProc restarts the OpenVPN process.
@@ -320,10 +326,15 @@ func Emit() error {
 
 	logrus.Info("configurations emitted to the filesystem")
 
-	// If the OpenVPN is already running, restart it.
-	if vpnProc.Status() == supervisor.RUNNING {
-		logrus.Info("OpenVPN process is restarting")
-		RestartVPNProc()
+	if IsInitialized() {
+		for {
+			if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
+				logrus.Info("OpenVPN process is restarting")
+				RestartVPNProc()
+				break
+			}
+			time.Sleep(1 * time.Second)
+		}
 	}
 
 	return nil
@@ -476,21 +487,32 @@ func emitCCD() error {
 	if err != nil {
 		return err
 	}
+	if !Testing {
+		// Clean and then create and write rendered ccd data.
+		err = os.RemoveAll(_DefaultVPNCCDPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+			} else {
+				return err
+			}
+		}
 
-	// Create and write rendered ccd data.
-	os.Mkdir(_DefaultVPNCCDPath, 0755)
-	clientsNetMask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
-	clientsNetPrefix := net.ParseIP(_DefaultServerNetwork)
-	clientNet := clientsNetPrefix.Mask(clientsNetMask).To4()
+		if _, err := os.Stat(_DefaultVPNCCDPath); err != nil {
+		}
 
-	counter := 2
+		err = os.Mkdir(_DefaultVPNCCDPath, 0755)
+		if err != nil {
+			if !os.IsExist(err) {
+				return err
+			}
+		}
+	}
 	for _, user := range users {
 		var result bytes.Buffer
-		clientNet[3] = byte(counter)
 		params := struct {
 			IP      string
 			NetMask string
-		}{IP: clientNet.String(), NetMask: _DefaultServerNetMask}
+		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
@@ -510,7 +532,6 @@ func emitCCD() error {
 		if err != nil {
 			return err
 		}
-		counter++
 	}
 	return nil
 }
@@ -587,6 +608,9 @@ func checkIptablesExecutable() bool {
 }
 
 func ensureBaseDir() {
+	if Testing {
+		return
+	}
 	os.Mkdir(varBasePath, 0755)
 }
 

@@ -9,7 +9,22 @@ message UserListRequest {
 message UserCreateRequest {
   string Username = 1;
   string Password = 2;
+  bool NoGW = 3;
+  uint32 HostID = 4;
 }
+
+message UserUpdateRequest {
+  string Username = 1;
+  string Password = 2;
+  enum GWPref {
+    NOPREF = 0;
+    NOGW = 1;
+    GW = 2;
+  }
+  GWPref gwpref = 3;
+  uint32 HostID = 4;
+}
+
 
 message UserDeleteRequest {
   string Username = 1;
@@ -26,6 +41,7 @@ message UserGenConfigRequest {
 service UserService {
   rpc List (UserListRequest) returns (UserResponse) {}
   rpc Create (UserCreateRequest) returns (UserResponse) {}
+  rpc Update (UserUpdateRequest) returns (UserResponse) {}
   rpc Delete (UserDeleteRequest) returns (UserResponse) {}
   rpc Renew (UserRenewRequest) returns (UserResponse) {}
   rpc GenConfig (UserGenConfigRequest) returns (UserGenConfigResponse) {}
@@ -37,6 +53,9 @@ message UserResponse {
     string ServerSerialNumber = 2;
     string Cert = 3;
     string CreatedAt = 4;
+    string IPNet = 5;
+    bool NoGW = 6;
+    uint32 HostID = 7;
   }
 
   repeated User users = 1;

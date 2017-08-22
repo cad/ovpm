@@ -1,17 +1,25 @@
 package ovpm
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/bouk/monkey"
 	"github.com/cad/ovpm/supervisor"
 )
 
 var fs map[string]string
 
+func setupTestCase() {
+	// Initialize.
+	fs = make(map[string]string)
+	vpnProc.Stop()
+}
+
 func TestVPNInit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	// Prepare:
@@ -24,6 +32,12 @@ func TestVPNInit(t *testing.T) {
 	// Isn't server empty struct?
 	if !db.NewRecord(&server) {
 		t.Fatalf("server is expected to be empty struct(new record) but it isn't %+v", server)
+	}
+
+	// Wrongfully initialize server.
+	err := Init("localhost", "asdf")
+	if err == nil {
+		t.Fatalf("error is expected to be not nil but it's nil instead")
 	}
 
 	// Initialize the server.
@@ -41,14 +55,17 @@ func TestVPNInit(t *testing.T) {
 
 func TestVPNDeinit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
 	// Prepare:
 	// Initialize the server.
 	Init("localhost", "")
-	u, _ := CreateNewUser("user", "p")
+	u, err := CreateNewUser("user", "p", false, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 	u.Delete()
 
 	// Test:
@@ -92,7 +109,7 @@ func TestVPNDeinit(t *testing.T) {
 
 func TestVPNIsInitialized(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -115,7 +132,7 @@ func TestVPNIsInitialized(t *testing.T) {
 
 func TestVPNGetServerInstance(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -152,13 +169,13 @@ func TestVPNGetServerInstance(t *testing.T) {
 
 func TestVPNDumpsClientConfig(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password")
+	user, _ := CreateNewUser("user", "password", false, 0)
 
 	// Test:
 	clientConfigBlob, err := DumpsClientConfig(user.GetUsername())
@@ -174,16 +191,20 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 
 func TestVPNDumpClientConfig(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password")
+	noGW := false
+	user, err := CreateNewUser("user", "password", noGW, 0)
+	if err != nil {
+		t.Fatalf("can not create user: %v", err)
+	}
 
 	// Test:
-	err := DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
+	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
 	if err != nil {
 		t.Fatalf("expected to dump client config but we got error instead: %v", err)
 	}
@@ -195,11 +216,40 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	if len(clientConfigBlob) == 0 {
 		t.Fatal("expected the dump not empty but it's empty instead")
 	}
+
+	// Is noGW honored?
+	if strings.Contains(clientConfigBlob, "route-nopull") != noGW {
+		logrus.Info(clientConfigBlob)
+		t.Fatalf("client config generator doesn't honor NoGW")
+	}
+
+	user.Delete()
+
+	noGW = true
+	user, err = CreateNewUser("user", "password", noGW, 0)
+	if err != nil {
+		t.Fatalf("can not create user: %v", err)
+	}
+
+	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
+	if err != nil {
+		t.Fatalf("expected to dump client config but we got error instead: %v", err)
+	}
+
+	// Read file.
+	clientConfigBlob = fs["/tmp/user.ovpn"]
+
+	// Is noGW honored?
+	if strings.Contains(clientConfigBlob, "route-nopull") != noGW {
+		logrus.Info(clientConfigBlob)
+		t.Fatalf("client config generator doesn't honor NoGW")
+	}
+
 }
 
 func TestVPNGetSystemCA(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -231,7 +281,7 @@ func TestVPNGetSystemCA(t *testing.T) {
 
 func TestVPNStartVPNProc(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 
@@ -265,7 +315,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 
 func TestVPNStopVPNProc(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -300,10 +350,6 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	// Test:
 
 	// Call restart.
-	// Isn't it stopped?
-	if vpnProc.Status() != supervisor.STOPPED {
-		t.Fatalf("expected state is STOPPED, got %s instead", vpnProc.Status())
-	}
 
 	RestartVPNProc()
 
@@ -323,7 +369,7 @@ func TestVPNRestartVPNProc(t *testing.T) {
 
 func TestVPNEmit(t *testing.T) {
 	// Init:
-	Testing = true
+	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
@@ -352,6 +398,30 @@ func TestVPNEmit(t *testing.T) {
 	// TODO(cad): Write test cases for ccd/ files as well.
 }
 
+func TestVPNemitToFile(t *testing.T) {
+	// Initialize:
+	// Prepare:
+	path := "/test/file"
+	content := "blah blah blah"
+
+	// Test:
+	// Is path exist?
+	if _, ok := fs[path]; ok {
+		t.Fatalf("key '%s' expected to be non-existent on fs, but it is instead", path)
+	}
+
+	// Emit the contents.
+	err := emitToFile(path, content, 0)
+	if err != nil {
+		t.Fatalf("expected  to be able to emit to the filesystem but we got this error instead: %v", err)
+	}
+
+	// Is the content on the filesystem correct?
+	if fs[path] != content {
+		t.Fatalf("content on the filesytem is expected to be same with '%s' but it's '%s' instead", content, fs[path])
+	}
+}
+
 type fakeProcess struct {
 	state supervisor.State
 }
@@ -373,9 +443,9 @@ func (f *fakeProcess) Status() supervisor.State {
 }
 
 func init() {
-	// Initialize.
+	// Init
+	Testing = true
 	fs = make(map[string]string)
-
 	// Monkeypatch emitToFile()
 	monkey.Patch(emitToFile, func(path, content string, mode uint) error {
 		fs[path] = content

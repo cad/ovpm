@@ -2,7 +2,10 @@ package ovpm
 
 import (
 	"fmt"
+	"net"
 	"time"
+
+	passlib "gopkg.in/hlandau/passlib.v1"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
@@ -15,6 +18,9 @@ type User interface {
 	GetUsername() string
 	GetServerSerialNumber() string
 	GetCert() string
+	GetIPNet() string
+	IsNoGW() bool
+	GetHostID() uint32
 }
 
 // DBUser is database model for VPN users.
@@ -24,10 +30,12 @@ type DBUser struct {
 	Server   DBServer
 
 	Username           string `gorm:"unique_index"`
-	Cert               string
-	ServerSerialNumber string
-	Password           string
-	Key                string
+	Cert               string // not user writable
+	ServerSerialNumber string // not user writable
+	Hash               string
+	Key                string // not user writable
+	NoGW               bool
+	HostID             uint32 // not user writable
 }
 
 // DBRevoked is a database model for revoked VPN users.
@@ -37,14 +45,23 @@ type DBRevoked struct {
 }
 
 func (u *DBUser) setPassword(password string) error {
-	// TODO(cad): Use a proper password hashing algorithm here.
-	u.Password = password
+	hashedPassword, err := passlib.Hash(password)
+	if err != nil {
+		return fmt.Errorf("can not set password: %v", err)
+	}
+
+	u.Hash = hashedPassword
 	return nil
 }
 
 // CheckPassword returns wether the given password is correct for the user.
 func (u *DBUser) CheckPassword(password string) bool {
-	return u.Password == password
+	_, err := passlib.Verify(password, u.Hash)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+	return true
 }
 
 // GetUser finds and returns the user with the given username from database.
@@ -68,9 +85,11 @@ func GetAllUsers() ([]*DBUser, error) {
 }
 
 // CreateNewUser creates a new user with the given username and password in the database.
+// If nogw is true, then ovpm doesn't push vpn server as the default gw for the user.
+//
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
-func CreateNewUser(username, password string) (*DBUser, error) {
+func CreateNewUser(username, password string, nogw bool, hostid uint32) (*DBUser, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -81,6 +100,7 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 	if !govalidator.IsAlphanumeric(username) {
 		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", username)
 	}
+
 	ca, err := GetSystemCA()
 	if err != nil {
 		return nil, err
@@ -94,14 +114,31 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can not get server: %v", err)
 	}
-	user := DBUser{
 
+	if hostid != 0 {
+		ip := HostID2IP(hostid)
+		if ip == nil {
+			return nil, fmt.Errorf("host id doesn't represent an ip %d", hostid)
+		}
+
+		network := net.IPNet{IP: net.ParseIP(server.Net).To4(), Mask: net.IPMask(net.ParseIP(server.Mask).To4())}
+		if !network.Contains(ip) {
+			return nil, fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
+		}
+
+		if hostIDsContains(getStaticHostIDs(), hostid) {
+			return nil, fmt.Errorf("ip %s is already allocated", ip)
+		}
+	}
+	user := DBUser{
 		Username:           username,
-		Password:           password,
 		Cert:               clientCert.Cert,
 		Key:                clientCert.Key,
 		ServerSerialNumber: server.SerialNumber,
+		NoGW:               nogw,
+		HostID:             hostid,
 	}
+	user.setPassword(password)
 
 	db.Create(&user)
 	if db.NewRecord(&user) {
@@ -118,9 +155,54 @@ func CreateNewUser(username, password string) (*DBUser, error) {
 	return &user, nil
 }
 
+// Update updates the user's attributes and writes them to the database.
+//
+// How this method works is similiar to PUT semantics of REST. It sets the user record fields to the provided function arguments.
+func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
+	if !IsInitialized() {
+		return fmt.Errorf("you first need to create server")
+	}
+
+	// If password is provided; set it. If not; leave it as it is.
+	if password != "" {
+		u.setPassword(password)
+	}
+
+	u.NoGW = nogw
+	u.HostID = hostid
+	db.Save(u)
+
+	if hostid != 0 {
+		server, err := GetServerInstance()
+		if err != nil {
+			return fmt.Errorf("can not get server: %v", err)
+		}
+
+		ip := HostID2IP(hostid)
+		if ip == nil {
+			return fmt.Errorf("host id doesn't represent an ip %d", hostid)
+		}
+
+		network := net.IPNet{IP: net.ParseIP(server.Net).To4(), Mask: net.IPMask(net.ParseIP(server.Mask).To4())}
+		if !network.Contains(ip) {
+			return fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
+		}
+
+		if hostIDsContains(getStaticHostIDs(), hostid) {
+			return fmt.Errorf("ip %s is already allocated", ip)
+		}
+	}
+
+	err := Emit()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Delete deletes a user by the given username from the database.
 func (u *DBUser) Delete() error {
-	if db.NewRecord(&u) {
+	if db.NewRecord(u) {
 		// user is not found
 		return fmt.Errorf("user is not initialized: %s", u.Username)
 	}
@@ -131,7 +213,7 @@ func (u *DBUser) Delete() error {
 	db.Create(&DBRevoked{
 		SerialNumber: crt.SerialNumber.Text(16),
 	})
-	db.Unscoped().Delete(&u)
+	db.Unscoped().Delete(u)
 	logrus.Infof("user deleted: %s", u.GetUsername())
 	err = Emit()
 	if err != nil {
@@ -149,6 +231,11 @@ func (u *DBUser) ResetPassword(password string) error {
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
 	}
 	db.Save(u)
+	err = Emit()
+	if err != nil {
+		return err
+	}
+
 	logrus.Infof("user password reset: %s", u.GetUsername())
 	return nil
 }
@@ -180,7 +267,12 @@ func (u *DBUser) Renew() error {
 	u.Key = clientCert.Key
 	u.ServerSerialNumber = server.SerialNumber
 
-	db.Save(&u)
+	db.Save(u)
+	err = Emit()
+	if err != nil {
+		return err
+	}
+
 	logrus.Infof("user renewed cert: %s", u.GetUsername())
 	return nil
 }
@@ -203,4 +295,88 @@ func (u *DBUser) GetServerSerialNumber() string {
 // GetCreatedAt returns user's creation time.
 func (u *DBUser) GetCreatedAt() string {
 	return u.CreatedAt.Format(time.UnixDate)
+}
+
+// getIP returns user's vpn ip addr.
+func (u *DBUser) getIP() net.IP {
+	users := getNonStaticHostUsers()
+	staticHostIDs := getStaticHostIDs()
+	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
+	network := net.ParseIP(_DefaultServerNetwork).To4().Mask(mask)
+
+	// Host is static?
+	if u.HostID != 0 {
+		// Host is really static?
+		if hostIDsContains(staticHostIDs, u.HostID) {
+			return HostID2IP(u.HostID)
+		}
+		return nil
+	}
+
+	// Host is dynamic.
+	for i, user := range users {
+		hostID := IP2HostID(network) + uint32(i+2)
+		if hostIDsContains(staticHostIDs, hostID) {
+			for hostIDsContains(staticHostIDs, hostID) {
+				i++
+				hostID = IP2HostID(network) + uint32(i+1)
+			}
+		}
+		if user.ID == u.ID {
+			return HostID2IP(hostID)
+		}
+	}
+	return nil
+}
+
+// GetIPNet returns user's vpn ip network. (e.g. 192.168.0.1/24)
+func (u *DBUser) GetIPNet() string {
+	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
+
+	ipn := net.IPNet{
+		IP:   u.getIP(),
+		Mask: mask,
+	}
+	return ipn.String()
+}
+
+// IsNoGW returns wether user is set to get the vpn server as their default gateway.
+func (u *DBUser) IsNoGW() bool {
+	return u.NoGW
+}
+
+// GetHostID returns user's Host ID.
+func (u *DBUser) GetHostID() uint32 {
+	return u.HostID
+}
+
+func getStaticHostUsers() []*DBUser {
+	var users []*DBUser
+	db.Unscoped().Not(DBUser{HostID: 0}).Find(&users)
+	return users
+}
+
+func getNonStaticHostUsers() []*DBUser {
+	var users []*DBUser
+	db.Unscoped().Where(DBUser{HostID: 0}).Find(&users)
+	return users
+}
+
+func getStaticHostIDs() []uint32 {
+	var ids []uint32
+	users := getStaticHostUsers()
+	for _, user := range users {
+		ids = append(ids, user.HostID)
+	}
+
+	return ids
+}
+
+func hostIDsContains(s []uint32, e uint32) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

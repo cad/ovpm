@@ -1,5 +1,3 @@
-//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
-
 package api
 
 import (
@@ -29,6 +27,9 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
 			CreatedAt:          user.GetCreatedAt(),
+			IPNet:              user.GetIPNet(),
+			NoGW:               user.IsNoGW(),
+			HostID:             user.GetHostID(),
 		})
 	}
 
@@ -38,7 +39,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,41 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		NoGW:               user.IsNoGW(),
+		HostID:             user.GetHostID(),
 	}
+	ut = append(ut, &pbUser)
+
+	return &pb.UserResponse{Users: ut}, nil
+}
+
+func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*pb.UserResponse, error) {
+	logrus.Debugf("rpc call: user update: %s", req.Username)
+	var ut []*pb.UserResponse_User
+	user, err := ovpm.GetUser(req.Username)
+	if err != nil {
+		return nil, err
+	}
+	var noGW bool
+
+	switch req.Gwpref {
+	case pb.UserUpdateRequest_NOGW:
+		noGW = false
+	case pb.UserUpdateRequest_GW:
+		noGW = true
+	default:
+		noGW = user.NoGW
+
+	}
+
+	user.Update(req.Password, noGW, req.HostID)
+	pbUser := pb.UserResponse_User{
+		Username:           user.GetUsername(),
+		ServerSerialNumber: user.GetServerSerialNumber(),
+		NoGW:               user.IsNoGW(),
+		HostID:             user.GetHostID(),
+	}
+
 	ut = append(ut, &pbUser)
 
 	return &pb.UserResponse{Users: ut}, nil
@@ -63,6 +98,7 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		HostID:             user.GetHostID(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -85,6 +121,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
+		HostID:             user.GetHostID(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -139,13 +176,4 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
-}
-
-func (s *VPNService) Apply(ctx context.Context, req *pb.VPNApplyRequest) (*pb.VPNApplyResponse, error) {
-	logrus.Debugf("rpc call: vpn apply")
-	if err := ovpm.Emit(); err != nil {
-		logrus.Errorf("can not apply configuration: %v", err)
-		return nil, err
-	}
-	return &pb.VPNApplyResponse{}, nil
 }

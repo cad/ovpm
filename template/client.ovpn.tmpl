@@ -6,6 +6,7 @@ proto udp
 remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
 remote-cert-tls server
+ns-cert-type server
 nobind
 persist-key
 persist-tun
@@ -18,3 +19,7 @@ verb 3
 {{ .Cert }}</cert>
 <key>
 {{ .Key }}</key>
+
+{{ if .NoGW }}
+route-nopull
+{{ end }}
