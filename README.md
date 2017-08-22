@@ -5,66 +5,97 @@
 [![codecov](https://codecov.io/gh/cad/ovpm/branch/master/graph/badge.svg)](https://codecov.io/gh/cad/ovpm)
 [![GoDoc](https://godoc.org/github.com/cad/ovpm?status.svg)](https://godoc.org/github.com/cad/ovpm)
 
-OVPM allows you to manage an OpenVPN server from command line easily. With OVPM you can create and run an OpenVPN server, add/remove vpn users, generate client .ovpn files for your users etc. 
+*OVPM* allows you to administrate an **OpenVPN** server on linux easily via command line. 
 
-## Usage
+With OVPM you can create and run an OpenVPN server, add/remove VPN users, generate client .ovpn files for your users etc. 
 
-Install OVPM:
+## Installation
+Install OVPM from RPM (CentOS/Fedora):
+
+```bash
+### Add YUM Repo
+$ curl -s https://packagecloud.io/install/repositories/cad/ovpm/script.rpm.sh | sudo bash
+
+### Install OVPM
+$ sudo yum install ovpm
+```
+
+Or install OVPM from source:
+
+Only dependency for ovpm is **OpenVPN>=2.3**.
 
 ```bash
 $ go get -u github.com/cad/ovpm/...
 ```
 
-And verify the installation by running ovpmd:
+## Start the Server
+You need to start the start OVPM server, which is called **ovpmd**, before doing anything.
+
+### CentOS/Fedora (RPM Package)
+
+Just use systemd to manage ovpmd.
 
 ```bash
-$ ovpmd --version
-
-ovpmd version 0.1.0
+$ systemctl start ovpmd
+$ systemctl enable ovpmd  # enable ovpmd to start on boot
 ```
 
-And also make sure openvpn is also installed on the host:
+### If You've Installed From Source (go get)
+
+Run in another terminal.
 
 ```bash
-$ openvpn --version
-
-OpenVPN 2.4.3 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO]
-...
-
-```
-
-Now you can actually run the ovpmd server:
-
-```bash
-# Since ovpmd launches and supervises openvpn binary it needs root privileges.
 $ sudo ovpmd
 
 INFO[0000] OVPM is running :9090 ...                    
+ERRO[0000] can not launch OpenVPN because system is not initialized 
 ```
 
-In another terminal you can use ovpm via the command line tool, ovpm:
+It complains about an error due to server not being initialized, it's completely fine getting this when you first start **ovpmd**.
+
+
+## Usage
+
+### Init Server
+If you just installed the ovpm from scratch you have started the **ovpm server** (ovpmd) then now you need to initialize the server.
+
+You can do so by invoking;
 
 ```bash
-$ ovpm 
+$ ovpm vpn init -s <your-vpn-server's-fqdn-or-ip-addr>
 
-NAME:
-   ovpm - OpenVPN Manager
+This operation will cause invalidation of existing user certificates.
+After this opeartion, new client config files (.ovpn) should be generated for each existing user.
 
-USAGE:
-   main [global options] command [command options] [arguments...]
-
-VERSION:
-   0.1.0
-
-COMMANDS:
-     user     User Operations
-     vpn      VPN Operations
-     help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --verbose            verbose output
-   --daemon-port value  port number for OVPM daemon to call
-   --help, -h           show help
-   --version, -v        print the version
-
+Are you sure ? (y/N)
+y
+INFO[0003] ovpm server initialized 
 ```
+
+Now you have your server initialized, up and running.
+
+### Create a VPN user
+If you have initialized your ovpm server now you can add users.
+
+Add a VPN user;
+
+```bash
+$ ovpm user create -u john -p 1234            
+
+INFO[0000] user created: john  
+```
+
+Please note that user password is taken but it will be used in the future releases. Such as for the Web UI and etc..
+
+
+### Export the OpenVPN Client Config
+After creating a user, you can export the client config for them.
+
+```bash
+$ ovpm user genconfig -u john
+
+INFO[0000] exported to john.ovpn
+```
+
+This .ovpn file contains all necesarray bits and pieces for the client to connect to your newly created VPN server.
+You can copy the OpenVPN client config file (e.g. john.ovpn) to the any OpenVPN client and use it to connect to your VPN server.
