@@ -10,7 +10,7 @@
 With OVPM you can create and run an OpenVPN server, add/remove VPN users, generate client .ovpn files for your users etc. 
 
 ## Installation
-### from RPM (CentOS/Fedora):
+**from RPM (CentOS/Fedora):**
 
 ```bash
 # Add YUM Repo
@@ -20,7 +20,7 @@ $ curl -s https://packagecloud.io/install/repositories/cad/ovpm/script.rpm.sh | 
 $ sudo yum install ovpm
 ```
 
-### from Source (go get):
+**from Source (go get):**
 
 Only dependency for ovpm is **OpenVPN>=2.3**.
 
@@ -31,7 +31,7 @@ $ go get -u github.com/cad/ovpm/...
 ## Start the Server
 You need to start the start OVPM server, which is called **ovpmd**, before doing anything.
 
-### CentOS/Fedora (RPM Package)
+**CentOS/Fedora (RPM Package)**
 
 Just use systemd to manage ovpmd.
 
@@ -40,7 +40,7 @@ $ systemctl start ovpmd
 $ systemctl enable ovpmd  # enable ovpmd to start on boot
 ```
 
-### If You've Installed From Source (go get)
+**If You've Installed From Source (go get)**
 
 Run in another terminal.
 
