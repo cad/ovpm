@@ -2,7 +2,7 @@
 set -ex
 
 echo "travis build no: $TRAVIS_BUILD_NUMBER"
-echo "travis build no: $TRAVIS_TAG"
+echo "travis tag: $TRAVIS_TAG"
 # deps
 rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
 curl -s https://mirror.go-repo.io/fedora/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
