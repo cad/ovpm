@@ -39,4 +39,5 @@ deploy:
   skip_cleanup: true
   on:
     tag: true
+    all_branches: true
     condition: -n $TRAVIS_TAG  && $TRAVIS_TAG == "v"*
