@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+echo "travis build no: $TRAVIS_BUILD_NUMBER"
+echo "travis build no: $TRAVIS_TAG"
 # deps
 rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
 curl -s https://mirror.go-repo.io/fedora/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
@@ -29,4 +31,4 @@ GOOS=linux  go build  -o $DIR/build/usr/bin/ovpm   ./cmd/ovpm
 cp $DIR/contrib/systemd/ovpmd.service $DIR/build/$UNITDIR
 
 #package
-fpm -s dir -t rpm -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration 1 --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh -p $DIR/rpm -C $DIR/build .
+fpm -s dir -t rpm -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $TRAVIS_BUILD_NUMBER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh -p $DIR/rpm -C $DIR/build .

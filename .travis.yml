@@ -30,7 +30,6 @@ script:
   - make docker-build
 
 deploy:
-  # Deploy packages to PackageCloud
   provider: packagecloud
   username: ${PACKAGECLOUD_USER}
   repository: ${PACKAGECLOUD_REPO}
@@ -40,4 +39,4 @@ deploy:
   skip_cleanup: true
   on:
     tag: true
-    #branch: master
+    condition: -n $TRAVIS_TAG  && $TRAVIS_TAG == "v*"
