@@ -8,8 +8,114 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/coreos/go-iptables/iptables"
+	"github.com/jinzhu/gorm"
 )
+
+// DBNetwork is database model for external networks on the VPN server.
+type DBNetwork struct {
+	gorm.Model
+	ServerID uint
+	Server   DBServer
+
+	Name string
+	CIDR string
+}
+
+// GetNetwork returns a network specified by its name.
+func GetNetwork(name string) (*DBNetwork, error) {
+	if !IsInitialized() {
+		return nil, fmt.Errorf("you first need to create server")
+	}
+	// Validate user input.
+	if govalidator.IsNull(name) {
+		return nil, fmt.Errorf("validation error: %s can not be null", name)
+	}
+	if !govalidator.IsAlphanumeric(name) {
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+	}
+
+	var network DBNetwork
+	db.Where(&DBNetwork{Name: name}).First(&network)
+
+	if db.NewRecord(&network) {
+		return nil, fmt.Errorf("network not found %s", name)
+	}
+
+	return &network, nil
+}
+
+// GetAllNetworks returns all networks defined in the system.
+func GetAllNetworks() ([]*DBNetwork, error) {
+	var networks []*DBNetwork
+	db.Find(&networks)
+
+	return networks, nil
+}
+
+// CreateNewNetwork creates a new network definition in the system.
+func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
+	if !IsInitialized() {
+		return nil, fmt.Errorf("you first need to create server")
+	}
+	// Validate user input.
+	if govalidator.IsNull(name) {
+		return nil, fmt.Errorf("validation error: %s can not be null", name)
+	}
+	if !govalidator.IsAlphanumeric(name) {
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+	}
+
+	if !govalidator.IsCIDR(cidr) {
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", name)
+	}
+
+	_, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
+	}
+
+	network := DBNetwork{
+		Name: name,
+		CIDR: ipnet.String(),
+	}
+	db.Save(&network)
+
+	if db.NewRecord(&network) {
+		return nil, fmt.Errorf("can not create network in the db")
+	}
+
+	return &network, nil
+
+}
+
+// Delete deletes a network definition in the system.
+func (n *DBNetwork) Delete() error {
+	if !IsInitialized() {
+		return fmt.Errorf("you first need to create server")
+	}
+
+	db.Unscoped().Delete(n)
+	logrus.Infof("network deleted: %s", n.Name)
+
+	return nil
+}
+
+// GetName returns network's name.
+func (n *DBNetwork) GetName() string {
+	return n.Name
+}
+
+// GetCIDR returns network's CIDR.
+func (n *DBNetwork) GetCIDR() string {
+	return n.Name
+}
+
+// GetCreatedAt returns network's name.
+func (n *DBNetwork) GetCreatedAt() string {
+	return n.CreatedAt.Format(time.UnixDate)
+}
 
 // routedInterface returns a network interface that can route IP
 // traffic and satisfies flags. It returns nil when an appropriate
@@ -161,12 +267,14 @@ func enableNat() error {
 
 }
 
+// HostID2IP converts a host id (32-bit unsigned integer) to an IP address.
 func HostID2IP(hostid uint32) net.IP {
 	ip := make([]byte, 4)
 	binary.BigEndian.PutUint32(ip, hostid)
 	return net.IP(ip)
 }
 
+//IP2HostID converts an IP address to a host id (32-bit unsigned integer).
 func IP2HostID(ip net.IP) uint32 {
 	hostid := binary.BigEndian.Uint32(ip)
 	return hostid

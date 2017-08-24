@@ -107,7 +107,7 @@ func templateClientOvpnTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 365, mode: os.FileMode(420), modTime: time.Unix(1503002198, 0)}
+	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 365, mode: os.FileMode(420), modTime: time.Unix(1503411871, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

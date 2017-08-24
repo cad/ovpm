@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
-//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
+//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto pb/network.proto --go_out=plugins=grpc:pb
 
 package ovpm
 
@@ -22,16 +22,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
-
-// DBNetwork is database model for external networks on the VPN server.
-type DBNetwork struct {
-	gorm.Model
-	ServerID uint
-	Server   DBServer
-
-	Name        string
-	NetworkCIDR string
-}
 
 // DBServer is database model for storing VPN server related stuff.
 type DBServer struct {

@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package pb;
+
+message NetworkCreateRequest {
+  string Name = 1;
+  string CIDR = 2;
+}
+message NetworkListRequest {}
+message NetworkDeleteRequest {
+  string Name = 1;
+}
+
+service NetworkService {
+  rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {}
+  rpc List (NetworkListRequest) returns (NetworkListResponse) {}
+  rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {}
+}
+message Network {
+  string Name = 1;
+  string CIDR = 2;
+  string CreatedAt = 3;
+}
+message NetworkCreateResponse {
+  Network Network = 1;
+}
+
+message NetworkListResponse {
+  repeated Network Networks = 1;
+}
+message NetworkDeleteResponse {
+  Network Network = 1;
+}
