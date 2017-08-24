@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -29,8 +30,8 @@ type DBNetwork struct {
 	ServerID uint
 	Server   DBServer
 
-	Name        string
-	NetworkCIDR string
+	Name string
+	CIDR string
 }
 
 // DBServer is database model for storing VPN server related stuff.
@@ -563,6 +564,62 @@ func emitDHParams() error {
 
 func emitIptables() error {
 	return nil
+}
+
+// CreateNewNetwork creates a new network definition in the system.
+func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
+	if !IsInitialized() {
+		return nil, fmt.Errorf("you first need to create server")
+	}
+	// Validate user input.
+	if govalidator.IsNull(name) {
+		return nil, fmt.Errorf("validation error: %s can not be null", name)
+	}
+	if !govalidator.IsAlphanumeric(name) {
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+	}
+
+	if !govalidator.IsCIDR(cidr) {
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", name)
+	}
+
+	_, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
+	}
+
+	network := DBNetwork{
+		Name: name,
+		CIDR: ipnet.String(),
+	}
+	db.Save(&network)
+
+	if db.NewRecord(&network) {
+		return nil, fmt.Errorf("can not create network in the db")
+	}
+
+	return &network, nil
+
+}
+
+// Delete deletes a network definition in the system.
+func (n *DBNetwork) Delete(name string) (*DBNetwork, error) {
+	if !IsInitialized() {
+		return nil, fmt.Errorf("you first need to create server")
+	}
+	// Validate user input.
+	if govalidator.IsNull(name) {
+		return nil, fmt.Errorf("validation error: %s can not be null", name)
+	}
+	if !govalidator.IsAlphanumeric(name) {
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+	}
+
+	db.Unscoped().Delete(n)
+	logrus.Infof("network deleted: %s", n.Name)
+
+	return &n, nil
+
 }
 
 func checkOpenVPNExecutable() bool {
