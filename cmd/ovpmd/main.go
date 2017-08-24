@@ -91,6 +91,7 @@ func newServer(port string) *server {
 	s := grpc.NewServer()
 	pb.RegisterUserServiceServer(s, &api.UserService{})
 	pb.RegisterVPNServiceServer(s, &api.VPNService{})
+	pb.RegisterNetworkServiceServer(s, &api.NetworkService{})
 	return &server{lis: lis, grpcServer: s, signal: sigs, done: done, port: port}
 }
 

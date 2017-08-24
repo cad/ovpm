@@ -19,7 +19,7 @@ type DBNetwork struct {
 	ServerID uint
 	Server   DBServer
 
-	Name string
+	Name string `gorm:"unique_index"`
 	CIDR string
 }
 
@@ -109,7 +109,7 @@ func (n *DBNetwork) GetName() string {
 
 // GetCIDR returns network's CIDR.
 func (n *DBNetwork) GetCIDR() string {
-	return n.Name
+	return n.CIDR
 }
 
 // GetCreatedAt returns network's name.
