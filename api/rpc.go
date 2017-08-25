@@ -194,6 +194,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 		nt = append(nt, &pb.Network{
 			Name:      network.GetName(),
 			CIDR:      network.GetCIDR(),
+			Type:      network.GetType().String(),
 			CreatedAt: network.GetCreatedAt(),
 		})
 	}
@@ -203,7 +204,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 
 func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
 	logrus.Debugf("rpc call: network create: %s", req.Name)
-	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR)
+	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type))
 	if err != nil {
 		return nil, err
 	}
@@ -211,6 +212,7 @@ func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateReques
 	n := pb.Network{
 		Name:      network.GetName(),
 		CIDR:      network.GetCIDR(),
+		Type:      network.GetType().String(),
 		CreatedAt: network.GetCreatedAt(),
 	}
 
@@ -232,8 +234,19 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 	n := pb.Network{
 		Name:      network.GetName(),
 		CIDR:      network.GetCIDR(),
+		Type:      network.GetType().String(),
 		CreatedAt: network.GetCreatedAt(),
 	}
 
 	return &pb.NetworkDeleteResponse{Network: &n}, nil
+}
+
+func (s *NetworkService) GetAllTypes(ctx context.Context, req *pb.NetworkGetAllTypesRequest) (*pb.NetworkGetAllTypesResponse, error) {
+	logrus.Debugf("rpc call: network get-types")
+	var networkTypes []string
+	for _, nt := range ovpm.GetAllNetworkTypes() {
+		networkTypes = append(networkTypes, nt.String())
+	}
+
+	return &pb.NetworkGetAllTypesResponse{Types: networkTypes}, nil
 }

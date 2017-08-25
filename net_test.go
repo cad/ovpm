@@ -1,6 +1,8 @@
 package ovpm
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestVPNCreateNewNetwork(t *testing.T) {
 	// Initialize:
@@ -13,8 +15,9 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 	// Test:
 	netName := "testnet"
 	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
 
-	n, err := CreateNewNetwork(netName, cidrStr)
+	n, err := CreateNewNetwork(netName, cidrStr, netType)
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -42,6 +45,10 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 		t.Fatalf("network CIDR is expected to be '%s' but it's '%s' instead", cidrStr, network.CIDR)
 	}
 
+	if network.Type != netType {
+		t.Fatalf("network CIDR is expected to be '%s' but it's '%s' instead", netType, network.Type)
+	}
+
 }
 
 func TestVPNDeleteNetwork(t *testing.T) {
@@ -55,8 +62,9 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	// Test:
 	netName := "testnet"
 	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
 
-	n, err := CreateNewNetwork(netName, cidrStr)
+	n, err := CreateNewNetwork(netName, cidrStr, netType)
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -92,8 +100,9 @@ func TestVPNGetNetwork(t *testing.T) {
 	// Test:
 	netName := "testnet"
 	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
 
-	_, err := CreateNewNetwork(netName, cidrStr)
+	_, err := CreateNewNetwork(netName, cidrStr, netType)
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -127,14 +136,15 @@ func TestVPNGetAllNetworks(t *testing.T) {
 	var getallnettests = []struct {
 		name    string
 		cidr    string
+		netType NetworkType
 		passing bool
 	}{
-		{"testnet1", "192.168.1.0/24", true},
-		{"testnet2", "10.10.0.0/16", true},
-		{"testnet3", "asdkfjadflsa", false},
+		{"testnet1", "192.168.1.0/24", SERVERNET, true},
+		{"testnet2", "10.10.0.0/16", SERVERNET, true},
+		{"testnet3", "asdkfjadflsa", SERVERNET, false},
 	}
 	for _, tt := range getallnettests {
-		_, err := CreateNewNetwork(tt.name, tt.cidr)
+		_, err := CreateNewNetwork(tt.name, tt.cidr, tt.netType)
 		if (err == nil) != tt.passing {
 			t.Fatalf("unexpected error when creating a new network: %v", err)
 		}
@@ -153,7 +163,115 @@ func TestVPNGetAllNetworks(t *testing.T) {
 			if n.CIDR != tt.cidr {
 				t.Fatalf("network CIDR is expected to be '%s' but it's '%s'", tt.cidr, n.CIDR)
 			}
+			if n.Type != tt.netType {
+				t.Fatalf("network CIDR is expected to be '%s' but it's '%s' instead", tt.netType, n.Type)
+			}
 		}
+	}
+}
+
+func TestNetAssociate(t *testing.T) {
+	// Initialize:
+	setupTestCase()
+	SetupDB("sqlite3", ":memory:")
+	defer CeaseDB()
+	Init("localhost", "")
+
+	// Prepare:
+	// Test:
+	netName := "testnet"
+	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
+	userName := "testUser2"
+	user, _ := CreateNewUser(userName, "123", false, 0)
+
+	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	err := n.Associate(user.Username)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n = nil
+
+	n, _ = GetNetwork(netName)
+
+	// Does number of associated users in the network object matches the number that we have created?
+	if count := len(n.Users); count != 1 {
+		t.Fatalf("network.Users count is expexted to be %d, but it's %d", 1, count)
+	}
+	err = n.Associate(user.Username)
+	if err == nil {
+		t.Fatalf("expected to get error but got no error instead")
+	}
+
+}
+
+func TestNetDissociate(t *testing.T) {
+	// Initialize:
+	setupTestCase()
+	SetupDB("sqlite3", ":memory:")
+	defer CeaseDB()
+	Init("localhost", "")
+
+	// Prepare:
+	// Test:
+	netName := "testnet"
+	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
+	userName := "testUser2"
+	user, _ := CreateNewUser(userName, "123", false, 0)
+
+	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	n.Associate(user.Username)
+
+	n = nil
+	n, _ = GetNetwork(netName)
+
+	// Does number of associated users in the network object matches the number that we have created?
+	if count := len(n.Users); count != 1 {
+		t.Fatalf("network.Users count is expexted to be %d, but it's %d", 1, count)
+	}
+
+	err := n.Dissociate(user.Username)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	n = nil
+	n, _ = GetNetwork(netName)
+
+	// Does number of associated users in the network object matches the number that we have created?
+	if count := len(n.Users); count != 0 {
+		t.Fatalf("network.Users count is expexted to be %d, but it's %d", 0, count)
+	}
+	err = n.Dissociate(user.Username)
+	if err == nil {
+		t.Fatalf("expected error but got no error instead")
+	}
+}
+
+func TestNetGetAssociatedUsers(t *testing.T) {
+	// Initialize:
+	setupTestCase()
+	SetupDB("sqlite3", ":memory:")
+	defer CeaseDB()
+	Init("localhost", "")
+
+	// Prepare:
+	// Test:
+	netName := "testnet"
+	cidrStr := "192.168.1.0/24"
+	netType := SERVERNET
+	userName := "testUser2"
+	user, _ := CreateNewUser(userName, "123", false, 0)
+
+	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	n.Associate(user.Username)
+	n = nil
+	n, _ = GetNetwork(netName)
+
+	// Test:
+	if n.GetAssociatedUsers()[0].Username != user.Username {
+		t.Fatalf("returned associated user is expected to be the same user with the one we have created, but its not")
 	}
 }
 

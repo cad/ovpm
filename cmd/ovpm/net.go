@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
@@ -23,13 +24,28 @@ var netDefineCommand = cli.Command{
 			Name:  "name, n",
 			Usage: "name of the network",
 		},
+		cli.StringFlag{
+			Name:  "type, t",
+			Usage: "type of the network (see $ovpm net types)",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "net:create"
 		name := c.String("name")
 		cidr := c.String("cidr")
+		typ := c.String("type")
 
-		if name == "" || cidr == "" {
+		if name == "" || cidr == "" || typ == "" {
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
+		if ovpm.NetworkTypeFromString(typ) == ovpm.UNDEFINEDNET {
+			fmt.Printf("undefined network type %s", typ)
+			fmt.Println()
+			fmt.Println("Network Types:")
+			fmt.Println("    ", ovpm.GetAllNetworkTypes())
+			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
@@ -38,7 +54,7 @@ var netDefineCommand = cli.Command{
 		defer conn.Close()
 		netSvc := pb.NewNetworkServiceClient(conn)
 
-		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, CIDR: cidr})
+		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, CIDR: cidr, Type: typ})
 		if err != nil {
 			logrus.Errorf("network can not be created '%s': %v", name, err)
 			os.Exit(1)
@@ -52,12 +68,6 @@ var netDefineCommand = cli.Command{
 var netListCommand = cli.Command{
 	Name:  "list",
 	Usage: "List network definitions.",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "cidr, c",
-			Usage: "CIDR of the network",
-		},
-	},
 	Action: func(c *cli.Context) error {
 		action = "net:list"
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -71,10 +81,10 @@ var netListCommand = cli.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"#", "name", "cidr", "created at"})
+		table.SetHeader([]string{"#", "name", "cidr", "type", "users", "created at"})
 		//table.SetBorder(false)
 		for i, network := range resp.Networks {
-			data := []string{fmt.Sprintf("%v", i+1), network.Name, network.CIDR, network.CreatedAt}
+			data := []string{fmt.Sprintf("%v", i+1), network.Name, network.CIDR, network.Type, "-", network.CreatedAt}
 			table.Append(data)
 		}
 		table.Render()

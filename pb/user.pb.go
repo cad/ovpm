@@ -25,10 +25,12 @@ It has these top-level messages:
 	NetworkCreateRequest
 	NetworkListRequest
 	NetworkDeleteRequest
+	NetworkGetAllTypesRequest
 	Network
 	NetworkCreateResponse
 	NetworkListResponse
 	NetworkDeleteResponse
+	NetworkGetAllTypesResponse
 */
 package pb
 

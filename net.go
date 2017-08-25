@@ -13,14 +13,63 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// NetworkType distinguishes different types of networks that is defined in the networks table.
+type NetworkType uint
+
+// NetworkTypes
+const (
+	UNDEFINEDNET NetworkType = iota
+	SERVERNET
+	ROUTE
+)
+
+var networkTypes = [...]struct {
+	Type   NetworkType
+	String string
+}{
+	{UNDEFINEDNET, "UNDEFINEDNET"},
+	{SERVERNET, "SERVERNET"},
+	{ROUTE, "ROUTE"},
+}
+
+// NetworkTypeFromString returns string representation of the network type.
+func NetworkTypeFromString(typ string) NetworkType {
+	for _, v := range networkTypes {
+		if v.String == typ {
+			return v.Type
+		}
+	}
+	return UNDEFINEDNET
+}
+
+// GetAllNetworkTypes returns all network types defined in the system.
+func GetAllNetworkTypes() []NetworkType {
+	var networkTypeList []NetworkType
+	for _, v := range networkTypes {
+		networkTypeList = append(networkTypeList, v.Type)
+	}
+	return networkTypeList
+}
+
+func (nt NetworkType) String() string {
+	for _, v := range networkTypes {
+		if v.Type == nt {
+			return v.String
+		}
+	}
+	return "UNDEFINEDNET"
+}
+
 // DBNetwork is database model for external networks on the VPN server.
 type DBNetwork struct {
 	gorm.Model
 	ServerID uint
 	Server   DBServer
 
-	Name string `gorm:"unique_index"`
-	CIDR string
+	Name  string `gorm:"unique_index"`
+	CIDR  string
+	Type  NetworkType
+	Users []*DBUser `gorm:"many2many:network_users;"`
 }
 
 // GetNetwork returns a network specified by its name.
@@ -37,7 +86,7 @@ func GetNetwork(name string) (*DBNetwork, error) {
 	}
 
 	var network DBNetwork
-	db.Where(&DBNetwork{Name: name}).First(&network)
+	db.Preload("Users").Where(&DBNetwork{Name: name}).First(&network)
 
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("network not found %s", name)
@@ -49,13 +98,13 @@ func GetNetwork(name string) (*DBNetwork, error) {
 // GetAllNetworks returns all networks defined in the system.
 func GetAllNetworks() ([]*DBNetwork, error) {
 	var networks []*DBNetwork
-	db.Find(&networks)
+	db.Preload("Users").Find(&networks)
 
 	return networks, nil
 }
 
 // CreateNewNetwork creates a new network definition in the system.
-func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
+func CreateNewNetwork(name, cidr string, nettype NetworkType) (*DBNetwork, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -68,7 +117,11 @@ func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
 	}
 
 	if !govalidator.IsCIDR(cidr) {
-		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", name)
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
+	}
+
+	if nettype == UNDEFINEDNET {
+		return nil, fmt.Errorf("validation error: `%s` must be a valid network type", nettype)
 	}
 
 	_, ipnet, err := net.ParseCIDR(cidr)
@@ -77,8 +130,10 @@ func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
 	}
 
 	network := DBNetwork{
-		Name: name,
-		CIDR: ipnet.String(),
+		Name:  name,
+		CIDR:  ipnet.String(),
+		Type:  nettype,
+		Users: []*DBUser{},
 	}
 	db.Save(&network)
 
@@ -102,6 +157,71 @@ func (n *DBNetwork) Delete() error {
 	return nil
 }
 
+// Associate allows the given user access to this network.
+func (n *DBNetwork) Associate(username string) error {
+	if !IsInitialized() {
+		return fmt.Errorf("you first need to create server")
+	}
+	user, err := GetUser(username)
+	if err != nil {
+		return fmt.Errorf("user can not be fetched: %v", err)
+	}
+
+	var users []DBUser
+	userAssoc := db.Model(&n).Association("Users")
+	userAssoc.Find(&users)
+	var found bool
+	for _, u := range users {
+		if u.ID == user.ID {
+			found = true
+			break
+		}
+	}
+	if found {
+		return fmt.Errorf("user %s is already associated with the network %s", user.Username, n.Name)
+	}
+
+	userAssoc.Append(user)
+	if userAssoc.Error != nil {
+		return fmt.Errorf("association failed: %v", userAssoc.Error)
+	}
+	logrus.Infof("user '%s' is associated with the network '%s'", user.GetUsername(), n.Name)
+	return nil
+}
+
+// Dissociate breaks up the given users association to the said network.
+func (n *DBNetwork) Dissociate(username string) error {
+	if !IsInitialized() {
+		return fmt.Errorf("you first need to create server")
+	}
+
+	user, err := GetUser(username)
+	if err != nil {
+		return fmt.Errorf("user can not be fetched: %v", err)
+	}
+
+	var users []DBUser
+	userAssoc := db.Model(&n).Association("Users")
+	userAssoc.Find(&users)
+	var found bool
+	for _, u := range users {
+		if u.ID == user.ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("user %s is already not associated with the network %s", user.Username, n.Name)
+	}
+
+	userAssoc.Delete(user)
+	if userAssoc.Error != nil {
+		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
+	}
+	logrus.Infof("user '%s' is dissociated with the network '%s'", user.GetUsername(), n.Name)
+	return nil
+}
+
 // GetName returns network's name.
 func (n *DBNetwork) GetName() string {
 	return n.Name
@@ -115,6 +235,16 @@ func (n *DBNetwork) GetCIDR() string {
 // GetCreatedAt returns network's name.
 func (n *DBNetwork) GetCreatedAt() string {
 	return n.CreatedAt.Format(time.UnixDate)
+}
+
+// GetType returns network's network type.
+func (n *DBNetwork) GetType() NetworkType {
+	return NetworkType(n.Type)
+}
+
+// GetAssociatedUsers returns network's associated users.
+func (n *DBNetwork) GetAssociatedUsers() []*DBUser {
+	return n.Users
 }
 
 // routedInterface returns a network interface that can route IP
@@ -259,8 +389,6 @@ func enableNat() error {
 
 	// Append iptables nat rules.
 	ipt.AppendUnique("nat", "POSTROUTING", "-o", rif.Name, "-j", "MASQUERADE")
-	// TODO(cad): we should use the interface name that we get when we query the system
-	// with the vpn server's internal ip address, instead of default "tun0".
 	ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED, ESTABLISHED", "-j", "ACCEPT")
 	ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT")
 	return nil
