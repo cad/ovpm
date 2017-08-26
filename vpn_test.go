@@ -340,7 +340,6 @@ func TestVPNStopVPNProc(t *testing.T) {
 
 func TestVPNRestartVPNProc(t *testing.T) {
 	// Init:
-	Testing = true
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
 	Init("localhost", "")
