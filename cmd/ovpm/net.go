@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
 	"github.com/olekukonko/tablewriter"
@@ -29,19 +30,41 @@ var netDefineCommand = cli.Command{
 			Name:  "type, t",
 			Usage: "type of the network (see $ovpm net types)",
 		},
+		cli.StringFlag{
+			Name:  "via, v",
+			Usage: "if network type is route, via represents route's gateway",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "net:create"
 		name := c.String("name")
 		cidr := c.String("cidr")
 		typ := c.String("type")
+		via := c.String("via")
 
 		if name == "" || cidr == "" || typ == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
 
-		if ovpm.NetworkTypeFromString(typ) == ovpm.UNDEFINEDNET {
+		switch ovpm.NetworkTypeFromString(typ) {
+		case ovpm.ROUTE:
+			if via != "" && !govalidator.IsCIDR(via) {
+				fmt.Printf("validation error: `%s` must be a network in the CIDR form", via)
+				fmt.Println()
+				fmt.Println(cli.ShowSubcommandHelp(c))
+				os.Exit(1)
+			} else {
+				via = ""
+			}
+		case ovpm.SERVERNET:
+			if via != "" {
+				fmt.Println("--via flag can only be used with --type ROUTE")
+				fmt.Println()
+				fmt.Println(cli.ShowSubcommandHelp(c))
+				os.Exit(1)
+			}
+		default: // Means UNDEFINEDNET
 			fmt.Printf("undefined network type %s", typ)
 			fmt.Println()
 			fmt.Println("Network Types:")
@@ -55,7 +78,7 @@ var netDefineCommand = cli.Command{
 		defer conn.Close()
 		netSvc := pb.NewNetworkServiceClient(conn)
 
-		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, CIDR: cidr, Type: typ})
+		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, CIDR: cidr, Type: typ, Via: via})
 		if err != nil {
 			logrus.Errorf("network can not be created '%s': %v", name, err)
 			os.Exit(1)
@@ -86,6 +109,7 @@ var netListCommand = cli.Command{
 		table.SetHeader([]string{"#", "name", "cidr", "type", "assoc", "created at"})
 		//table.SetBorder(false)
 		for i, network := range resp.Networks {
+			// Create associated user list for this network.
 			var usernameList string
 			usernames := network.GetAssociatedUsernames()
 			count := len(usernames)
@@ -96,8 +120,15 @@ var netListCommand = cli.Command{
 					usernameList = usernameList + fmt.Sprintf("%s, ", uname)
 				}
 			}
-
-			data := []string{fmt.Sprintf("%v", i+1), network.Name, network.CIDR, network.Type, usernameList, network.CreatedAt}
+			var cidr = network.CIDR
+			var via = network.Via
+			if via == "" {
+				via = "vpn-server"
+			}
+			if ovpm.NetworkTypeFromString(network.Type) == ovpm.ROUTE {
+				cidr = fmt.Sprintf("%s via %s", network.CIDR, via)
+			}
+			data := []string{fmt.Sprintf("%v", i+1), network.Name, cidr, network.Type, usernameList, network.CreatedAt}
 			table.Append(data)
 		}
 		table.Render()
