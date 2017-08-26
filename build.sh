@@ -3,6 +3,8 @@ set -ex
 
 echo "travis build no: $TRAVIS_BUILD_NUMBER"
 echo "travis tag: $TRAVIS_TAG"
+echo "travis go version: $TRAVIS_GO_VERSION"
+
 # deps
 rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
 curl -s https://mirror.go-repo.io/fedora/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo

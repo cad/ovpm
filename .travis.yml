@@ -8,7 +8,7 @@ cache:
 
 language: go
 go:
-  - 1.8
+  - stable
   - tip
 go_import_path: github.com/cad/ovpm
 env:
@@ -20,6 +20,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y openvpn
   - go get -t -v ./...
+
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
@@ -40,4 +41,4 @@ deploy:
   on:
     tag: true
     all_branches: true
-    condition: -n $TRAVIS_TAG  && $TRAVIS_TAG == "v"* && TRAVIS_GO_VERSION != "tip"
+    condition: -n $TRAVIS_TAG  && $TRAVIS_TAG == "v"* && $TRAVIS_GO_VERSION == "stable"

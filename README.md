@@ -9,6 +9,8 @@
 
 With OVPM you can create and run an OpenVPN server, add/remove VPN users, generate client .ovpn files for your users etc. 
 
+*This software is not stable yet. We recommend against using it for anything serious until, version 1.0 is released.*
+
 ## Installation
 **from RPM (CentOS/Fedora):**
 
