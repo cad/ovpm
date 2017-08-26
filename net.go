@@ -3,6 +3,7 @@ package ovpm
 import (
 	"encoding/binary"
 	"fmt"
+	"log"
 	"net"
 
 	"time"
@@ -96,11 +97,11 @@ func GetNetwork(name string) (*DBNetwork, error) {
 }
 
 // GetAllNetworks returns all networks defined in the system.
-func GetAllNetworks() ([]*DBNetwork, error) {
+func GetAllNetworks() []*DBNetwork {
 	var networks []*DBNetwork
 	db.Preload("Users").Find(&networks)
 
-	return networks, nil
+	return networks
 }
 
 // CreateNewNetwork creates a new network definition in the system.
@@ -140,7 +141,8 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType) (*DBNetwork, error
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("can not create network in the db")
 	}
-
+	Emit()
+	logrus.Infof("network defined: %s (%s)", network.Name, network.CIDR)
 	return &network, nil
 
 }
@@ -152,8 +154,8 @@ func (n *DBNetwork) Delete() error {
 	}
 
 	db.Unscoped().Delete(n)
+	Emit()
 	logrus.Infof("network deleted: %s", n.Name)
-
 	return nil
 }
 
@@ -185,6 +187,7 @@ func (n *DBNetwork) Associate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("association failed: %v", userAssoc.Error)
 	}
+	Emit()
 	logrus.Infof("user '%s' is associated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -218,6 +221,7 @@ func (n *DBNetwork) Dissociate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
 	}
+	Emit()
 	logrus.Infof("user '%s' is dissociated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -247,10 +251,49 @@ func (n *DBNetwork) GetAssociatedUsers() []*DBUser {
 	return n.Users
 }
 
-// routedInterface returns a network interface that can route IP
-// traffic and satisfies flags. It returns nil when an appropriate
-// network interface is not found. Network must be "ip", "ip4" or
-// "ip6".
+// GetAssociatedUsernames returns network's associated user names.
+func (n *DBNetwork) GetAssociatedUsernames() []string {
+	var usernames []string
+
+	for _, user := range n.GetAssociatedUsers() {
+		usernames = append(usernames, user.Username)
+	}
+	return usernames
+}
+
+// interfaceOfIP returns a network interface that has the given IP.
+func interfaceOfIP(ipnet *net.IPNet) *net.Interface {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			logrus.Error(err)
+			return nil
+		}
+		for _, addr := range addrs {
+			switch addr := addr.(type) {
+			case *net.IPAddr:
+				if ip := addr.IP; ip != nil {
+					if ipnet.Contains(ip) {
+						return &iface
+					}
+				}
+			case *net.IPNet:
+				if ip := addr.IP; ip != nil {
+					if ipnet.Contains(ip) {
+						return &iface
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func routedInterface(network string, flags net.Flags) *net.Interface {
 	switch network {
 	case "ip", "ip4", "ip6":
@@ -271,6 +314,21 @@ func routedInterface(network string, flags net.Flags) *net.Interface {
 		return &ifi
 	}
 	return nil
+}
+
+func getOutboundInterface() *net.Interface {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ipnet := net.IPNet{
+		IP:   localAddr.IP.To4(),
+		Mask: localAddr.IP.To4().DefaultMask(),
+	}
+	return interfaceOfIP(&ipnet)
 }
 
 func hasRoutableIP(network string, ifi *net.Interface) (net.IP, bool) {
@@ -294,32 +352,19 @@ func hasRoutableIP(network string, ifi *net.Interface) (net.IP, bool) {
 }
 
 func vpnInterface() *net.Interface {
-	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask))
-	prefix := net.ParseIP(_DefaultServerNetwork)
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Errorf("can't get server instance: %v", err)
+		return nil
+	}
+
+	mask := net.IPMask(net.ParseIP(server.Mask))
+	prefix := net.ParseIP(server.Net)
 	netw := prefix.Mask(mask).To4()
 	netw[3] = byte(1) // Server is always gets xxx.xxx.xxx.1
 	ipnet := net.IPNet{IP: netw, Mask: mask}
 
-	ifs, err := net.Interfaces()
-	if err != nil {
-		logrus.Errorf("can not get system network interfaces: %v", err)
-		return nil
-	}
-
-	for _, ifc := range ifs {
-		addrs, err := ifc.Addrs()
-		if err != nil {
-			logrus.Errorf("can not get interface addresses: %v", err)
-			return nil
-		}
-		for _, addr := range addrs {
-			//logrus.Debugf("addr: %s == %s", addr.String(), ipnet.String())
-			if addr.String() == ipnet.String() {
-				return &ifc
-			}
-		}
-	}
-	return nil
+	return interfaceOfIP(&ipnet)
 }
 
 func routableIP(network string, ip net.IP) net.IP {
@@ -370,9 +415,16 @@ func ensureNatEnabled() {
 
 // enableNat is an idempotent command that ensures nat is enabled for the vpn server.
 func enableNat() error {
-	rif := routedInterface("ip", net.FlagUp|net.FlagBroadcast)
+	if Testing {
+		return nil
+	}
+	// rif := routedInterface("ip", net.FlagUp|net.FlagBroadcast)
+	// if rif == nil {
+	// 	return fmt.Errorf("can not get routable network interface")
+	// }
+	rif := getOutboundInterface()
 	if rif == nil {
-		return fmt.Errorf("can not get routable network interface")
+		return fmt.Errorf("can not get default gw interface")
 	}
 
 	vpnIfc := vpnInterface()
@@ -387,10 +439,29 @@ func enableNat() error {
 		return fmt.Errorf("can not create new iptables object: %v", err)
 	}
 
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Errorf("can't get server instance: %v", err)
+		return nil
+	}
+
+	mask := net.IPMask(net.ParseIP(server.Mask))
+	prefix := net.ParseIP(server.Net)
+	netw := prefix.Mask(mask).To4()
+	netw[3] = byte(1) // Server is always gets xxx.xxx.xxx.1
+	ipnet := net.IPNet{IP: netw, Mask: mask}
+
 	// Append iptables nat rules.
-	ipt.AppendUnique("nat", "POSTROUTING", "-o", rif.Name, "-j", "MASQUERADE")
-	ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED, ESTABLISHED", "-j", "ACCEPT")
-	ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT")
+	if err := ipt.AppendUnique("nat", "POSTROUTING", "-s", ipnet.String(), "-o", rif.Name, "-j", "MASQUERADE"); err != nil {
+		return err
+	}
+
+	if err := ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED,ESTABLISHED", "-j", "ACCEPT"); err != nil {
+		return err
+	}
+	if err := ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT"); err != nil {
+		return err
+	}
 	return nil
 
 }

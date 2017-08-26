@@ -61,6 +61,8 @@ func main() {
 				netListCommand,
 				netDefineCommand,
 				netUndefineCommand,
+				netAssociateCommand,
+				netDissociateCommand,
 			},
 		},
 	}
