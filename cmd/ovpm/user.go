@@ -13,100 +13,90 @@ import (
 	"github.com/urfave/cli"
 )
 
-var userGenconfigCommand = cli.Command{
-	Name:  "genconfig",
-	Usage: "Generate client config for the user. (.ovpn file)",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Usage: "username of the vpn user",
-		},
-		cli.StringFlag{
-			Name:  "out, o",
-			Usage: ".ovpn file output path",
-		},
-	},
+var userListCommand = cli.Command{
+	Name:  "list",
+	Usage: "List VPN users.",
 	Action: func(c *cli.Context) error {
-		action = "user:export-config"
-		username := c.String("user")
-		output := c.String("out")
-
-		if username == "" {
-			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
-		}
-		if output == "" {
-			output = username + ".ovpn"
-		}
-
-		//conn := getConn(c.String("port"))
+		action = "user:list"
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
-		pb.NewVPNServiceClient(conn)
+		vpnSvc := pb.NewVPNServiceClient(conn)
 
-		res, err := userSvc.GenConfig(context.Background(), &pb.UserGenConfigRequest{Username: username})
+		server, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
 		if err != nil {
-			logrus.Errorf("user config can not be exported %s: %v", username, err)
+			logrus.Errorf("can not get server status: %v", err)
+			os.Exit(1)
 			return err
 		}
-		emitToFile(output, res.ClientConfig, 0)
-		logrus.Infof("exported to %s", output)
+
+		resp, err := userSvc.List(context.Background(), &pb.UserListRequest{})
+		if err != nil {
+			logrus.Errorf("users can not be fetched: %v", err)
+			os.Exit(1)
+			return err
+		}
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
+		//table.SetBorder(false)
+		for i, user := range resp.Users {
+			static := ""
+			if user.HostID != 0 {
+				static = "s"
+			}
+			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
+			table.Append(data)
+		}
+		table.Render()
+
 		return nil
 	},
 }
 
-var userRenewCommand = cli.Command{
-	Name:  "renew",
-	Usage: "Renew VPN user certificates.",
+var userCreateCommand = cli.Command{
+	Name:  "create",
+	Usage: "Create a VPN user.",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "user, u",
-			Usage: "username of the vpn user",
+			Name:  "username, u",
+			Usage: "username for the vpn user",
+		},
+		cli.StringFlag{
+			Name:  "password, p",
+			Usage: "password for the vpn user",
+		},
+		cli.BoolFlag{
+			Name:  "no-gw",
+			Usage: "don't push vpn server as default gateway for this user",
+		},
+		cli.StringFlag{
+			Name:  "static",
+			Usage: "ip address for the vpn user",
 		},
 	},
 	Action: func(c *cli.Context) error {
-		action = "user:renew"
-		username := c.String("user")
+		action = "user:create"
+		username := c.String("username")
+		password := c.String("password")
+		noGW := c.Bool("no-gw")
+		static := c.String("static")
 
-		if username == "" {
+		if username == "" || password == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
 
-		//conn := getConn(c.String("port"))
-		conn := getConn(c.GlobalString("daemon-port"))
-		defer conn.Close()
-		userSvc := pb.NewUserServiceClient(conn)
-		pb.NewVPNServiceClient(conn)
+		var hostid uint32
+		if static != "" {
+			h := ovpm.IP2HostID(net.ParseIP(static).To4())
+			if h == 0 {
+				fmt.Println("--static flag takes a valid ipv4 address")
+				fmt.Println()
+				fmt.Println(cli.ShowSubcommandHelp(c))
+				os.Exit(1)
+			}
 
-		_, err := userSvc.Renew(context.Background(), &pb.UserRenewRequest{Username: username})
-		if err != nil {
-			logrus.Errorf("can't renew user cert '%s': %v", username, err)
-			os.Exit(1)
-			return err
-		}
-		logrus.Infof("user cert renewed: '%s'", username)
-		return nil
-	},
-}
-
-var userDeleteCommand = cli.Command{
-	Name:  "delete",
-	Usage: "Delete a VPN user.",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Usage: "username of the vpn user",
-		},
-	},
-	Action: func(c *cli.Context) error {
-		action = "user:delete"
-		username := c.String("user")
-
-		if username == "" {
-			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			hostid = h
 		}
 
 		//conn := getConn(c.String("port"))
@@ -114,13 +104,13 @@ var userDeleteCommand = cli.Command{
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
 
-		_, err := userSvc.Delete(context.Background(), &pb.UserDeleteRequest{Username: username})
+		response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid})
 		if err != nil {
-			logrus.Errorf("user can not be deleted '%s': %v", username, err)
+			logrus.Errorf("user can not be created '%s': %v", username, err)
 			os.Exit(1)
 			return err
 		}
-		logrus.Infof("user deleted: %s", username)
+		logrus.Infof("user created: %s", response.Users[0].Username)
 		return nil
 	},
 }
@@ -223,50 +213,22 @@ var userUpdateCommand = cli.Command{
 	},
 }
 
-var userCreateCommand = cli.Command{
-	Name:  "create",
-	Usage: "Create a VPN user.",
+var userDeleteCommand = cli.Command{
+	Name:  "delete",
+	Usage: "Delete a VPN user.",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "username, u",
-			Usage: "username for the vpn user",
-		},
-		cli.StringFlag{
-			Name:  "password, p",
-			Usage: "password for the vpn user",
-		},
-		cli.BoolFlag{
-			Name:  "no-gw",
-			Usage: "don't push vpn server as default gateway for this user",
-		},
-		cli.StringFlag{
-			Name:  "static",
-			Usage: "ip address for the vpn user",
+			Name:  "user, u",
+			Usage: "username of the vpn user",
 		},
 	},
 	Action: func(c *cli.Context) error {
-		action = "user:create"
-		username := c.String("username")
-		password := c.String("password")
-		noGW := c.Bool("no-gw")
-		static := c.String("static")
+		action = "user:delete"
+		username := c.String("user")
 
-		if username == "" || password == "" {
+		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
-		}
-
-		var hostid uint32
-		if static != "" {
-			h := ovpm.IP2HostID(net.ParseIP(static).To4())
-			if h == 0 {
-				fmt.Println("--static flag takes a valid ipv4 address")
-				fmt.Println()
-				fmt.Println(cli.ShowSubcommandHelp(c))
-				os.Exit(1)
-			}
-
-			hostid = h
 		}
 
 		//conn := getConn(c.String("port"))
@@ -274,53 +236,91 @@ var userCreateCommand = cli.Command{
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
 
-		response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid})
+		_, err := userSvc.Delete(context.Background(), &pb.UserDeleteRequest{Username: username})
 		if err != nil {
-			logrus.Errorf("user can not be created '%s': %v", username, err)
+			logrus.Errorf("user can not be deleted '%s': %v", username, err)
 			os.Exit(1)
 			return err
 		}
-		logrus.Infof("user created: %s", response.Users[0].Username)
+		logrus.Infof("user deleted: %s", username)
 		return nil
 	},
 }
 
-var userListCommand = cli.Command{
-	Name:  "list",
-	Usage: "List VPN users.",
+var userRenewCommand = cli.Command{
+	Name:  "renew",
+	Usage: "Renew VPN user certificates.",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user, u",
+			Usage: "username of the vpn user",
+		},
+	},
 	Action: func(c *cli.Context) error {
-		action = "user:list"
+		action = "user:renew"
+		username := c.String("user")
+
+		if username == "" {
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
+		//conn := getConn(c.String("port"))
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
-		vpnSvc := pb.NewVPNServiceClient(conn)
+		pb.NewVPNServiceClient(conn)
 
-		server, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
+		_, err := userSvc.Renew(context.Background(), &pb.UserRenewRequest{Username: username})
 		if err != nil {
-			logrus.Errorf("can not get server status: %v", err)
+			logrus.Errorf("can't renew user cert '%s': %v", username, err)
 			os.Exit(1)
 			return err
 		}
+		logrus.Infof("user cert renewed: '%s'", username)
+		return nil
+	},
+}
 
-		resp, err := userSvc.List(context.Background(), &pb.UserListRequest{})
-		if err != nil {
-			logrus.Errorf("users can not be fetched: %v", err)
+var userGenconfigCommand = cli.Command{
+	Name:  "genconfig",
+	Usage: "Generate client config for the user. (.ovpn file)",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user, u",
+			Usage: "username of the vpn user",
+		},
+		cli.StringFlag{
+			Name:  "out, o",
+			Usage: ".ovpn file output path",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		action = "user:export-config"
+		username := c.String("user")
+		output := c.String("out")
+
+		if username == "" {
+			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
+		}
+		if output == "" {
+			output = username + ".ovpn"
+		}
+
+		//conn := getConn(c.String("port"))
+		conn := getConn(c.GlobalString("daemon-port"))
+		defer conn.Close()
+		userSvc := pb.NewUserServiceClient(conn)
+		pb.NewVPNServiceClient(conn)
+
+		res, err := userSvc.GenConfig(context.Background(), &pb.UserGenConfigRequest{Username: username})
+		if err != nil {
+			logrus.Errorf("user config can not be exported %s: %v", username, err)
 			return err
 		}
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
-		//table.SetBorder(false)
-		for i, user := range resp.Users {
-			static := ""
-			if user.HostID != 0 {
-				static = "s"
-			}
-			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
-			table.Append(data)
-		}
-		table.Render()
-
+		emitToFile(output, res.ClientConfig, 0)
+		logrus.Infof("exported to %s", output)
 		return nil
 	},
 }

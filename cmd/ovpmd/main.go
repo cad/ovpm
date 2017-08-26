@@ -83,16 +83,19 @@ func newServer(port string) *server {
 		fmt.Println(sig)
 		done <- true
 	}()
-
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-	if err != nil {
-		logrus.Fatalf("could not listen to port %s: %v", port, err)
+	if !ovpm.Testing {
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+		if err != nil {
+			logrus.Fatalf("could not listen to port %s: %v", port, err)
+		}
+		s := grpc.NewServer()
+		pb.RegisterUserServiceServer(s, &api.UserService{})
+		pb.RegisterVPNServiceServer(s, &api.VPNService{})
+		pb.RegisterNetworkServiceServer(s, &api.NetworkService{})
+		return &server{lis: lis, grpcServer: s, signal: sigs, done: done, port: port}
 	}
-	s := grpc.NewServer()
-	pb.RegisterUserServiceServer(s, &api.UserService{})
-	pb.RegisterVPNServiceServer(s, &api.VPNService{})
-	pb.RegisterNetworkServiceServer(s, &api.NetworkService{})
-	return &server{lis: lis, grpcServer: s, signal: sigs, done: done, port: port}
+	return &server{}
+
 }
 
 func (s *server) start() {

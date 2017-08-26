@@ -20,6 +20,7 @@ var _ = math.Inf
 type NetworkCreateRequest struct {
 	Name string `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
 	CIDR string `protobuf:"bytes,2,opt,name=CIDR" json:"CIDR,omitempty"`
+	Type string `protobuf:"bytes,3,opt,name=Type" json:"Type,omitempty"`
 }
 
 func (m *NetworkCreateRequest) Reset()                    { *m = NetworkCreateRequest{} }
@@ -37,6 +38,13 @@ func (m *NetworkCreateRequest) GetName() string {
 func (m *NetworkCreateRequest) GetCIDR() string {
 	if m != nil {
 		return m.CIDR
+	}
+	return ""
+}
+
+func (m *NetworkCreateRequest) GetType() string {
+	if m != nil {
+		return m.Type
 	}
 	return ""
 }
@@ -65,16 +73,74 @@ func (m *NetworkDeleteRequest) GetName() string {
 	return ""
 }
 
+type NetworkGetAllTypesRequest struct {
+}
+
+func (m *NetworkGetAllTypesRequest) Reset()                    { *m = NetworkGetAllTypesRequest{} }
+func (m *NetworkGetAllTypesRequest) String() string            { return proto.CompactTextString(m) }
+func (*NetworkGetAllTypesRequest) ProtoMessage()               {}
+func (*NetworkGetAllTypesRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
+
+type NetworkAssociateRequest struct {
+	Name     string `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	Username string `protobuf:"bytes,2,opt,name=Username" json:"Username,omitempty"`
+}
+
+func (m *NetworkAssociateRequest) Reset()                    { *m = NetworkAssociateRequest{} }
+func (m *NetworkAssociateRequest) String() string            { return proto.CompactTextString(m) }
+func (*NetworkAssociateRequest) ProtoMessage()               {}
+func (*NetworkAssociateRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{4} }
+
+func (m *NetworkAssociateRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *NetworkAssociateRequest) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+type NetworkDissociateRequest struct {
+	Name     string `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	Username string `protobuf:"bytes,2,opt,name=Username" json:"Username,omitempty"`
+}
+
+func (m *NetworkDissociateRequest) Reset()                    { *m = NetworkDissociateRequest{} }
+func (m *NetworkDissociateRequest) String() string            { return proto.CompactTextString(m) }
+func (*NetworkDissociateRequest) ProtoMessage()               {}
+func (*NetworkDissociateRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{5} }
+
+func (m *NetworkDissociateRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *NetworkDissociateRequest) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
 type Network struct {
-	Name      string `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
-	CIDR      string `protobuf:"bytes,2,opt,name=CIDR" json:"CIDR,omitempty"`
-	CreatedAt string `protobuf:"bytes,3,opt,name=CreatedAt" json:"CreatedAt,omitempty"`
+	Name                string   `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	CIDR                string   `protobuf:"bytes,2,opt,name=CIDR" json:"CIDR,omitempty"`
+	Type                string   `protobuf:"bytes,3,opt,name=Type" json:"Type,omitempty"`
+	CreatedAt           string   `protobuf:"bytes,4,opt,name=CreatedAt" json:"CreatedAt,omitempty"`
+	AssociatedUsernames []string `protobuf:"bytes,5,rep,name=AssociatedUsernames" json:"AssociatedUsernames,omitempty"`
 }
 
 func (m *Network) Reset()                    { *m = Network{} }
 func (m *Network) String() string            { return proto.CompactTextString(m) }
 func (*Network) ProtoMessage()               {}
-func (*Network) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
+func (*Network) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{6} }
 
 func (m *Network) GetName() string {
 	if m != nil {
@@ -90,11 +156,25 @@ func (m *Network) GetCIDR() string {
 	return ""
 }
 
+func (m *Network) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
 func (m *Network) GetCreatedAt() string {
 	if m != nil {
 		return m.CreatedAt
 	}
 	return ""
+}
+
+func (m *Network) GetAssociatedUsernames() []string {
+	if m != nil {
+		return m.AssociatedUsernames
+	}
+	return nil
 }
 
 type NetworkCreateResponse struct {
@@ -104,7 +184,7 @@ type NetworkCreateResponse struct {
 func (m *NetworkCreateResponse) Reset()                    { *m = NetworkCreateResponse{} }
 func (m *NetworkCreateResponse) String() string            { return proto.CompactTextString(m) }
 func (*NetworkCreateResponse) ProtoMessage()               {}
-func (*NetworkCreateResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{4} }
+func (*NetworkCreateResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{7} }
 
 func (m *NetworkCreateResponse) GetNetwork() *Network {
 	if m != nil {
@@ -120,7 +200,7 @@ type NetworkListResponse struct {
 func (m *NetworkListResponse) Reset()                    { *m = NetworkListResponse{} }
 func (m *NetworkListResponse) String() string            { return proto.CompactTextString(m) }
 func (*NetworkListResponse) ProtoMessage()               {}
-func (*NetworkListResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{5} }
+func (*NetworkListResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{8} }
 
 func (m *NetworkListResponse) GetNetworks() []*Network {
 	if m != nil {
@@ -136,7 +216,7 @@ type NetworkDeleteResponse struct {
 func (m *NetworkDeleteResponse) Reset()                    { *m = NetworkDeleteResponse{} }
 func (m *NetworkDeleteResponse) String() string            { return proto.CompactTextString(m) }
 func (*NetworkDeleteResponse) ProtoMessage()               {}
-func (*NetworkDeleteResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{6} }
+func (*NetworkDeleteResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{9} }
 
 func (m *NetworkDeleteResponse) GetNetwork() *Network {
 	if m != nil {
@@ -145,14 +225,52 @@ func (m *NetworkDeleteResponse) GetNetwork() *Network {
 	return nil
 }
 
+type NetworkGetAllTypesResponse struct {
+	Types []string `protobuf:"bytes,1,rep,name=Types" json:"Types,omitempty"`
+}
+
+func (m *NetworkGetAllTypesResponse) Reset()                    { *m = NetworkGetAllTypesResponse{} }
+func (m *NetworkGetAllTypesResponse) String() string            { return proto.CompactTextString(m) }
+func (*NetworkGetAllTypesResponse) ProtoMessage()               {}
+func (*NetworkGetAllTypesResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{10} }
+
+func (m *NetworkGetAllTypesResponse) GetTypes() []string {
+	if m != nil {
+		return m.Types
+	}
+	return nil
+}
+
+type NetworkAssociateResponse struct {
+}
+
+func (m *NetworkAssociateResponse) Reset()                    { *m = NetworkAssociateResponse{} }
+func (m *NetworkAssociateResponse) String() string            { return proto.CompactTextString(m) }
+func (*NetworkAssociateResponse) ProtoMessage()               {}
+func (*NetworkAssociateResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{11} }
+
+type NetworkDissociateResponse struct {
+}
+
+func (m *NetworkDissociateResponse) Reset()                    { *m = NetworkDissociateResponse{} }
+func (m *NetworkDissociateResponse) String() string            { return proto.CompactTextString(m) }
+func (*NetworkDissociateResponse) ProtoMessage()               {}
+func (*NetworkDissociateResponse) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{12} }
+
 func init() {
 	proto.RegisterType((*NetworkCreateRequest)(nil), "pb.NetworkCreateRequest")
 	proto.RegisterType((*NetworkListRequest)(nil), "pb.NetworkListRequest")
 	proto.RegisterType((*NetworkDeleteRequest)(nil), "pb.NetworkDeleteRequest")
+	proto.RegisterType((*NetworkGetAllTypesRequest)(nil), "pb.NetworkGetAllTypesRequest")
+	proto.RegisterType((*NetworkAssociateRequest)(nil), "pb.NetworkAssociateRequest")
+	proto.RegisterType((*NetworkDissociateRequest)(nil), "pb.NetworkDissociateRequest")
 	proto.RegisterType((*Network)(nil), "pb.Network")
 	proto.RegisterType((*NetworkCreateResponse)(nil), "pb.NetworkCreateResponse")
 	proto.RegisterType((*NetworkListResponse)(nil), "pb.NetworkListResponse")
 	proto.RegisterType((*NetworkDeleteResponse)(nil), "pb.NetworkDeleteResponse")
+	proto.RegisterType((*NetworkGetAllTypesResponse)(nil), "pb.NetworkGetAllTypesResponse")
+	proto.RegisterType((*NetworkAssociateResponse)(nil), "pb.NetworkAssociateResponse")
+	proto.RegisterType((*NetworkDissociateResponse)(nil), "pb.NetworkDissociateResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -169,6 +287,9 @@ type NetworkServiceClient interface {
 	Create(ctx context.Context, in *NetworkCreateRequest, opts ...grpc.CallOption) (*NetworkCreateResponse, error)
 	List(ctx context.Context, in *NetworkListRequest, opts ...grpc.CallOption) (*NetworkListResponse, error)
 	Delete(ctx context.Context, in *NetworkDeleteRequest, opts ...grpc.CallOption) (*NetworkDeleteResponse, error)
+	GetAllTypes(ctx context.Context, in *NetworkGetAllTypesRequest, opts ...grpc.CallOption) (*NetworkGetAllTypesResponse, error)
+	Associate(ctx context.Context, in *NetworkAssociateRequest, opts ...grpc.CallOption) (*NetworkAssociateResponse, error)
+	Dissociate(ctx context.Context, in *NetworkDissociateRequest, opts ...grpc.CallOption) (*NetworkDissociateResponse, error)
 }
 
 type networkServiceClient struct {
@@ -206,12 +327,42 @@ func (c *networkServiceClient) Delete(ctx context.Context, in *NetworkDeleteRequ
 	return out, nil
 }
 
+func (c *networkServiceClient) GetAllTypes(ctx context.Context, in *NetworkGetAllTypesRequest, opts ...grpc.CallOption) (*NetworkGetAllTypesResponse, error) {
+	out := new(NetworkGetAllTypesResponse)
+	err := grpc.Invoke(ctx, "/pb.NetworkService/GetAllTypes", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *networkServiceClient) Associate(ctx context.Context, in *NetworkAssociateRequest, opts ...grpc.CallOption) (*NetworkAssociateResponse, error) {
+	out := new(NetworkAssociateResponse)
+	err := grpc.Invoke(ctx, "/pb.NetworkService/Associate", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *networkServiceClient) Dissociate(ctx context.Context, in *NetworkDissociateRequest, opts ...grpc.CallOption) (*NetworkDissociateResponse, error) {
+	out := new(NetworkDissociateResponse)
+	err := grpc.Invoke(ctx, "/pb.NetworkService/Dissociate", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for NetworkService service
 
 type NetworkServiceServer interface {
 	Create(context.Context, *NetworkCreateRequest) (*NetworkCreateResponse, error)
 	List(context.Context, *NetworkListRequest) (*NetworkListResponse, error)
 	Delete(context.Context, *NetworkDeleteRequest) (*NetworkDeleteResponse, error)
+	GetAllTypes(context.Context, *NetworkGetAllTypesRequest) (*NetworkGetAllTypesResponse, error)
+	Associate(context.Context, *NetworkAssociateRequest) (*NetworkAssociateResponse, error)
+	Dissociate(context.Context, *NetworkDissociateRequest) (*NetworkDissociateResponse, error)
 }
 
 func RegisterNetworkServiceServer(s *grpc.Server, srv NetworkServiceServer) {
@@ -272,6 +423,60 @@ func _NetworkService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NetworkService_GetAllTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NetworkGetAllTypesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NetworkServiceServer).GetAllTypes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.NetworkService/GetAllTypes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NetworkServiceServer).GetAllTypes(ctx, req.(*NetworkGetAllTypesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NetworkService_Associate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NetworkAssociateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NetworkServiceServer).Associate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.NetworkService/Associate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NetworkServiceServer).Associate(ctx, req.(*NetworkAssociateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NetworkService_Dissociate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NetworkDissociateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NetworkServiceServer).Dissociate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.NetworkService/Dissociate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NetworkServiceServer).Dissociate(ctx, req.(*NetworkDissociateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _NetworkService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.NetworkService",
 	HandlerType: (*NetworkServiceServer)(nil),
@@ -288,6 +493,18 @@ var _NetworkService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "Delete",
 			Handler:    _NetworkService_Delete_Handler,
 		},
+		{
+			MethodName: "GetAllTypes",
+			Handler:    _NetworkService_GetAllTypes_Handler,
+		},
+		{
+			MethodName: "Associate",
+			Handler:    _NetworkService_Associate_Handler,
+		},
+		{
+			MethodName: "Dissociate",
+			Handler:    _NetworkService_Dissociate_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "network.proto",
@@ -296,23 +513,32 @@ var _NetworkService_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("network.proto", fileDescriptor2) }
 
 var fileDescriptor2 = []byte{
-	// 273 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xcd, 0x4b, 0x2d, 0x29,
-	0xcf, 0x2f, 0xca, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2a, 0x48, 0x52, 0xb2, 0xe3,
-	0x12, 0xf1, 0x83, 0x08, 0x3a, 0x17, 0xa5, 0x26, 0x96, 0xa4, 0x06, 0xa5, 0x16, 0x96, 0xa6, 0x16,
-	0x97, 0x08, 0x09, 0x71, 0xb1, 0xf8, 0x25, 0xe6, 0xa6, 0x4a, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06,
-	0x81, 0xd9, 0x20, 0x31, 0x67, 0x4f, 0x97, 0x20, 0x09, 0x26, 0x88, 0x18, 0x88, 0xad, 0x24, 0xc2,
-	0x25, 0x04, 0xd5, 0xef, 0x93, 0x59, 0x5c, 0x02, 0xd5, 0xad, 0xa4, 0x05, 0x37, 0xd5, 0x25, 0x35,
-	0x27, 0x15, 0xaf, 0xa9, 0x4a, 0xfe, 0x5c, 0xec, 0x50, 0xb5, 0xc4, 0x5a, 0x2a, 0x24, 0xc3, 0xc5,
-	0x09, 0x71, 0x6d, 0x8a, 0x63, 0x89, 0x04, 0x33, 0x58, 0x02, 0x21, 0xa0, 0x64, 0xc7, 0x25, 0x8a,
-	0xe6, 0xa5, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0x21, 0x55, 0xb8, 0x4d, 0x60, 0x1b, 0xb8, 0x8d,
-	0xb8, 0xf5, 0x0a, 0x92, 0xf4, 0xa0, 0x42, 0x41, 0x30, 0x39, 0x25, 0x3b, 0x2e, 0x61, 0x14, 0x2f,
-	0x41, 0x75, 0xab, 0x73, 0x71, 0x40, 0x85, 0x8b, 0x25, 0x18, 0x15, 0x98, 0xd1, 0xb5, 0xc3, 0x25,
-	0x91, 0xec, 0x87, 0x79, 0x9e, 0x24, 0xfb, 0x8d, 0xce, 0x32, 0x72, 0xf1, 0x41, 0xd9, 0xc1, 0xa9,
-	0x45, 0x65, 0x99, 0xc9, 0xa9, 0x42, 0xf6, 0x5c, 0x6c, 0x10, 0xbf, 0x08, 0x49, 0x20, 0x69, 0x41,
-	0x89, 0x31, 0x29, 0x49, 0x2c, 0x32, 0x10, 0x8b, 0x95, 0x18, 0x84, 0x2c, 0xb9, 0x58, 0x40, 0x9e,
-	0x11, 0x12, 0x43, 0x52, 0x84, 0x14, 0x61, 0x52, 0xe2, 0x18, 0xe2, 0x70, 0xad, 0xf6, 0x5c, 0x6c,
-	0x10, 0x7f, 0xa0, 0xd8, 0x8d, 0x12, 0xaf, 0x28, 0x76, 0xa3, 0x7a, 0x5a, 0x89, 0x21, 0x89, 0x0d,
-	0x9c, 0xda, 0x8c, 0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0xff, 0xf0, 0x5e, 0xe8, 0x7e, 0x02, 0x00,
-	0x00,
+	// 429 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0xcd, 0x4e, 0xf2, 0x40,
+	0x14, 0xa5, 0x14, 0xf8, 0xe8, 0x25, 0x9f, 0x8b, 0x01, 0x65, 0x18, 0xc0, 0x90, 0x49, 0x8c, 0xc4,
+	0x05, 0x31, 0xb8, 0x72, 0x03, 0x21, 0x90, 0x28, 0x6a, 0x58, 0x54, 0x7d, 0x00, 0x7e, 0x66, 0xd1,
+	0x88, 0xb4, 0x76, 0xaa, 0xc6, 0x07, 0xf1, 0x4d, 0x7c, 0x40, 0xd3, 0xce, 0x74, 0x98, 0x42, 0xd1,
+	0x18, 0x76, 0xd3, 0x73, 0xee, 0x9c, 0x73, 0x39, 0x77, 0x2e, 0xf0, 0x7f, 0xc5, 0x82, 0x77, 0xd7,
+	0x7f, 0xea, 0x78, 0xbe, 0x1b, 0xb8, 0x28, 0xeb, 0xcd, 0xa8, 0x0d, 0x95, 0x89, 0x00, 0x87, 0x3e,
+	0x9b, 0x06, 0xcc, 0x66, 0x2f, 0xaf, 0x8c, 0x07, 0x08, 0x41, 0x6e, 0x32, 0x7d, 0x66, 0xd8, 0x68,
+	0x19, 0x6d, 0xcb, 0x8e, 0xce, 0x21, 0x36, 0x1c, 0x8f, 0x6c, 0x9c, 0x15, 0x58, 0x78, 0x0e, 0xb1,
+	0x87, 0x0f, 0x8f, 0x61, 0x53, 0x60, 0xe1, 0x99, 0x56, 0x00, 0x49, 0xcd, 0x3b, 0x87, 0x07, 0x52,
+	0x91, 0x9e, 0x29, 0xa7, 0x11, 0x5b, 0xb2, 0x1f, 0x9d, 0x68, 0x1d, 0x6a, 0xb2, 0xf6, 0x8a, 0x05,
+	0x83, 0xe5, 0x32, 0x94, 0xe5, 0xb1, 0xd0, 0x18, 0xaa, 0x92, 0x1c, 0x70, 0xee, 0xce, 0x9d, 0x5f,
+	0xba, 0x26, 0x50, 0x7c, 0xe4, 0xcc, 0x5f, 0x85, 0xb8, 0xe8, 0x5c, 0x7d, 0xd3, 0x1b, 0xc0, 0x71,
+	0x4f, 0xce, 0xbe, 0x5a, 0x9f, 0x06, 0xfc, 0x93, 0x62, 0xfb, 0xa4, 0x87, 0x1a, 0x60, 0x89, 0x51,
+	0x2c, 0x06, 0x01, 0xce, 0x45, 0xc4, 0x1a, 0x40, 0xe7, 0x50, 0x56, 0xbf, 0x7a, 0x11, 0x7b, 0x73,
+	0x9c, 0x6f, 0x99, 0x6d, 0xcb, 0x4e, 0xa3, 0x68, 0x0f, 0x0e, 0x37, 0x26, 0xcc, 0x3d, 0x77, 0xc5,
+	0x19, 0x3a, 0x51, 0xfd, 0x46, 0x7d, 0x96, 0xba, 0xa5, 0x8e, 0x37, 0xeb, 0x48, 0xc8, 0x8e, 0x39,
+	0xda, 0x83, 0x72, 0x62, 0x9a, 0xf2, 0xf6, 0x29, 0x14, 0x25, 0xcc, 0xb1, 0xd1, 0x32, 0x37, 0xaf,
+	0x2b, 0x52, 0xf3, 0x8f, 0xe7, 0xfe, 0x37, 0xff, 0x2e, 0x90, 0xb4, 0xb7, 0x20, 0x45, 0x2a, 0x90,
+	0x8f, 0x80, 0xa8, 0x07, 0xcb, 0x16, 0x1f, 0x94, 0xa8, 0xb9, 0x6a, 0x4f, 0x44, 0xdc, 0xd0, 0xde,
+	0x96, 0x3e, 0x73, 0x41, 0x76, 0xbf, 0x4c, 0x38, 0x90, 0xec, 0x3d, 0xf3, 0xdf, 0x9c, 0x39, 0x43,
+	0x7d, 0x28, 0x88, 0xe0, 0x10, 0xd6, 0xfa, 0x4b, 0x6c, 0x0b, 0xa9, 0xa5, 0x30, 0xd2, 0x2e, 0x83,
+	0x2e, 0x21, 0x17, 0x26, 0x87, 0x8e, 0xb4, 0x22, 0x6d, 0x31, 0x48, 0x75, 0x0b, 0x57, 0x57, 0xfb,
+	0x50, 0x10, 0xa1, 0x25, 0xbc, 0x13, 0xfb, 0x93, 0xf0, 0x4e, 0x26, 0x4c, 0x33, 0x68, 0x02, 0x25,
+	0x2d, 0x35, 0xd4, 0xd4, 0x6a, 0xb7, 0x37, 0x8b, 0x1c, 0xef, 0xa2, 0x95, 0xde, 0x35, 0x58, 0x2a,
+	0x51, 0x54, 0xd7, 0xca, 0x37, 0x57, 0x91, 0x34, 0xd2, 0x49, 0xa5, 0x74, 0x0b, 0xb0, 0xce, 0x1f,
+	0xe9, 0xd5, 0x5b, 0xab, 0x48, 0x9a, 0x3b, 0xd8, 0x58, 0x6c, 0x56, 0x88, 0xfe, 0xd0, 0x2e, 0xbe,
+	0x03, 0x00, 0x00, 0xff, 0xff, 0xd7, 0x4a, 0x6c, 0x70, 0xe1, 0x04, 0x00, 0x00,
 }

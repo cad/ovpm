@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -19,6 +20,7 @@ import (
 	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"
 	"github.com/cad/ovpm/supervisor"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
@@ -308,7 +310,7 @@ func Emit() error {
 	}
 
 	if err := emitIptables(); err != nil {
-		return fmt.Errorf("can not emit iptables conf: %s", err)
+		return fmt.Errorf("can not emit iptables: %s", err)
 	}
 
 	if err := emitCRL(); err != nil {
@@ -552,6 +554,63 @@ func emitDHParams() error {
 }
 
 func emitIptables() error {
+	if Testing {
+		return nil
+	}
+	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
+	if err != nil {
+		return fmt.Errorf("can not create new iptables object: %v", err)
+	}
+
+	for _, network := range GetAllNetworks() {
+		associatedUsernames := network.GetAssociatedUsernames()
+		switch network.Type {
+		case SERVERNET:
+			users, err := GetAllUsers()
+			if err != nil {
+				return err
+			}
+			for _, user := range users {
+				var found bool
+				for _, auser := range associatedUsernames {
+					if user.Username == auser {
+						found = true
+						break
+					}
+				}
+
+				userIP, _, err := net.ParseCIDR(user.GetIPNet())
+				if err != nil {
+					return err
+				}
+				_, networkIPNet, err := net.ParseCIDR(network.CIDR)
+				if err != nil {
+					return err
+				}
+
+				// get destination network's iface
+				iface := interfaceOfIP(networkIPNet)
+				if iface == nil {
+					return fmt.Errorf("cant find interface for %s", networkIPNet.String())
+				}
+				logrus.Debugf("emitIptables: net(%s) iface name '%s'", network.Name, iface.Name)
+				logrus.Debugf("emitIptables: user '%s' ip addr '%s'", user.GetUsername(), userIP.String())
+				// enable nat for the user to the destination network n
+				if found {
+					err = ipt.AppendUnique("nat", "POSTROUTING", "-s", userIP.String(), "-o", iface.Name, "-j", "MASQUERADE")
+					if err != nil {
+						logrus.Error(err)
+						return err
+					}
+				} else {
+					err = ipt.Delete("nat", "POSTROUTING", "-s", userIP.String(), "-o", iface.Name, "-j", "MASQUERADE")
+					if err != nil {
+						logrus.Debug(err)
+					}
+				}
+			}
+		}
+	}
 	return nil
 }
 
