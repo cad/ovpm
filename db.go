@@ -24,9 +24,9 @@ func SetupDB(dialect string, args ...interface{}) {
 	}
 
 	db.AutoMigrate(&DBUser{})
-	db.AutoMigrate(&DBNetwork{})
 	db.AutoMigrate(&DBServer{})
 	db.AutoMigrate(&DBRevoked{})
+	db.AutoMigrate(&DBNetwork{})
 }
 
 // CeaseDB closes the database.

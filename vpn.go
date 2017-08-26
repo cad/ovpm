@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
-//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto --go_out=plugins=grpc:pb
+//go:generate protoc -I pb/ pb/user.proto pb/vpn.proto pb/network.proto --go_out=plugins=grpc:pb
 
 package ovpm
 
@@ -20,19 +20,10 @@ import (
 	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"
 	"github.com/cad/ovpm/supervisor"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
-
-// DBNetwork is database model for external networks on the VPN server.
-type DBNetwork struct {
-	gorm.Model
-	ServerID uint
-	Server   DBServer
-
-	Name string
-	CIDR string
-}
 
 // DBServer is database model for storing VPN server related stuff.
 type DBServer struct {
@@ -319,7 +310,7 @@ func Emit() error {
 	}
 
 	if err := emitIptables(); err != nil {
-		return fmt.Errorf("can not emit iptables conf: %s", err)
+		return fmt.Errorf("can not emit iptables: %s", err)
 	}
 
 	if err := emitCRL(); err != nil {
@@ -563,63 +554,64 @@ func emitDHParams() error {
 }
 
 func emitIptables() error {
-	return nil
-}
-
-// CreateNewNetwork creates a new network definition in the system.
-func CreateNewNetwork(name, cidr string) (*DBNetwork, error) {
-	if !IsInitialized() {
-		return nil, fmt.Errorf("you first need to create server")
+	if Testing {
+		return nil
 	}
-	// Validate user input.
-	if govalidator.IsNull(name) {
-		return nil, fmt.Errorf("validation error: %s can not be null", name)
-	}
-	if !govalidator.IsAlphanumeric(name) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
-	}
-
-	if !govalidator.IsCIDR(cidr) {
-		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", name)
-	}
-
-	_, ipnet, err := net.ParseCIDR(cidr)
+	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
-		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
+		return fmt.Errorf("can not create new iptables object: %v", err)
 	}
 
-	network := DBNetwork{
-		Name: name,
-		CIDR: ipnet.String(),
+	for _, network := range GetAllNetworks() {
+		associatedUsernames := network.GetAssociatedUsernames()
+		switch network.Type {
+		case SERVERNET:
+			users, err := GetAllUsers()
+			if err != nil {
+				return err
+			}
+			for _, user := range users {
+				var found bool
+				for _, auser := range associatedUsernames {
+					if user.Username == auser {
+						found = true
+						break
+					}
+				}
+
+				userIP, _, err := net.ParseCIDR(user.GetIPNet())
+				if err != nil {
+					return err
+				}
+				_, networkIPNet, err := net.ParseCIDR(network.CIDR)
+				if err != nil {
+					return err
+				}
+
+				// get destination network's iface
+				iface := interfaceOfIP(networkIPNet)
+				if iface == nil {
+					return fmt.Errorf("cant find interface for %s", networkIPNet.String())
+				}
+				logrus.Debugf("emitIptables: net(%s) iface name '%s'", network.Name, iface.Name)
+				logrus.Debugf("emitIptables: user '%s' ip addr '%s'", user.GetUsername(), userIP.String())
+				// enable nat for the user to the destination network n
+				if found {
+					err = ipt.AppendUnique("nat", "POSTROUTING", "-s", userIP.String(), "-o", iface.Name, "-j", "MASQUERADE")
+					if err != nil {
+						logrus.Error(err)
+						return err
+					}
+				} else {
+					err = ipt.Delete("nat", "POSTROUTING", "-s", userIP.String(), "-o", iface.Name, "-j", "MASQUERADE")
+					if err != nil {
+						logrus.Debug(err)
+					}
+				}
+			}
+		}
 	}
-	db.Save(&network)
-
-	if db.NewRecord(&network) {
-		return nil, fmt.Errorf("can not create network in the db")
-	}
-
-	return &network, nil
-
-}
-
-// Delete deletes a network definition in the system.
-func (n *DBNetwork) Delete(name string) (*DBNetwork, error) {
-	if !IsInitialized() {
-		return nil, fmt.Errorf("you first need to create server")
-	}
-	// Validate user input.
-	if govalidator.IsNull(name) {
-		return nil, fmt.Errorf("validation error: %s can not be null", name)
-	}
-	if !govalidator.IsAlphanumeric(name) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
-	}
-
-	db.Unscoped().Delete(n)
-	logrus.Infof("network deleted: %s", n.Name)
-
-	return &n, nil
-
+	return nil
 }
 
 func checkOpenVPNExecutable() bool {

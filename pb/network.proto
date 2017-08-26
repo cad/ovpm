@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package pb;
+
+message NetworkCreateRequest {
+  string Name = 1;
+  string CIDR = 2;
+  string Type = 3;
+}
+message NetworkListRequest {}
+message NetworkDeleteRequest {
+  string Name = 1;
+}
+message NetworkGetAllTypesRequest {}
+message NetworkAssociateRequest {
+  string Name = 1;
+  string Username = 2;
+}
+message NetworkDissociateRequest {
+  string Name = 1;
+  string Username = 2;
+}
+service NetworkService {
+  rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {}
+  rpc List (NetworkListRequest) returns (NetworkListResponse) {}
+  rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {}
+  rpc GetAllTypes(NetworkGetAllTypesRequest) returns (NetworkGetAllTypesResponse) {}
+  rpc Associate (NetworkAssociateRequest) returns (NetworkAssociateResponse) {}
+  rpc Dissociate (NetworkDissociateRequest) returns (NetworkDissociateResponse) {}
+}
+message Network {
+  string Name = 1;
+  string CIDR = 2;
+  string Type = 3;
+  string CreatedAt = 4;
+  repeated string AssociatedUsernames = 5;
+}
+message NetworkCreateResponse {
+  Network Network = 1;
+}
+message NetworkListResponse {
+  repeated Network Networks = 1;
+}
+message NetworkDeleteResponse {
+  Network Network = 1;
+}
+message NetworkGetAllTypesResponse {
+  repeated string Types = 1;
+}
+message NetworkAssociateResponse {}
+message NetworkDissociateResponse {}

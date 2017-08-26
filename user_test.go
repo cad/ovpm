@@ -11,7 +11,6 @@ import (
 
 func TestCreateNewUser(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -80,7 +79,6 @@ func TestCreateNewUser(t *testing.T) {
 
 func TestUserUpdate(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -117,7 +115,6 @@ func TestUserUpdate(t *testing.T) {
 
 func TestUserPasswordCorrect(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -135,7 +132,6 @@ func TestUserPasswordCorrect(t *testing.T) {
 
 func TestUserPasswordReset(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -163,7 +159,6 @@ func TestUserPasswordReset(t *testing.T) {
 
 func TestUserDelete(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -202,7 +197,6 @@ func TestUserDelete(t *testing.T) {
 
 func TestUserGet(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -227,7 +221,6 @@ func TestUserGet(t *testing.T) {
 
 func TestUserGetAll(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -266,7 +259,6 @@ func TestUserGetAll(t *testing.T) {
 
 func TestUserRenew(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -289,7 +281,6 @@ func TestUserRenew(t *testing.T) {
 
 func TestUserIPAllocator(t *testing.T) {
 	// Initialize:
-	ovpm.Testing = true
 	ovpm.SetupDB("sqlite3", ":memory:")
 	defer ovpm.CeaseDB()
 	ovpm.Init("localhost", "")
@@ -346,4 +337,8 @@ func areUsersEqual(user1, user2 *ovpm.DBUser) bool {
 	logrus.Infof("users are the same!")
 	return true
 
+}
+
+func init() {
+	ovpm.Testing = true
 }

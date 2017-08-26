@@ -7,6 +7,7 @@ Package pb is a generated protocol buffer package.
 It is generated from these files:
 	user.proto
 	vpn.proto
+	network.proto
 
 It has these top-level messages:
 	UserListRequest
@@ -21,6 +22,19 @@ It has these top-level messages:
 	VPNInitRequest
 	VPNStatusResponse
 	VPNInitResponse
+	NetworkCreateRequest
+	NetworkListRequest
+	NetworkDeleteRequest
+	NetworkGetAllTypesRequest
+	NetworkAssociateRequest
+	NetworkDissociateRequest
+	Network
+	NetworkCreateResponse
+	NetworkListResponse
+	NetworkDeleteResponse
+	NetworkGetAllTypesResponse
+	NetworkAssociateResponse
+	NetworkDissociateResponse
 */
 package pb
 

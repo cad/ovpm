@@ -177,3 +177,105 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 	}
 	return &pb.VPNInitResponse{}, nil
 }
+
+type NetworkService struct{}
+
+func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (*pb.NetworkListResponse, error) {
+	logrus.Debug("rpc call: network list")
+	var nt []*pb.Network
+
+	networks := ovpm.GetAllNetworks()
+	for _, network := range networks {
+		nt = append(nt, &pb.Network{
+			Name:                network.GetName(),
+			CIDR:                network.GetCIDR(),
+			Type:                network.GetType().String(),
+			CreatedAt:           network.GetCreatedAt(),
+			AssociatedUsernames: network.GetAssociatedUsernames(),
+		})
+	}
+
+	return &pb.NetworkListResponse{Networks: nt}, nil
+}
+
+func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
+	logrus.Debugf("rpc call: network create: %s", req.Name)
+	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type))
+	if err != nil {
+		return nil, err
+	}
+
+	n := pb.Network{
+		Name:                network.GetName(),
+		CIDR:                network.GetCIDR(),
+		Type:                network.GetType().String(),
+		CreatedAt:           network.GetCreatedAt(),
+		AssociatedUsernames: network.GetAssociatedUsernames(),
+	}
+
+	return &pb.NetworkCreateResponse{Network: &n}, nil
+}
+
+func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteRequest) (*pb.NetworkDeleteResponse, error) {
+	logrus.Debugf("rpc call: network delete: %s", req.Name)
+	network, err := ovpm.GetNetwork(req.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = network.Delete()
+	if err != nil {
+		return nil, err
+	}
+
+	n := pb.Network{
+		Name:                network.GetName(),
+		CIDR:                network.GetCIDR(),
+		Type:                network.GetType().String(),
+		CreatedAt:           network.GetCreatedAt(),
+		AssociatedUsernames: network.GetAssociatedUsernames(),
+	}
+
+	return &pb.NetworkDeleteResponse{Network: &n}, nil
+}
+
+func (s *NetworkService) GetAllTypes(ctx context.Context, req *pb.NetworkGetAllTypesRequest) (*pb.NetworkGetAllTypesResponse, error) {
+	logrus.Debugf("rpc call: network get-types")
+	var networkTypes []string
+	for _, nt := range ovpm.GetAllNetworkTypes() {
+		networkTypes = append(networkTypes, nt.String())
+	}
+
+	return &pb.NetworkGetAllTypesResponse{Types: networkTypes}, nil
+}
+
+func (s *NetworkService) Associate(ctx context.Context, req *pb.NetworkAssociateRequest) (*pb.NetworkAssociateResponse, error) {
+	logrus.Debugf("rpc call: network associate")
+
+	network, err := ovpm.GetNetwork(req.Name)
+	if err != nil {
+		return nil, err
+	}
+	err = network.Associate(req.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.NetworkAssociateResponse{}, nil
+}
+
+func (s *NetworkService) Dissociate(ctx context.Context, req *pb.NetworkDissociateRequest) (*pb.NetworkDissociateResponse, error) {
+	logrus.Debugf("rpc call: network dissociate")
+
+	network, err := ovpm.GetNetwork(req.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = network.Dissociate(req.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.NetworkDissociateResponse{}, nil
+}

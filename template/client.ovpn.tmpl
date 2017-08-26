@@ -5,13 +5,13 @@ dev tun
 proto udp
 remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
-remote-cert-tls server
 ns-cert-type server
 nobind
 persist-key
 persist-tun
 comp-lzo
 verb 3
+auth-nocache
 
 <ca>
 {{ .CA }}</ca>

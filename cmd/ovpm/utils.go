@@ -33,5 +33,4 @@ func getConn(port string) *grpc.ClientConn {
 		logrus.Fatalf("fail to dial: %v", err)
 	}
 	return conn
-
 }
