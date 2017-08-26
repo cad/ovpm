@@ -17,7 +17,7 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 
-	n, err := CreateNewNetwork(netName, cidrStr, netType)
+	n, err := CreateNewNetwork(netName, cidrStr, netType, "")
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -64,7 +64,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 
-	n, err := CreateNewNetwork(netName, cidrStr, netType)
+	n, err := CreateNewNetwork(netName, cidrStr, netType, "")
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestVPNGetNetwork(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 
-	_, err := CreateNewNetwork(netName, cidrStr, netType)
+	_, err := CreateNewNetwork(netName, cidrStr, netType, "")
 	if err != nil {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
@@ -144,7 +144,7 @@ func TestVPNGetAllNetworks(t *testing.T) {
 		{"testnet3", "asdkfjadflsa", SERVERNET, false},
 	}
 	for _, tt := range getallnettests {
-		_, err := CreateNewNetwork(tt.name, tt.cidr, tt.netType)
+		_, err := CreateNewNetwork(tt.name, tt.cidr, tt.netType, "")
 		if (err == nil) != tt.passing {
 			t.Fatalf("unexpected error when creating a new network: %v", err)
 		}
@@ -185,7 +185,7 @@ func TestNetAssociate(t *testing.T) {
 	userName := "testUser2"
 	user, _ := CreateNewUser(userName, "123", false, 0)
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
 	err := n.Associate(user.Username)
 	if err != nil {
 		t.Fatal(err)
@@ -220,7 +220,7 @@ func TestNetDissociate(t *testing.T) {
 	userName := "testUser2"
 	user, _ := CreateNewUser(userName, "123", false, 0)
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
 	n.Associate(user.Username)
 
 	n = nil
@@ -264,7 +264,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	userName := "testUser2"
 	user, _ := CreateNewUser(userName, "123", false, 0)
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType)
+	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
 	n.Associate(user.Username)
 	n = nil
 	n, _ = GetNetwork(netName)

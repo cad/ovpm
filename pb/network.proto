@@ -6,6 +6,7 @@ message NetworkCreateRequest {
   string Name = 1;
   string CIDR = 2;
   string Type = 3;
+  string Via = 4;
 }
 message NetworkListRequest {}
 message NetworkDeleteRequest {
@@ -34,6 +35,7 @@ message Network {
   string Type = 3;
   string CreatedAt = 4;
   repeated string AssociatedUsernames = 5;
+  string Via = 6;
 }
 message NetworkCreateResponse {
   Network Network = 1;

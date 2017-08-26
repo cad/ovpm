@@ -192,6 +192,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 			Type:                network.GetType().String(),
 			CreatedAt:           network.GetCreatedAt(),
 			AssociatedUsernames: network.GetAssociatedUsernames(),
+			Via:                 network.GetVia(),
 		})
 	}
 
@@ -200,7 +201,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 
 func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
 	logrus.Debugf("rpc call: network create: %s", req.Name)
-	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type))
+	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type), req.Via)
 	if err != nil {
 		return nil, err
 	}
@@ -211,6 +212,7 @@ func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateReques
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
+		Via:                 network.GetVia(),
 	}
 
 	return &pb.NetworkCreateResponse{Network: &n}, nil
@@ -234,6 +236,7 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
+		Via:                 network.GetVia(),
 	}
 
 	return &pb.NetworkDeleteResponse{Network: &n}, nil

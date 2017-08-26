@@ -1,2 +1,5 @@
 ifconfig-push {{ .IP }} {{ .NetMask }}
 #iroute 192.168.90.0 255.255.255.0
+{{range .Routes}}
+push "route {{index . 0}} {{index . 1}} {{index . 2}}"
+{{ end }}

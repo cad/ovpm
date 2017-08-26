@@ -2,6 +2,7 @@ package ovpm
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -70,6 +71,7 @@ type DBNetwork struct {
 	Name  string `gorm:"unique_index"`
 	CIDR  string
 	Type  NetworkType
+	Via   string
 	Users []*DBUser `gorm:"many2many:network_users;"`
 }
 
@@ -105,7 +107,7 @@ func GetAllNetworks() []*DBNetwork {
 }
 
 // CreateNewNetwork creates a new network definition in the system.
-func CreateNewNetwork(name, cidr string, nettype NetworkType) (*DBNetwork, error) {
+func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNetwork, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -121,6 +123,10 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType) (*DBNetwork, error
 		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
 	}
 
+	if !govalidator.IsCIDR(via) && via != "" {
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", via)
+	}
+
 	if nettype == UNDEFINEDNET {
 		return nil, fmt.Errorf("validation error: `%s` must be a valid network type", nettype)
 	}
@@ -130,11 +136,24 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType) (*DBNetwork, error
 		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
 	}
 
+	// Overwrite via with the parsed CIDR string.
+	if nettype == ROUTE && via != "" {
+		_, viaNet, err := net.ParseCIDR(via)
+		if err != nil {
+			return nil, fmt.Errorf("can not parse CIDR %s: %v", via, err)
+		}
+		via = viaNet.String()
+
+	} else {
+		via = ""
+	}
+
 	network := DBNetwork{
 		Name:  name,
 		CIDR:  ipnet.String(),
 		Type:  nettype,
 		Users: []*DBUser{},
+		Via:   via,
 	}
 	db.Save(&network)
 
@@ -259,6 +278,11 @@ func (n *DBNetwork) GetAssociatedUsernames() []string {
 		usernames = append(usernames, user.Username)
 	}
 	return usernames
+}
+
+// GetVia returns network' via.
+func (n *DBNetwork) GetVia() string {
+	return n.Via
 }
 
 // interfaceOfIP returns a network interface that has the given IP.
@@ -477,4 +501,21 @@ func HostID2IP(hostid uint32) net.IP {
 func IP2HostID(ip net.IP) uint32 {
 	hostid := binary.BigEndian.Uint32(ip)
 	return hostid
+}
+
+// IncrementIP will return next ip address within the network.
+func IncrementIP(ip, mask string) (string, error) {
+	ipAddr := net.ParseIP(ip).To4()
+	netMask := net.IPMask(net.ParseIP(mask).To4())
+	ipNet := net.IPNet{IP: ipAddr, Mask: netMask}
+	for i := len(ipAddr) - 1; i >= 0; i-- {
+		ipAddr[i]++
+		if ip[i] != 0 {
+			break
+		}
+	}
+	if !ipNet.Contains(ipAddr) {
+		return ip, errors.New("overflowed CIDR while incrementing IP")
+	}
+	return ipAddr.String(), nil
 }
