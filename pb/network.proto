@@ -21,11 +21,16 @@ message NetworkDissociateRequest {
   string Name = 1;
   string Username = 2;
 }
+
+message NetworkGetAssociatedUsersRequest {
+  string Name = 1;
+}
 service NetworkService {
   rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {}
   rpc List (NetworkListRequest) returns (NetworkListResponse) {}
   rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {}
   rpc GetAllTypes(NetworkGetAllTypesRequest) returns (NetworkGetAllTypesResponse) {}
+  rpc GetAssociatedUsers(NetworkGetAssociatedUsersRequest) returns (NetworkGetAssociatedUsersResponse) {}
   rpc Associate (NetworkAssociateRequest) returns (NetworkAssociateResponse) {}
   rpc Dissociate (NetworkDissociateRequest) returns (NetworkDissociateResponse) {}
 }
@@ -37,6 +42,11 @@ message Network {
   repeated string AssociatedUsernames = 5;
   string Via = 6;
 }
+
+message NetworkType {
+  string Type = 1;
+  string Description = 2;
+}
 message NetworkCreateResponse {
   Network Network = 1;
 }
@@ -47,7 +57,10 @@ message NetworkDeleteResponse {
   Network Network = 1;
 }
 message NetworkGetAllTypesResponse {
-  repeated string Types = 1;
+  repeated NetworkType Types = 1;
 }
 message NetworkAssociateResponse {}
 message NetworkDissociateResponse {}
+message NetworkGetAssociatedUsersResponse {
+  repeated string Usernames = 1;
+}

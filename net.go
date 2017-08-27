@@ -26,12 +26,13 @@ const (
 )
 
 var networkTypes = [...]struct {
-	Type   NetworkType
-	String string
+	Type        NetworkType
+	String      string
+	Description string
 }{
-	{UNDEFINEDNET, "UNDEFINEDNET"},
-	{SERVERNET, "SERVERNET"},
-	{ROUTE, "ROUTE"},
+	{UNDEFINEDNET, "UNDEFINEDNET", "unknown network type"},
+	{SERVERNET, "SERVERNET", "network behind vpn server"},
+	{ROUTE, "ROUTE", "network to be pushed as route"},
 }
 
 // NetworkTypeFromString returns string representation of the network type.
@@ -57,6 +58,15 @@ func (nt NetworkType) String() string {
 	for _, v := range networkTypes {
 		if v.Type == nt {
 			return v.String
+		}
+	}
+	return "UNDEFINEDNET"
+}
+
+func (nt NetworkType) Description() string {
+	for _, v := range networkTypes {
+		if v.Type == nt {
+			return v.Description
 		}
 	}
 	return "UNDEFINEDNET"
