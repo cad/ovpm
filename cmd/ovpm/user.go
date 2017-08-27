@@ -38,14 +38,14 @@ var userListCommand = cli.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
+		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "gw"})
 		//table.SetBorder(false)
 		for i, user := range resp.Users {
 			static := ""
 			if user.HostID != 0 {
 				static = "s"
 			}
-			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
+			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGW)}
 			table.Append(data)
 		}
 		table.Render()
@@ -120,7 +120,7 @@ var userCreateCommand = cli.Command{
 var userUpdateCommand = cli.Command{
 	Name:    "update",
 	Usage:   "Update a VPN user.",
-	Aliases: []string{"c"},
+	Aliases: []string{"u"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "username, u",
