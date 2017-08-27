@@ -14,8 +14,8 @@ import (
 )
 
 var netDefineCommand = cli.Command{
-	Name:    "define",
-	Aliases: []string{"def", "d"},
+	Name:    "def",
+	Aliases: []string{"d"},
 	Usage:   "Define a network.",
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -91,8 +91,8 @@ var netDefineCommand = cli.Command{
 
 var netListCommand = cli.Command{
 	Name:    "list",
-	Aliases: []string{"lis", "l"},
-	Usage:   "List network definitions.",
+	Aliases: []string{"l"},
+	Usage:   "List defined networks.",
 	Action: func(c *cli.Context) error {
 		action = "net:list"
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -105,13 +105,21 @@ var netListCommand = cli.Command{
 			os.Exit(1)
 			return err
 		}
+
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"#", "name", "cidr", "type", "assoc", "created at"})
 		//table.SetBorder(false)
 		for i, network := range resp.Networks {
 			// Create associated user list for this network.
 			var usernameList string
-			usernames := network.GetAssociatedUsernames()
+			assocUsers, err := netSvc.GetAssociatedUsers(context.Background(), &pb.NetworkGetAssociatedUsersRequest{Name: network.Name})
+			if err != nil {
+				logrus.Errorf("assoc users can not be fetched: %v", err)
+				os.Exit(1)
+				return err
+			}
+
+			usernames := assocUsers.Usernames
 			count := len(usernames)
 			for i, uname := range usernames {
 				if i+1 == count {
@@ -137,9 +145,38 @@ var netListCommand = cli.Command{
 	},
 }
 
+var netTypesCommand = cli.Command{
+	Name:    "types",
+	Aliases: []string{"t"},
+	Usage:   "Show available network types.",
+	Action: func(c *cli.Context) error {
+		action = "net:types"
+		conn := getConn(c.GlobalString("daemon-port"))
+		defer conn.Close()
+		netSvc := pb.NewNetworkServiceClient(conn)
+
+		resp, err := netSvc.GetAllTypes(context.Background(), &pb.NetworkGetAllTypesRequest{})
+		if err != nil {
+			logrus.Errorf("networks can not be fetched: %v", err)
+			os.Exit(1)
+			return err
+		}
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"#", "net type", "desc"})
+		//table.SetBorder(false)
+		for i, ntype := range resp.Types {
+			data := []string{fmt.Sprintf("%v", i+1), ntype.Type, ntype.Description}
+			table.Append(data)
+		}
+		table.Render()
+
+		return nil
+	},
+}
+
 var netUndefineCommand = cli.Command{
-	Name:    "undefine",
-	Aliases: []string{"undef", "u"},
+	Name:    "undef",
+	Aliases: []string{"u"},
 	Usage:   "Undefine an existing network.",
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -173,8 +210,8 @@ var netUndefineCommand = cli.Command{
 }
 
 var netAssociateCommand = cli.Command{
-	Name:    "associate",
-	Aliases: []string{"assoc", "a"},
+	Name:    "assoc",
+	Aliases: []string{"a"},
 	Usage:   "Associate a user with a network.",
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -214,8 +251,8 @@ var netAssociateCommand = cli.Command{
 }
 
 var netDissociateCommand = cli.Command{
-	Name:    "dissociate",
-	Aliases: []string{"dissoc", "d"},
+	Name:    "dissoc",
+	Aliases: []string{"d"},
 	Usage:   "Dissociate a user from a network.",
 	Flags: []cli.Flag{
 		cli.StringFlag{

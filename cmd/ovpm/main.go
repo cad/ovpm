@@ -59,6 +59,7 @@ func main() {
 			Usage: "Network Operations",
 			Subcommands: []cli.Command{
 				netListCommand,
+				netTypesCommand,
 				netDefineCommand,
 				netUndefineCommand,
 				netAssociateCommand,

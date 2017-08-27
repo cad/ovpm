@@ -28,13 +28,16 @@ It has these top-level messages:
 	NetworkGetAllTypesRequest
 	NetworkAssociateRequest
 	NetworkDissociateRequest
+	NetworkGetAssociatedUsersRequest
 	Network
+	NetworkType
 	NetworkCreateResponse
 	NetworkListResponse
 	NetworkDeleteResponse
 	NetworkGetAllTypesResponse
 	NetworkAssociateResponse
 	NetworkDissociateResponse
+	NetworkGetAssociatedUsersResponse
 */
 package pb
 
