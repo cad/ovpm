@@ -252,7 +252,7 @@ var netAssociateCommand = cli.Command{
 
 var netDissociateCommand = cli.Command{
 	Name:    "dissoc",
-	Aliases: []string{"d"},
+	Aliases: []string{"di"},
 	Usage:   "Dissociate a user from a network.",
 	Flags: []cli.Flag{
 		cli.StringFlag{

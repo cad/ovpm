@@ -66,9 +66,9 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	switch req.Gwpref {
 	case pb.UserUpdateRequest_NOGW:
-		noGW = false
-	case pb.UserUpdateRequest_GW:
 		noGW = true
+	case pb.UserUpdateRequest_GW:
+		noGW = false
 	default:
 		noGW = user.NoGW
 

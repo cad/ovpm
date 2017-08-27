@@ -35,8 +35,9 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:  "user",
-			Usage: "User Operations",
+			Name:    "user",
+			Usage:   "User Operations",
+			Aliases: []string{"u"},
 			Subcommands: []cli.Command{
 				userListCommand,
 				userCreateCommand,
@@ -47,16 +48,18 @@ func main() {
 			},
 		},
 		{
-			Name:  "vpn",
-			Usage: "VPN Operations",
+			Name:    "vpn",
+			Usage:   "VPN Operations",
+			Aliases: []string{"v"},
 			Subcommands: []cli.Command{
 				vpnStatusCommand,
 				vpnInitCommand,
 			},
 		},
 		{
-			Name:  "net",
-			Usage: "Network Operations",
+			Name:    "net",
+			Usage:   "Network Operations",
+			Aliases: []string{"n"},
 			Subcommands: []cli.Command{
 				netListCommand,
 				netTypesCommand,

@@ -511,16 +511,6 @@ func emitCCD() error {
 				for _, assocUsername := range network.GetAssociatedUsernames() {
 					if assocUsername == user.Username {
 						via := network.Via
-						if via == "" {
-							server, err := GetServerInstance()
-							if err != nil {
-								return err
-							}
-							via, err = IncrementIP(server.Net, server.Mask)
-							if err != nil {
-								return err
-							}
-						}
 						ip, mask, err := net.ParseCIDR(network.CIDR)
 						if err != nil {
 							return err
@@ -532,10 +522,11 @@ func emitCCD() error {
 		}
 		var result bytes.Buffer
 		params := struct {
-			IP      string
-			NetMask string
-			Routes  [][3]string // [0] is IP, [1] is Netmask, [2] is Via
-		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask, Routes: associatedRoutes}
+			IP         string
+			NetMask    string
+			Routes     [][3]string // [0] is IP, [1] is Netmask, [2] is Via
+			RedirectGW bool
+		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask, Routes: associatedRoutes, RedirectGW: !user.NoGW}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {

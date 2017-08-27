@@ -14,8 +14,9 @@ import (
 )
 
 var userListCommand = cli.Command{
-	Name:  "list",
-	Usage: "List VPN users.",
+	Name:    "list",
+	Usage:   "List VPN users.",
+	Aliases: []string{"l"},
 	Action: func(c *cli.Context) error {
 		action = "user:list"
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -37,14 +38,14 @@ var userListCommand = cli.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "no gw"})
+		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "gw"})
 		//table.SetBorder(false)
 		for i, user := range resp.Users {
 			static := ""
 			if user.HostID != 0 {
 				static = "s"
 			}
-			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", user.NoGW)}
+			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGW)}
 			table.Append(data)
 		}
 		table.Render()
@@ -54,8 +55,9 @@ var userListCommand = cli.Command{
 }
 
 var userCreateCommand = cli.Command{
-	Name:  "create",
-	Usage: "Create a VPN user.",
+	Name:    "create",
+	Usage:   "Create a VPN user.",
+	Aliases: []string{"c"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "username, u",
@@ -116,8 +118,9 @@ var userCreateCommand = cli.Command{
 }
 
 var userUpdateCommand = cli.Command{
-	Name:  "update",
-	Usage: "Update a VPN user.",
+	Name:    "update",
+	Usage:   "Update a VPN user.",
+	Aliases: []string{"u"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "username, u",
@@ -214,8 +217,9 @@ var userUpdateCommand = cli.Command{
 }
 
 var userDeleteCommand = cli.Command{
-	Name:  "delete",
-	Usage: "Delete a VPN user.",
+	Name:    "delete",
+	Usage:   "Delete a VPN user.",
+	Aliases: []string{"d"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",
@@ -248,8 +252,9 @@ var userDeleteCommand = cli.Command{
 }
 
 var userRenewCommand = cli.Command{
-	Name:  "renew",
-	Usage: "Renew VPN user certificates.",
+	Name:    "renew",
+	Usage:   "Renew VPN user certificates.",
+	Aliases: []string{"r"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",
@@ -283,8 +288,9 @@ var userRenewCommand = cli.Command{
 }
 
 var userGenconfigCommand = cli.Command{
-	Name:  "genconfig",
-	Usage: "Generate client config for the user. (.ovpn file)",
+	Name:    "genconfig",
+	Usage:   "Generate client config for the user. (.ovpn file)",
+	Aliases: []string{"g"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",

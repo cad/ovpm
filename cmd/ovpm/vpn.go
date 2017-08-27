@@ -13,8 +13,9 @@ import (
 )
 
 var vpnStatusCommand = cli.Command{
-	Name:  "status",
-	Usage: "Show VPN status.",
+	Name:    "status",
+	Usage:   "Show VPN status.",
+	Aliases: []string{"s"},
 	Action: func(c *cli.Context) error {
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
@@ -41,8 +42,9 @@ var vpnStatusCommand = cli.Command{
 }
 
 var vpnInitCommand = cli.Command{
-	Name:  "init",
-	Usage: "Initialize VPN server.",
+	Name:    "init",
+	Usage:   "Initialize VPN server.",
+	Aliases: []string{"i"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "hostname, s",
