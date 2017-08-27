@@ -192,6 +192,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 			Type:                network.GetType().String(),
 			CreatedAt:           network.GetCreatedAt(),
 			AssociatedUsernames: network.GetAssociatedUsernames(),
+			Via:                 network.GetVia(),
 		})
 	}
 
@@ -200,7 +201,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 
 func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
 	logrus.Debugf("rpc call: network create: %s", req.Name)
-	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type))
+	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type), req.Via)
 	if err != nil {
 		return nil, err
 	}
@@ -211,6 +212,7 @@ func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateReques
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
+		Via:                 network.GetVia(),
 	}
 
 	return &pb.NetworkCreateResponse{Network: &n}, nil
@@ -234,6 +236,7 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
+		Via:                 network.GetVia(),
 	}
 
 	return &pb.NetworkDeleteResponse{Network: &n}, nil
@@ -241,12 +244,25 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 
 func (s *NetworkService) GetAllTypes(ctx context.Context, req *pb.NetworkGetAllTypesRequest) (*pb.NetworkGetAllTypesResponse, error) {
 	logrus.Debugf("rpc call: network get-types")
-	var networkTypes []string
+	var networkTypes []*pb.NetworkType
 	for _, nt := range ovpm.GetAllNetworkTypes() {
-		networkTypes = append(networkTypes, nt.String())
+		if nt == ovpm.UNDEFINEDNET {
+			continue
+		}
+		networkTypes = append(networkTypes, &pb.NetworkType{Type: nt.String(), Description: nt.Description()})
 	}
 
 	return &pb.NetworkGetAllTypesResponse{Types: networkTypes}, nil
+}
+
+func (s *NetworkService) GetAssociatedUsers(ctx context.Context, req *pb.NetworkGetAssociatedUsersRequest) (*pb.NetworkGetAssociatedUsersResponse, error) {
+	logrus.Debugf("rpc call: network get-associated-users")
+	network, err := ovpm.GetNetwork(req.Name)
+	if err != nil {
+		return nil, err
+	}
+	usernames := network.GetAssociatedUsernames()
+	return &pb.NetworkGetAssociatedUsersResponse{Usernames: usernames}, nil
 }
 
 func (s *NetworkService) Associate(ctx context.Context, req *pb.NetworkAssociateRequest) (*pb.NetworkAssociateResponse, error) {

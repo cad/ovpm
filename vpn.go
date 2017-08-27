@@ -480,6 +480,8 @@ func emitCCD() error {
 	if err != nil {
 		return err
 	}
+
+	// Filesystem related stuff. Skipping when testing.
 	if !Testing {
 		// Clean and then create and write rendered ccd data.
 		err = os.RemoveAll(_DefaultVPNCCDPath)
@@ -500,12 +502,40 @@ func emitCCD() error {
 			}
 		}
 	}
+	// Render ccd templates for the users.
 	for _, user := range users {
+		var associatedRoutes [][3]string
+		for _, network := range GetAllNetworks() {
+			switch network.Type {
+			case ROUTE:
+				for _, assocUsername := range network.GetAssociatedUsernames() {
+					if assocUsername == user.Username {
+						via := network.Via
+						if via == "" {
+							server, err := GetServerInstance()
+							if err != nil {
+								return err
+							}
+							via, err = IncrementIP(server.Net, server.Mask)
+							if err != nil {
+								return err
+							}
+						}
+						ip, mask, err := net.ParseCIDR(network.CIDR)
+						if err != nil {
+							return err
+						}
+						associatedRoutes = append(associatedRoutes, [3]string{ip.To4().String(), net.IP(mask.Mask).To4().String(), via})
+					}
+				}
+			}
+		}
 		var result bytes.Buffer
 		params := struct {
 			IP      string
 			NetMask string
-		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask}
+			Routes  [][3]string // [0] is IP, [1] is Netmask, [2] is Via
+		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask, Routes: associatedRoutes}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
@@ -591,10 +621,9 @@ func emitIptables() error {
 				// get destination network's iface
 				iface := interfaceOfIP(networkIPNet)
 				if iface == nil {
-					return fmt.Errorf("cant find interface for %s", networkIPNet.String())
+					logrus.Warnf("network doesn't exist on server %s[SERVERNET]: cant find interface for %s", network.Name, networkIPNet.String())
+					return nil
 				}
-				logrus.Debugf("emitIptables: net(%s) iface name '%s'", network.Name, iface.Name)
-				logrus.Debugf("emitIptables: user '%s' ip addr '%s'", user.GetUsername(), userIP.String())
 				// enable nat for the user to the destination network n
 				if found {
 					err = ipt.AppendUnique("nat", "POSTROUTING", "-s", userIP.String(), "-o", iface.Name, "-j", "MASQUERADE")
