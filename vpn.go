@@ -511,16 +511,6 @@ func emitCCD() error {
 				for _, assocUsername := range network.GetAssociatedUsernames() {
 					if assocUsername == user.Username {
 						via := network.Via
-						if via == "" {
-							server, err := GetServerInstance()
-							if err != nil {
-								return err
-							}
-							via, err = IncrementIP(server.Net, server.Mask)
-							if err != nil {
-								return err
-							}
-						}
 						ip, mask, err := net.ParseCIDR(network.CIDR)
 						if err != nil {
 							return err
