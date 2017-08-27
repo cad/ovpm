@@ -38,7 +38,7 @@ var userListCommand = cli.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "gw"})
+		table.SetHeader([]string{"#", "username", "ip", "created at", "valid crt", "push gw"})
 		//table.SetBorder(false)
 		for i, user := range resp.Users {
 			static := ""
