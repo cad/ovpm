@@ -167,7 +167,7 @@ func templateServerConfTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9586, mode: os.FileMode(420), modTime: time.Unix(1503828220, 0)}
+	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9586, mode: os.FileMode(420), modTime: time.Unix(1503828509, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
