@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+import "google/api/annotations.proto";
+
 message UserListRequest {
 
 }
@@ -39,12 +41,46 @@ message UserGenConfigRequest {
 }
 
 service UserService {
-  rpc List (UserListRequest) returns (UserResponse) {}
-  rpc Create (UserCreateRequest) returns (UserResponse) {}
-  rpc Update (UserUpdateRequest) returns (UserResponse) {}
-  rpc Delete (UserDeleteRequest) returns (UserResponse) {}
-  rpc Renew (UserRenewRequest) returns (UserResponse) {}
-  rpc GenConfig (UserGenConfigRequest) returns (UserGenConfigResponse) {}
+  rpc List (UserListRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/list"
+      body: "*"
+    };
+
+  }
+  rpc Create (UserCreateRequest) returns (UserResponse) {
+        option (google.api.http) = {
+          post: "/v1/user/create"
+          body: "*"
+        };
+  }
+  rpc Update (UserUpdateRequest) returns (UserResponse) {
+        option (google.api.http) = {
+      post: "/v1/user/update"
+      body: "*"
+    };
+
+  }
+  rpc Delete (UserDeleteRequest) returns (UserResponse) {
+        option (google.api.http) = {
+      post: "/v1/user/delete"
+      body: "*"
+    };
+
+  }
+  rpc Renew (UserRenewRequest) returns (UserResponse) {
+        option (google.api.http) = {
+      post: "/v1/user/renew"
+      body: "*"
+    };
+
+  }
+  rpc GenConfig (UserGenConfigRequest) returns (UserGenConfigResponse) {
+        option (google.api.http) = {
+      post: "/v1/user/genconfig"
+      body: "*"
+    };
+  }
 }
 
 message UserResponse {

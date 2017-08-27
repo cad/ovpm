@@ -1,0 +1,122 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "vpn.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/vpn/init": {
+      "post": {
+        "operationId": "Init",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbVPNInitResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbVPNInitRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VPNService"
+        ]
+      }
+    },
+    "/v1/vpn/status": {
+      "post": {
+        "operationId": "Status",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbVPNStatusResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbVPNStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VPNService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "pbVPNInitRequest": {
+      "type": "object",
+      "properties": {
+        "Hostname": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        }
+      }
+    },
+    "pbVPNInitResponse": {
+      "type": "object"
+    },
+    "pbVPNStatusRequest": {
+      "type": "object"
+    },
+    "pbVPNStatusResponse": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "SerialNumber": {
+          "type": "string"
+        },
+        "Hostname": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "Cert": {
+          "type": "string"
+        },
+        "CACert": {
+          "type": "string"
+        },
+        "Net": {
+          "type": "string"
+        },
+        "Mask": {
+          "type": "string"
+        },
+        "CreatedAt": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

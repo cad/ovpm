@@ -3,11 +3,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -16,7 +19,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api"
-	"github.com/cad/ovpm/pb"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/urfave/cli"
 )
 
@@ -64,9 +67,12 @@ func main() {
 }
 
 type server struct {
-	port       string
+	grpcPort   string
 	lis        net.Listener
 	grpcServer *grpc.Server
+	restServer *runtime.ServeMux
+	restCancel context.CancelFunc
+	restPort   string
 	signal     chan os.Signal
 	done       chan bool
 }
@@ -88,26 +94,41 @@ func newServer(port string) *server {
 		if err != nil {
 			logrus.Fatalf("could not listen to port %s: %v", port, err)
 		}
-		s := grpc.NewServer()
-		pb.RegisterUserServiceServer(s, &api.UserService{})
-		pb.RegisterVPNServiceServer(s, &api.VPNService{})
-		pb.RegisterNetworkServiceServer(s, &api.NetworkService{})
-		return &server{lis: lis, grpcServer: s, signal: sigs, done: done, port: port}
+
+		rpcServer := api.NewRPCServer()
+		restServer, restCancel, err := api.NewRESTServer()
+		if err != nil {
+			logrus.Fatalf("could not get new rest server :%v", err)
+		}
+
+		return &server{
+			lis:        lis,
+			grpcServer: rpcServer,
+			restServer: restServer,
+			restCancel: context.CancelFunc(restCancel),
+			restPort:   increasePort(port),
+			signal:     sigs,
+			done:       done,
+			grpcPort:   port,
+		}
 	}
 	return &server{}
 
 }
 
 func (s *server) start() {
-	logrus.Infof("OVPM is running :%s ...", s.port)
+	logrus.Infof("OVPM is running gRPC:%s, REST:%s ...", s.grpcPort, s.restPort)
 	go s.grpcServer.Serve(s.lis)
+	go http.ListenAndServe(":"+s.restPort, s.restServer)
 	ovpm.StartVPNProc()
 }
 
 func (s *server) stop() {
 	logrus.Info("OVPM is shutting down ...")
 	s.grpcServer.Stop()
+	s.restCancel()
 	ovpm.StopVPNProc()
+
 }
 
 func (s *server) waitForInterrupt() {
@@ -128,4 +149,14 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func increasePort(p string) string {
+	i, err := strconv.Atoi(p)
+	if err != nil {
+		logrus.Panicf(fmt.Sprintf("can't convert %s to int: %v", p, err))
+
+	}
+	i++
+	return fmt.Sprintf("%d", i)
 }

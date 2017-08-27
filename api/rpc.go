@@ -4,6 +4,8 @@ import (
 	"os"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
@@ -294,4 +296,13 @@ func (s *NetworkService) Dissociate(ctx context.Context, req *pb.NetworkDissocia
 	}
 
 	return &pb.NetworkDissociateResponse{}, nil
+}
+
+// NewRPCServer returns a new gRPC server.
+func NewRPCServer() *grpc.Server {
+	s := grpc.NewServer()
+	pb.RegisterUserServiceServer(s, &UserService{})
+	pb.RegisterVPNServiceServer(s, &VPNService{})
+	pb.RegisterNetworkServiceServer(s, &NetworkService{})
+	return s
 }

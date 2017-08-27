@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+import "google/api/annotations.proto";
+
 message NetworkCreateRequest {
   string Name = 1;
   string CIDR = 2;
@@ -26,13 +28,55 @@ message NetworkGetAssociatedUsersRequest {
   string Name = 1;
 }
 service NetworkService {
-  rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {}
-  rpc List (NetworkListRequest) returns (NetworkListResponse) {}
-  rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {}
-  rpc GetAllTypes(NetworkGetAllTypesRequest) returns (NetworkGetAllTypesResponse) {}
-  rpc GetAssociatedUsers(NetworkGetAssociatedUsersRequest) returns (NetworkGetAssociatedUsersResponse) {}
-  rpc Associate (NetworkAssociateRequest) returns (NetworkAssociateResponse) {}
-  rpc Dissociate (NetworkDissociateRequest) returns (NetworkDissociateResponse) {}
+  rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/create"
+      body: "*"
+    };
+
+  }
+  rpc List (NetworkListRequest) returns (NetworkListResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/list"
+      body: "*"
+    };
+
+  }
+  rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/delete"
+      body: "*"
+    };
+
+  }
+  rpc GetAllTypes(NetworkGetAllTypesRequest) returns (NetworkGetAllTypesResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/getalltypes"
+      body: "*"
+    };
+
+  }
+  rpc GetAssociatedUsers(NetworkGetAssociatedUsersRequest) returns (NetworkGetAssociatedUsersResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/getassociatedusers"
+      body: "*"
+    };
+
+  }
+  rpc Associate (NetworkAssociateRequest) returns (NetworkAssociateResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/associate"
+      body: "*"
+    };
+
+  }
+  rpc Dissociate (NetworkDissociateRequest) returns (NetworkDissociateResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/dissociate"
+      body: "*"
+    };
+
+  }
 }
 message Network {
   string Name = 1;

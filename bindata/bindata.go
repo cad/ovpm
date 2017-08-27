@@ -87,7 +87,7 @@ func templateCcdFileTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 229, mode: os.FileMode(420), modTime: time.Unix(1503827317, 0)}
+	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 229, mode: os.FileMode(420), modTime: time.Unix(1503828686, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -167,7 +167,7 @@ func templateServerConfTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9586, mode: os.FileMode(420), modTime: time.Unix(1503828509, 0)}
+	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9586, mode: os.FileMode(420), modTime: time.Unix(1503828686, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+import "google/api/annotations.proto";
+
 message VPNStatusRequest {}
 message VPNInitRequest {
   string Hostname = 1;
@@ -9,8 +11,16 @@ message VPNInitRequest {
 }
 
 service VPNService {
-  rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {}
-  rpc Init (VPNInitRequest) returns (VPNInitResponse) {}
+  rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {
+    option (google.api.http) = {
+      post: "/v1/vpn/status"
+      body: "*"
+    };}
+  rpc Init (VPNInitRequest) returns (VPNInitResponse) {
+    option (google.api.http) = {
+      post: "/v1/vpn/init"
+      body: "*"
+    };}
 }
 
 message VPNStatusResponse {

@@ -1,0 +1,297 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/user/create": {
+      "post": {
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/user/delete": {
+      "post": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserDeleteRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/user/genconfig": {
+      "post": {
+        "operationId": "GenConfig",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserGenConfigResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserGenConfigRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/user/list": {
+      "post": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserListRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/user/renew": {
+      "post": {
+        "operationId": "Renew",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserRenewRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/v1/user/update": {
+      "post": {
+        "operationId": "Update",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserResponseUser": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        },
+        "ServerSerialNumber": {
+          "type": "string"
+        },
+        "Cert": {
+          "type": "string"
+        },
+        "CreatedAt": {
+          "type": "string"
+        },
+        "IPNet": {
+          "type": "string"
+        },
+        "NoGW": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "HostID": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "UserUpdateRequestGWPref": {
+      "type": "string",
+      "enum": [
+        "NOPREF",
+        "NOGW",
+        "GW"
+      ],
+      "default": "NOPREF"
+    },
+    "pbUserCreateRequest": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "NoGW": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "HostID": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "pbUserDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserGenConfigRequest": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserGenConfigResponse": {
+      "type": "object",
+      "properties": {
+        "ClientConfig": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserListRequest": {
+      "type": "object"
+    },
+    "pbUserRenewRequest": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserResponseUser"
+          }
+        }
+      }
+    },
+    "pbUserUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "gwpref": {
+          "$ref": "#/definitions/UserUpdateRequestGWPref"
+        },
+        "HostID": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

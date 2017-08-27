@@ -1,0 +1,356 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "network.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/network/associate": {
+      "post": {
+        "operationId": "Associate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkAssociateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkAssociateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/create": {
+      "post": {
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkCreateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/delete": {
+      "post": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkDeleteResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkDeleteRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/dissociate": {
+      "post": {
+        "operationId": "Dissociate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkDissociateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkDissociateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/getalltypes": {
+      "post": {
+        "operationId": "GetAllTypes",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkGetAllTypesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkGetAllTypesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/getassociatedusers": {
+      "post": {
+        "operationId": "GetAssociatedUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkGetAssociatedUsersResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkGetAssociatedUsersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    },
+    "/v1/network/list": {
+      "post": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbNetworkListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbNetworkListRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NetworkService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "pbNetwork": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "CIDR": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string"
+        },
+        "CreatedAt": {
+          "type": "string"
+        },
+        "AssociatedUsernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Via": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkAssociateRequest": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkAssociateResponse": {
+      "type": "object"
+    },
+    "pbNetworkCreateRequest": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "CIDR": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string"
+        },
+        "Via": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkCreateResponse": {
+      "type": "object",
+      "properties": {
+        "Network": {
+          "$ref": "#/definitions/pbNetwork"
+        }
+      }
+    },
+    "pbNetworkDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "Network": {
+          "$ref": "#/definitions/pbNetwork"
+        }
+      }
+    },
+    "pbNetworkDissociateRequest": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkDissociateResponse": {
+      "type": "object"
+    },
+    "pbNetworkGetAllTypesRequest": {
+      "type": "object"
+    },
+    "pbNetworkGetAllTypesResponse": {
+      "type": "object",
+      "properties": {
+        "Types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbNetworkType"
+          }
+        }
+      }
+    },
+    "pbNetworkGetAssociatedUsersRequest": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      }
+    },
+    "pbNetworkGetAssociatedUsersResponse": {
+      "type": "object",
+      "properties": {
+        "Usernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pbNetworkListRequest": {
+      "type": "object"
+    },
+    "pbNetworkListResponse": {
+      "type": "object",
+      "properties": {
+        "Networks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbNetwork"
+          }
+        }
+      }
+    },
+    "pbNetworkType": {
+      "type": "object",
+      "properties": {
+        "Type": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
