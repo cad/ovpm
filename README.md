@@ -16,7 +16,7 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 
 ```bash
 # Add YUM Repo
-$ curl -s https://packagecloud.io/install/repositories/cad/ovpm/script.rpm.sh | sudo bash
+$ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 
 # Install OVPM
 $ sudo yum install ovpm

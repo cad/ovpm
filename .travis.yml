@@ -34,7 +34,7 @@ deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
-  local_dir: release/rpm/
+  local_dir: release/
   on:
     tag: true
     all_branches: true
