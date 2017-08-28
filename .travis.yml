@@ -31,13 +31,10 @@ script:
   - make docker-build
 
 deploy:
-  provider: packagecloud
-  username: ${PACKAGECLOUD_USER}
-  repository: ${PACKAGECLOUD_REPO}
-  token: ${PACKAGECLOUD_TOKEN}
-  dist: ${OS}/${DIST}
-  package_glob: rpm/*.{deb,rpm}
+  provider: pages
   skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: release/rpm/
   on:
     tag: true
     all_branches: true
