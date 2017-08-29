@@ -9,7 +9,7 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:
@@ -56,7 +56,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:
@@ -94,7 +94,7 @@ func TestVPNGetNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:
@@ -129,7 +129,7 @@ func TestVPNGetAllNetworks(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:
@@ -175,7 +175,7 @@ func TestNetAssociate(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:
@@ -213,7 +213,10 @@ func TestNetDissociate(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	err := Init("localhost", "", UDPProto)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Prepare:
 	// Test:
@@ -221,9 +224,15 @@ func TestNetDissociate(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, _ := CreateNewUser(userName, "123", false, 0)
+	user, err := CreateNewUser(userName, "123", false, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
+	n, err := CreateNewNetwork(netName, cidrStr, netType, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	n.Associate(user.Username)
 
 	n = nil
@@ -234,7 +243,7 @@ func TestNetDissociate(t *testing.T) {
 		t.Fatalf("network.Users count is expexted to be %d, but it's %d", 1, count)
 	}
 
-	err := n.Dissociate(user.Username)
+	err = n.Dissociate(user.Username)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -257,7 +266,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	// Test:

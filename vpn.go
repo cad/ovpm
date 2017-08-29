@@ -27,6 +27,11 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const (
+	TCPProto string = "tcp"
+	UDPProto string = "udp"
+)
+
 // DBServer is database model for storing VPN server related stuff.
 type DBServer struct {
 	gorm.Model
@@ -35,6 +40,7 @@ type DBServer struct {
 
 	Hostname string // Server's ip address or FQDN
 	Port     string // Server's listening port
+	Proto    string // Server's proto udp or tcp
 	Cert     string // Server RSA certificate.
 	Key      string // Server RSA private key.
 	CACert   string // Root CA RSA certificate.
@@ -60,12 +66,26 @@ type _VPNServerConfig struct {
 	Net          string
 	Mask         string
 	Port         string
+	Proto        string
 }
 
 // Init regenerates keys and certs for a Root CA, and saves them in the database.
-func Init(hostname string, port string) error {
+//
+// proto can be either "udp" or "tcp" and if it's "" it defaults to "udp".
+func Init(hostname string, port string, proto string) error {
 	if port == "" {
 		port = DefaultVPNPort
+	}
+
+	switch proto {
+	case "":
+		proto = UDPProto
+	case UDPProto:
+		proto = UDPProto
+	case TCPProto:
+		proto = TCPProto
+	default:
+		return fmt.Errorf("validation error: proto:`%s` should be either 'tcp' or 'udp'", proto)
 	}
 
 	if !govalidator.IsNumeric(port) {
@@ -99,6 +119,7 @@ func Init(hostname string, port string) error {
 
 		SerialNumber: serialNumber,
 		Hostname:     hostname,
+		Proto:        proto,
 		Port:         port,
 		Cert:         srv.Cert,
 		Key:          srv.Key,
@@ -376,6 +397,7 @@ func emitServerConf() error {
 		Net:          _DefaultServerNetwork,
 		Mask:         _DefaultServerNetMask,
 		Port:         port,
+		Proto:        serverInstance.Proto,
 	}
 	data, err := bindata.Asset("template/server.conf.tmpl")
 	if err != nil {
