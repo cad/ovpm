@@ -22,6 +22,18 @@ $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 $ sudo yum install ovpm
 ```
 
+**from DEB (Ubuntu/DEBIAN):**
+
+This is tested only on Ubuntu >=16.04.3 LTS
+
+```bash
+# Add APT Repo
+$ sudo sh -c 'echo "deb [trusted=yes] https://cad.github.io/ovpm/deb/ ovpm main" >> /etc/apt/sources.list'
+
+# Install OVPM
+$ sudo yum install ovpm
+```
+
 **from Source (go get):**
 
 Only dependency for ovpm is **OpenVPN>=2.3**.
