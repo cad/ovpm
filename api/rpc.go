@@ -163,6 +163,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		SerialNumber: server.SerialNumber,
 		Hostname:     server.Hostname,
 		Port:         server.Port,
+		Proto:        server.Proto,
 		Cert:         server.Cert,
 		CACert:       server.CACert,
 		Net:          server.Net,
@@ -174,7 +175,16 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 
 func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
 	logrus.Debugf("rpc call: vpn init")
-	if err := ovpm.Init(req.Hostname, req.Port); err != nil {
+	var proto string
+	switch req.Protopref {
+	case pb.VPNProto_TCP:
+		proto = ovpm.TCPProto
+	case pb.VPNProto_UDP:
+		proto = ovpm.UDPProto
+	case pb.VPNProto_NOPREF:
+		proto = ovpm.UDPProto
+	}
+	if err := ovpm.Init(req.Hostname, req.Port, proto); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil

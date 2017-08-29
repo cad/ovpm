@@ -77,11 +77,23 @@
         },
         "Port": {
           "type": "string"
+        },
+        "Protopref": {
+          "$ref": "#/definitions/pbVPNProto"
         }
       }
     },
     "pbVPNInitResponse": {
       "type": "object"
+    },
+    "pbVPNProto": {
+      "type": "string",
+      "enum": [
+        "NOPREF",
+        "UDP",
+        "TCP"
+      ],
+      "default": "NOPREF"
     },
     "pbVPNStatusRequest": {
       "type": "object"
@@ -114,6 +126,9 @@
           "type": "string"
         },
         "CreatedAt": {
+          "type": "string"
+        },
+        "Proto": {
           "type": "string"
         }
       }

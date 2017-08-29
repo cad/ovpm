@@ -32,6 +32,7 @@ var vpnStatusCommand = cli.Command{
 		table.Append([]string{"Name", res.Name})
 		table.Append([]string{"Hostname", res.Hostname})
 		table.Append([]string{"Port", res.Port})
+		table.Append([]string{"Proto", res.Proto})
 		table.Append([]string{"Network", res.Net})
 		table.Append([]string{"Netmask", res.Mask})
 		table.Append([]string{"Created At", res.CreatedAt})
@@ -55,6 +56,10 @@ var vpnInitCommand = cli.Command{
 			Usage: "port number of the vpn server",
 			Value: ovpm.DefaultVPNPort,
 		},
+		cli.BoolFlag{
+			Name:  "tcp, t",
+			Usage: "use TCP for vpn protocol, instead of UDP",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "vpn:init"
@@ -69,6 +74,17 @@ var vpnInitCommand = cli.Command{
 		port := c.String("port")
 		if port == "" {
 			port = ovpm.DefaultVPNPort
+		}
+
+		tcp := c.Bool("tcp")
+
+		var proto pb.VPNProto
+
+		switch tcp {
+		case true:
+			proto = pb.VPNProto_TCP
+		default:
+			proto = pb.VPNProto_UDP
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -90,7 +106,7 @@ var vpnInitCommand = cli.Command{
 			okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 			nokayResponses := []string{"n", "N", "no", "No", "NO"}
 			if stringInSlice(response, okayResponses) {
-				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port}); err != nil {
+				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto}); err != nil {
 					logrus.Errorf("server can not be initialized: %v", err)
 					os.Exit(1)
 					return err

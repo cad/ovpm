@@ -35,13 +35,13 @@ func TestVPNInit(t *testing.T) {
 	}
 
 	// Wrongfully initialize server.
-	err := Init("localhost", "asdf")
+	err := Init("localhost", "asdf", UDPProto)
 	if err == nil {
 		t.Fatalf("error is expected to be not nil but it's nil instead")
 	}
 
 	// Initialize the server.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Check database if the database has no server.
 	var server2 DBServer
@@ -61,7 +61,7 @@ func TestVPNDeinit(t *testing.T) {
 
 	// Prepare:
 	// Initialize the server.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 	u, err := CreateNewUser("user", "p", false, 0)
 	if err != nil {
 		t.Fatal(err)
@@ -122,7 +122,7 @@ func TestVPNIsInitialized(t *testing.T) {
 	}
 
 	// Initialize the server.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Isn't initialized?
 	if !IsInitialized() {
@@ -152,7 +152,7 @@ func TestVPNGetServerInstance(t *testing.T) {
 	}
 
 	// Initialize server.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	server, err = GetServerInstance()
 
@@ -172,7 +172,7 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	user, _ := CreateNewUser("user", "password", false, 0)
@@ -194,7 +194,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	noGW := false
@@ -262,7 +262,7 @@ func TestVPNGetSystemCA(t *testing.T) {
 	}
 
 	// Initialize system.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	ca, err = GetSystemCA()
 	if err != nil {
@@ -302,7 +302,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 	}
 
 	// Initialize OVPM server.
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Call start again..
 	StartVPNProc()
@@ -318,7 +318,7 @@ func TestVPNStopVPNProc(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 	vpnProc.Start()
@@ -342,7 +342,7 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	// Init:
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 
@@ -371,7 +371,7 @@ func TestVPNEmit(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "")
+	Init("localhost", "", UDPProto)
 
 	// Prepare:
 

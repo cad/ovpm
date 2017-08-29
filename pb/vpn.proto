@@ -4,10 +4,17 @@ package pb;
 
 import "google/api/annotations.proto";
 
+enum VPNProto {
+  NOPREF = 0;
+  UDP = 1;
+  TCP = 2;
+}
+
 message VPNStatusRequest {}
 message VPNInitRequest {
   string Hostname = 1;
   string Port = 2;
+  VPNProto Protopref = 3;
 }
 
 service VPNService {
@@ -33,5 +40,6 @@ message VPNStatusResponse {
   string Net = 7;
   string Mask = 8;
   string CreatedAt = 9;
+  string Proto = 10;
 }
 message VPNInitResponse {}

@@ -3,7 +3,7 @@ port {{ .Port }}
 
 # TCP or UDP server?
 ;proto tcp
-proto udp
+proto {{ .Proto }}
 
 # "dev tun" will create a routed IP tunnel,
 # "dev tap" will create an ethernet tunnel.
