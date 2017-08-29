@@ -210,6 +210,15 @@
       ],
       "default": "NOPREF"
     },
+    "UserUpdateRequestStaticPref": {
+      "type": "string",
+      "enum": [
+        "NOPREFSTATIC",
+        "NOSTATIC",
+        "STATIC"
+      ],
+      "default": "NOPREFSTATIC"
+    },
     "pbUserCreateRequest": {
       "type": "object",
       "properties": {
@@ -290,6 +299,9 @@
         "HostID": {
           "type": "integer",
           "format": "int64"
+        },
+        "staticpref": {
+          "$ref": "#/definitions/UserUpdateRequestStaticPref"
         }
       }
     }

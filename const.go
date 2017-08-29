@@ -7,6 +7,9 @@ const (
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
 
+	// DefaultVPNProto is the default OpenVPN protocol to use.
+	DefaultVPNProto = UDPProto
+
 	etcBasePath = "/etc/ovpm/"
 	varBasePath = "/var/db/ovpm/"
 

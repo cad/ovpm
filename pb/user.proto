@@ -25,6 +25,12 @@ message UserUpdateRequest {
   }
   GWPref gwpref = 3;
   uint32 HostID = 4;
+  enum StaticPref {
+    NOPREFSTATIC = 0;
+    NOSTATIC = 1;
+    STATIC = 2;
+  }
+  StaticPref staticpref = 5;
 }
 
 
