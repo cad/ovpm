@@ -76,7 +76,10 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	}
 
-	user.Update(req.Password, noGW, req.HostID)
+	err = user.Update(req.Password, noGW, req.HostID)
+	if err != nil {
+		return nil, err
+	}
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),

@@ -170,7 +170,6 @@ func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
 
 	u.NoGW = nogw
 	u.HostID = hostid
-	db.Save(u)
 
 	if hostid != 0 {
 		server, err := GetServerInstance()
@@ -192,6 +191,7 @@ func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
 			return fmt.Errorf("ip %s is already allocated", ip)
 		}
 	}
+	db.Save(u)
 
 	err := Emit()
 	if err != nil {
@@ -304,27 +304,29 @@ func (u *DBUser) getIP() net.IP {
 	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
 	network := net.ParseIP(_DefaultServerNetwork).To4().Mask(mask)
 
-	// Host is static?
+	// If the user has static ip address, return it immediately.
 	if u.HostID != 0 {
-		// Host is really static?
-		if hostIDsContains(staticHostIDs, u.HostID) {
-			return HostID2IP(u.HostID)
-		}
-		return nil
+		return HostID2IP(u.HostID)
 	}
 
-	// Host is dynamic.
-	for i, user := range users {
-		hostID := IP2HostID(network) + uint32(i+2)
-		if hostIDsContains(staticHostIDs, hostID) {
-			for hostIDsContains(staticHostIDs, hostID) {
-				i++
-				hostID = IP2HostID(network) + uint32(i+1)
-			}
+	// Calculate dynamic ip addresses from a deterministic address pool.
+	freeHostID := 0
+	for _, user := range users {
+		// Skip, if user is supposed to have static ip.
+		if user.HostID != 0 {
+			continue
+		}
+
+		// Try the next available host id.
+		hostID := IP2HostID(network) + uint32(freeHostID)
+		for hostIDsContains(staticHostIDs, hostID+2) {
+			freeHostID++ // Increase the host id and try again until it is available.
+			hostID = IP2HostID(network) + uint32(freeHostID)
 		}
 		if user.ID == u.ID {
-			return HostID2IP(hostID)
+			return HostID2IP(hostID + 2)
 		}
+		freeHostID++
 	}
 	return nil
 }

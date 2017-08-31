@@ -384,6 +384,11 @@ func emitServerConf() error {
 		port = serverInstance.Port
 	}
 
+	proto := DefaultVPNProto
+	if serverInstance.Proto != "" {
+		proto = serverInstance.Proto
+	}
+
 	var result bytes.Buffer
 
 	server := _VPNServerConfig{
@@ -397,7 +402,7 @@ func emitServerConf() error {
 		Net:          _DefaultServerNetwork,
 		Mask:         _DefaultServerNetMask,
 		Port:         port,
-		Proto:        serverInstance.Proto,
+		Proto:        proto,
 	}
 	data, err := bindata.Asset("template/server.conf.tmpl")
 	if err != nil {

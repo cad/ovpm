@@ -78,13 +78,9 @@ var vpnInitCommand = cli.Command{
 
 		tcp := c.Bool("tcp")
 
-		var proto pb.VPNProto
-
-		switch tcp {
-		case true:
+		proto := pb.VPNProto_UDP
+		if tcp {
 			proto = pb.VPNProto_TCP
-		default:
-			proto = pb.VPNProto_UDP
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
