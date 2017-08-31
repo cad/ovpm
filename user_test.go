@@ -75,6 +75,14 @@ func TestCreateNewUser(t *testing.T) {
 	if user.NoGW != noGW {
 		t.Fatalf("user.NoGW is expected to be %t but it's %t instead", noGW, user.NoGW)
 	}
+
+	// Try to create a user with an invalid static ip.
+	user = nil
+	_, err = ovpm.CreateNewUser("staticuser", password, noGW, ovpm.IP2HostID(net.ParseIP("8.8.8.8").To4()))
+	if err == nil {
+		t.Fatalf("user creation expected to err but it didn't")
+	}
+
 }
 
 func TestUserUpdate(t *testing.T) {
@@ -97,16 +105,18 @@ func TestUserUpdate(t *testing.T) {
 	var updatetests = []struct {
 		password string
 		noGW     bool
+		hostid   uint32
 		ok       bool
 	}{
-		{"testpw", false, true},
-		{"123", false, true},
-		{"123", false, true},
-		{"", true, true},
+		{"testpw", false, 0, true},
+		{"123", false, 0, true},
+		{"123", false, 0, true},
+		{"", true, 0, true},
+		{"", true, ovpm.IP2HostID(net.ParseIP("10.10.10.10").To4()), false}, // Invalid static address.
 	}
 
 	for _, tt := range updatetests {
-		err := user.Update(tt.password, tt.noGW, 0)
+		err := user.Update(tt.password, tt.noGW, tt.hostid)
 		if (err == nil) != tt.ok {
 			t.Errorf("user is expected to be able to update but it gave us this error instead: %v", err)
 		}
@@ -299,9 +309,8 @@ func TestUserIPAllocator(t *testing.T) {
 		{"user2", false, 0, "10.9.0.3/24", true},
 		{"user3", true, 0, "10.9.0.4/24", true},
 		{"user4", true, ovpm.IP2HostID(net.ParseIP("10.9.0.5").To4()), "10.9.0.5/24", true},
-		{"user5", true, ovpm.IP2HostID(net.ParseIP("192.168.1.1").To4()), "10.9.0.6/24", false},
 		{"user6", true, ovpm.IP2HostID(net.ParseIP("10.9.0.7").To4()), "10.9.0.7/24", true},
-		{"user7", true, 0, "10.9.0.8/24", true},
+		{"user7", true, 0, "10.9.0.6/24", true},
 	}
 	for _, tt := range iptests {
 		user, err := ovpm.CreateNewUser(tt.username, "pass", tt.gw, tt.hostid)
@@ -310,7 +319,7 @@ func TestUserIPAllocator(t *testing.T) {
 		}
 		if user != nil {
 			if user.GetIPNet() != tt.expectedIP {
-				t.Fatalf("%s is expected to be %s", user.GetIPNet(), tt.expectedIP)
+				t.Fatalf("user %s ip %s is expected to be %s", user.GetUsername(), user.GetIPNet(), tt.expectedIP)
 			}
 		}
 	}
