@@ -1,10 +1,29 @@
 # Change Log
 
-## [v0.1.10](https://github.com/cad/ovpm/tree/v0.1.10) (2017-08-27)
+## [v0.1.11](https://github.com/cad/ovpm/tree/v0.1.11) (2017-08-31)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.10...v0.1.11)
+
+**Implemented enhancements:**
+
+- be able to change initial ip block [\#29](https://github.com/cad/ovpm/issues/29)
+
+**Fixed bugs:**
+
+- can add duplicate static ip [\#37](https://github.com/cad/ovpm/issues/37)
+- net def --via flag doesn't work as documented [\#36](https://github.com/cad/ovpm/issues/36)
+- Error when group 'nobody' doesn't exist [\#32](https://github.com/cad/ovpm/issues/32)
+- --static option doesn't work when user update [\#28](https://github.com/cad/ovpm/issues/28)
+
+**Merged pull requests:**
+
+- openvpn user created by openvpn package, so use openvpn user instead. [\#35](https://github.com/cad/ovpm/pull/35) ([ilkerdagli](https://github.com/ilkerdagli))
+
+## [v0.1.10](https://github.com/cad/ovpm/tree/v0.1.10) (2017-08-29)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.9...v0.1.10)
 
 **Implemented enhancements:**
 
+- command line flags for tcp or udp at initialize [\#30](https://github.com/cad/ovpm/issues/30)
 - show network types in cli [\#27](https://github.com/cad/ovpm/issues/27)
 
 ## [v0.1.9](https://github.com/cad/ovpm/tree/v0.1.9) (2017-08-27)
@@ -76,4 +95,3 @@
 - implement remote control proto [\#8](https://github.com/cad/ovpm/issues/8)
 - write docs [\#4](https://github.com/cad/ovpm/issues/4)
 - write unit tests [\#3](https://github.com/cad/ovpm/issues/3)
-
