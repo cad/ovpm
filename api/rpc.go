@@ -187,7 +187,8 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 	case pb.VPNProto_NOPREF:
 		proto = ovpm.UDPProto
 	}
-	if err := ovpm.Init(req.Hostname, req.Port, proto); err != nil {
+
+	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil

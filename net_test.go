@@ -9,7 +9,7 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
@@ -56,7 +56,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
@@ -94,7 +94,7 @@ func TestVPNGetNetwork(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
@@ -129,7 +129,7 @@ func TestVPNGetAllNetworks(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
@@ -175,7 +175,7 @@ func TestNetAssociate(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
@@ -213,7 +213,7 @@ func TestNetDissociate(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	err := Init("localhost", "", UDPProto)
+	err := Init("localhost", "", UDPProto, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -266,7 +266,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	setupTestCase()
 	SetupDB("sqlite3", ":memory:")
 	defer CeaseDB()
-	Init("localhost", "", UDPProto)
+	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
 	// Test:
