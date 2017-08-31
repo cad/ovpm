@@ -133,8 +133,8 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
 	}
 
-	if via != "" && !govalidator.IsCIDR(via) {
-		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", via)
+	if via != "" && !govalidator.IsIPv4(via) {
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the IPv4 form", via)
 	}
 
 	if nettype == UNDEFINEDNET {
@@ -146,13 +146,13 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
 	}
 
-	// Overwrite via with the parsed CIDR string.
+	// Overwrite via with the parsed IPv4 string.
 	if nettype == ROUTE && via != "" {
-		_, viaNet, err := net.ParseCIDR(via)
+		viaIP := net.ParseIP(via).To4()
 		if err != nil {
-			return nil, fmt.Errorf("can not parse CIDR %s: %v", via, err)
+			return nil, fmt.Errorf("can not parse IPv4 %s: %v", via, err)
 		}
-		via = viaNet.String()
+		via = viaIP.String()
 
 	} else {
 		via = ""
