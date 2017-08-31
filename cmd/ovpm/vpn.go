@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
 	"github.com/olekukonko/tablewriter"
@@ -60,12 +61,16 @@ var vpnInitCommand = cli.Command{
 			Name:  "tcp, t",
 			Usage: "use TCP for vpn protocol, instead of UDP",
 		},
+		cli.StringFlag{
+			Name:  "net, n",
+			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "vpn:init"
 		hostname := c.String("hostname")
 		if hostname == "" {
-			logrus.Errorf("'hostname' is needed")
+			logrus.Errorf("'hostname' is required")
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 
@@ -78,13 +83,17 @@ var vpnInitCommand = cli.Command{
 
 		tcp := c.Bool("tcp")
 
-		var proto pb.VPNProto
-
-		switch tcp {
-		case true:
+		proto := pb.VPNProto_UDP
+		if tcp {
 			proto = pb.VPNProto_TCP
-		default:
-			proto = pb.VPNProto_UDP
+		}
+
+		ipblock := c.String("net")
+		if ipblock != "" && !govalidator.IsCIDR(ipblock) {
+			fmt.Println("--net takes an ip network in the CIDR form. e.g. 10.9.0.0/24")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -106,7 +115,7 @@ var vpnInitCommand = cli.Command{
 			okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 			nokayResponses := []string{"n", "N", "no", "No", "NO"}
 			if stringInSlice(response, okayResponses) {
-				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto}); err != nil {
+				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto, IPBlock: ipblock}); err != nil {
 					logrus.Errorf("server can not be initialized: %v", err)
 					os.Exit(1)
 					return err

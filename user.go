@@ -170,7 +170,6 @@ func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
 
 	u.NoGW = nogw
 	u.HostID = hostid
-	db.Save(u)
 
 	if hostid != 0 {
 		server, err := GetServerInstance()
@@ -192,6 +191,7 @@ func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
 			return fmt.Errorf("ip %s is already allocated", ip)
 		}
 	}
+	db.Save(u)
 
 	err := Emit()
 	if err != nil {
@@ -244,6 +244,8 @@ func (u *DBUser) ResetPassword(password string) error {
 //
 // This is often used to sign users when the current CA is changed while there are
 // still  existing users in the database.
+//
+// Also it can be used when a user cert is expired or user's private key stolen, missing etc.
 func (u *DBUser) Renew() error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
@@ -301,37 +303,47 @@ func (u *DBUser) GetCreatedAt() string {
 func (u *DBUser) getIP() net.IP {
 	users := getNonStaticHostUsers()
 	staticHostIDs := getStaticHostIDs()
-	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
-	network := net.ParseIP(_DefaultServerNetwork).To4().Mask(mask)
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Panicf("can not get server instance: %v", err)
+	}
+	mask := net.IPMask(net.ParseIP(server.Mask).To4())
+	network := net.ParseIP(server.Net).To4().Mask(mask)
 
-	// Host is static?
+	// If the user has static ip address, return it immediately.
 	if u.HostID != 0 {
-		// Host is really static?
-		if hostIDsContains(staticHostIDs, u.HostID) {
-			return HostID2IP(u.HostID)
-		}
-		return nil
+		return HostID2IP(u.HostID)
 	}
 
-	// Host is dynamic.
-	for i, user := range users {
-		hostID := IP2HostID(network) + uint32(i+2)
-		if hostIDsContains(staticHostIDs, hostID) {
-			for hostIDsContains(staticHostIDs, hostID) {
-				i++
-				hostID = IP2HostID(network) + uint32(i+1)
-			}
+	// Calculate dynamic ip addresses from a deterministic address pool.
+	freeHostID := 0
+	for _, user := range users {
+		// Skip, if user is supposed to have static ip.
+		if user.HostID != 0 {
+			continue
+		}
+
+		// Try the next available host id.
+		hostID := IP2HostID(network) + uint32(freeHostID)
+		for hostIDsContains(staticHostIDs, hostID+2) {
+			freeHostID++ // Increase the host id and try again until it is available.
+			hostID = IP2HostID(network) + uint32(freeHostID)
 		}
 		if user.ID == u.ID {
-			return HostID2IP(hostID)
+			return HostID2IP(hostID + 2)
 		}
+		freeHostID++
 	}
 	return nil
 }
 
 // GetIPNet returns user's vpn ip network. (e.g. 192.168.0.1/24)
 func (u *DBUser) GetIPNet() string {
-	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Panicf("can not get user ipnet: %v", err)
+	}
+	mask := net.IPMask(net.ParseIP(server.Mask).To4())
 
 	ipn := net.IPNet{
 		IP:   u.getIP(),

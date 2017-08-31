@@ -2,10 +2,16 @@ package ovpm
 
 const (
 	// Version defines the version of ovpm.
-	Version = "0.1.10"
+	Version = "0.1.11"
 
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
+
+	// DefaultVPNProto is the default OpenVPN protocol to use.
+	DefaultVPNProto = UDPProto
+
+	// DefaultVPNNetwork is the default OpenVPN network to use.
+	DefaultVPNNetwork = "10.9.0.0/24"
 
 	etcBasePath = "/etc/ovpm/"
 	varBasePath = "/var/db/ovpm/"
@@ -20,9 +26,6 @@ const (
 	_DefaultCAKeyPath    = varBasePath + "ca.key"
 	_DefaultDHParamsPath = varBasePath + "dh4096.pem"
 	_DefaultCRLPath      = varBasePath + "crl.pem"
-
-	_DefaultServerNetwork = "10.9.0.0"
-	_DefaultServerNetMask = "255.255.255.0"
 )
 
 // Testing is used to determine wether we are testing or running normally.

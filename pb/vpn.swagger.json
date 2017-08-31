@@ -80,6 +80,9 @@
         },
         "Protopref": {
           "$ref": "#/definitions/pbVPNProto"
+        },
+        "IPBlock": {
+          "type": "string"
         }
       }
     },

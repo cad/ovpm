@@ -49,14 +49,13 @@ var netDefineCommand = cli.Command{
 
 		switch ovpm.NetworkTypeFromString(typ) {
 		case ovpm.ROUTE:
-			if via != "" && !govalidator.IsCIDR(via) {
-				fmt.Printf("validation error: `%s` must be a network in the CIDR form", via)
+			if via != "" && !govalidator.IsIPv4(via) {
+				fmt.Printf("validation error: `%s` must be a network in the IPv4 form", via)
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				os.Exit(1)
-			} else {
-				via = ""
 			}
+
 		case ovpm.SERVERNET:
 			if via != "" {
 				fmt.Println("--via flag can only be used with --type ROUTE")

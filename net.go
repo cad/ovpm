@@ -133,8 +133,8 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
 	}
 
-	if !govalidator.IsCIDR(via) && via != "" {
-		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", via)
+	if via != "" && !govalidator.IsIPv4(via) {
+		return nil, fmt.Errorf("validation error: `%s` must be a network in the IPv4 form", via)
 	}
 
 	if nettype == UNDEFINEDNET {
@@ -146,13 +146,13 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 		return nil, fmt.Errorf("can not parse CIDR %s: %v", cidr, err)
 	}
 
-	// Overwrite via with the parsed CIDR string.
+	// Overwrite via with the parsed IPv4 string.
 	if nettype == ROUTE && via != "" {
-		_, viaNet, err := net.ParseCIDR(via)
+		viaIP := net.ParseIP(via).To4()
 		if err != nil {
-			return nil, fmt.Errorf("can not parse CIDR %s: %v", via, err)
+			return nil, fmt.Errorf("can not parse IPv4 %s: %v", via, err)
 		}
-		via = viaNet.String()
+		via = viaIP.String()
 
 	} else {
 		via = ""
@@ -507,7 +507,7 @@ func HostID2IP(hostid uint32) net.IP {
 	return net.IP(ip)
 }
 
-//IP2HostID converts an IP address to a host id (32-bit unsigned integer).
+// IP2HostID converts an IP address to a host id (32-bit unsigned integer).
 func IP2HostID(ip net.IP) uint32 {
 	hostid := binary.BigEndian.Uint32(ip)
 	return hostid
@@ -515,6 +515,13 @@ func IP2HostID(ip net.IP) uint32 {
 
 // IncrementIP will return next ip address within the network.
 func IncrementIP(ip, mask string) (string, error) {
+	if !govalidator.IsIPv4(ip) {
+		return "", fmt.Errorf("'ip' is expected to be a valid IPv4 %s", ip)
+	}
+	if !govalidator.IsIPv4(ip) {
+		return "", fmt.Errorf("'mask' is expected to be a valid IPv4 %s", mask)
+	}
+
 	ipAddr := net.ParseIP(ip).To4()
 	netMask := net.IPMask(net.ParseIP(mask).To4())
 	ipNet := net.IPNet{IP: ipAddr, Mask: netMask}

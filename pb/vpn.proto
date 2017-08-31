@@ -15,6 +15,7 @@ message VPNInitRequest {
   string Hostname = 1;
   string Port = 2;
   VPNProto Protopref = 3;
+  string IPBlock = 4;
 }
 
 service VPNService {

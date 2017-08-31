@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/pb"
 	"github.com/olekukonko/tablewriter"
@@ -87,12 +88,17 @@ var userCreateCommand = cli.Command{
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
-
+		if static != "" && !govalidator.IsIPv4(static) {
+			fmt.Println("--static flag takes a valid ipv4 address")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
 		var hostid uint32
 		if static != "" {
 			h := ovpm.IP2HostID(net.ParseIP(static).To4())
 			if h == 0 {
-				fmt.Println("--static flag takes a valid ipv4 address")
+				fmt.Printf("can not parse %s as IPv4", static)
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				os.Exit(1)
@@ -142,6 +148,10 @@ var userUpdateCommand = cli.Command{
 			Name:  "static",
 			Usage: "ip address for the vpn user",
 		},
+		cli.BoolFlag{
+			Name:  "no-static",
+			Usage: "do not set static ip address for the vpn user",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "user:update"
@@ -150,32 +160,64 @@ var userUpdateCommand = cli.Command{
 		nogw := c.Bool("no-gw")
 		gw := c.Bool("gw")
 		static := c.String("static")
+		noStatic := c.Bool("no-static")
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
 
-		if !(password != "" || gw || nogw) {
+		// Check wether if all flags are are empty.
+		if !(password != "" || gw || nogw || static != "" || noStatic) {
 			fmt.Println("nothing is updated!")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			os.Exit(1)
 		}
 
-		var hostid uint32
-		if static != "" {
-			h := ovpm.IP2HostID(net.ParseIP(static).To4())
-			if h == 0 {
-				fmt.Println("--static flag takes a valid ipv4 address")
-				fmt.Println()
-				fmt.Println(cli.ShowSubcommandHelp(c))
-				os.Exit(1)
-			}
-
-			hostid = h
+		// Given that static is set, check wether it's IPv4.
+		if static != "" && !govalidator.IsIPv4(static) {
+			fmt.Println("--static flag takes a valid ipv4 address")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
 		}
+		var staticPref pb.UserUpdateRequest_StaticPref
+		staticPref = pb.UserUpdateRequest_NOPREFSTATIC
+		var hostid uint32
 
+		switch {
+		case static != "" && !noStatic:
+			// means static is set.
+			if static != "" {
+				h := ovpm.IP2HostID(net.ParseIP(static).To4())
+				if h == 0 {
+					fmt.Printf("can't parse %s as IPv4", static)
+					fmt.Println()
+					fmt.Println(cli.ShowSubcommandHelp(c))
+					os.Exit(1)
+				}
+
+				hostid = h
+			}
+			staticPref = pb.UserUpdateRequest_STATIC
+
+		case static == "" && noStatic:
+			// means no-static
+			hostid = 0
+			staticPref = pb.UserUpdateRequest_NOSTATIC
+		case static != "" && noStatic:
+			// means invalid
+			fmt.Println("--static flag and --no-static flag cannot be used together")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		case static == "" && !noStatic:
+		default:
+			// means no pref
+			staticPref = pb.UserUpdateRequest_NOPREFSTATIC
+			hostid = 0
+		}
 		var gwPref pb.UserUpdateRequest_GWPref
 
 		switch {
@@ -200,10 +242,11 @@ var userUpdateCommand = cli.Command{
 		userSvc := pb.NewUserServiceClient(conn)
 
 		response, err := userSvc.Update(context.Background(), &pb.UserUpdateRequest{
-			Username: username,
-			Password: password,
-			Gwpref:   gwPref,
-			HostID:   hostid,
+			Username:   username,
+			Password:   password,
+			Gwpref:     gwPref,
+			HostID:     hostid,
+			Staticpref: staticPref,
 		})
 
 		if err != nil {
