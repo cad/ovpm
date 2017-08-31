@@ -303,8 +303,12 @@ func (u *DBUser) GetCreatedAt() string {
 func (u *DBUser) getIP() net.IP {
 	users := getNonStaticHostUsers()
 	staticHostIDs := getStaticHostIDs()
-	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
-	network := net.ParseIP(_DefaultServerNetwork).To4().Mask(mask)
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Panicf("can not get server instance: %v", err)
+	}
+	mask := net.IPMask(net.ParseIP(server.Mask).To4())
+	network := net.ParseIP(server.Net).To4().Mask(mask)
 
 	// If the user has static ip address, return it immediately.
 	if u.HostID != 0 {
@@ -335,7 +339,11 @@ func (u *DBUser) getIP() net.IP {
 
 // GetIPNet returns user's vpn ip network. (e.g. 192.168.0.1/24)
 func (u *DBUser) GetIPNet() string {
-	mask := net.IPMask(net.ParseIP(_DefaultServerNetMask).To4())
+	server, err := GetServerInstance()
+	if err != nil {
+		logrus.Panicf("can not get user ipnet: %v", err)
+	}
+	mask := net.IPMask(net.ParseIP(server.Mask).To4())
 
 	ipn := net.IPNet{
 		IP:   u.getIP(),

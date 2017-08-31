@@ -69,10 +69,17 @@ type _VPNServerConfig struct {
 	Proto        string
 }
 
-// Init regenerates keys and certs for a Root CA, and saves them in the database.
+// Init regenerates keys and certs for a Root CA, gets initial settings for the VPN server
+// and saves them in the database.
 //
-// proto can be either "udp" or "tcp" and if it's "" it defaults to "udp".
-func Init(hostname string, port string, proto string) error {
+// 'proto' can be either "udp" or "tcp" and if it's "" it defaults to "udp".
+//
+// 'ipblock' is a IP network in the CIDR form. VPN clients get their IP addresses from this network.
+// It defaults to const 'DefaultVPNNetwork'.
+//
+// Please note that, Init is potentially destructive procedure, it will cause invalidation of
+// existing .ovpn profiles of the current users. So it should be used carefully.
+func Init(hostname string, port string, proto string, ipblock string) error {
 	if port == "" {
 		port = DefaultVPNPort
 	}
@@ -86,6 +93,33 @@ func Init(hostname string, port string, proto string) error {
 		proto = TCPProto
 	default:
 		return fmt.Errorf("validation error: proto:`%s` should be either 'tcp' or 'udp'", proto)
+	}
+
+	// vpn network to use.
+	var ipnet *net.IPNet
+
+	// If user didn't specify, pick the vpn network from defaults.
+	if ipblock == "" {
+		var err error
+		_, ipnet, err = net.ParseCIDR(DefaultVPNNetwork)
+		if err != nil {
+			return fmt.Errorf("can not parse CIDR %s: %v", DefaultVPNNetwork, err)
+		}
+	}
+
+	// Check if the user specified vpn network is valid.
+	if ipblock != "" && !govalidator.IsCIDR(ipblock) {
+		return fmt.Errorf("validation error: ipblock:`%s` should be a CIDR network", ipblock)
+	}
+
+	// Use user specified vpn network.
+	if ipblock != "" {
+		var err error
+		_, ipnet, err = net.ParseCIDR(ipblock)
+		if err != nil {
+			return fmt.Errorf("can parse ipblock: %s", err)
+
+		}
 	}
 
 	if !govalidator.IsNumeric(port) {
@@ -113,6 +147,7 @@ func Init(hostname string, port string, proto string) error {
 	if err != nil {
 		return fmt.Errorf("can not create server cert creds: %s", err)
 	}
+
 	serialNumber := uuid.New().String()
 	serverInstance := DBServer{
 		Name: serverName,
@@ -125,8 +160,8 @@ func Init(hostname string, port string, proto string) error {
 		Key:          srv.Key,
 		CACert:       ca.Cert,
 		CAKey:        ca.Key,
-		Net:          _DefaultServerNetwork,
-		Mask:         _DefaultServerNetMask,
+		Net:          ipnet.IP.To4().String(),
+		Mask:         net.IP(ipnet.Mask).To4().String(),
 	}
 
 	db.Create(&serverInstance)
@@ -375,6 +410,11 @@ func emitToFile(path, content string, mode uint) error {
 }
 
 func emitServerConf() error {
+	dbServer, err := GetServerInstance()
+	if err != nil {
+		return fmt.Errorf("can not get server instance: %v", err)
+	}
+
 	serverInstance, err := GetServerInstance()
 	if err != nil {
 		return fmt.Errorf("can not retrieve server: %v", err)
@@ -399,8 +439,8 @@ func emitServerConf() error {
 		CCDPath:      _DefaultVPNCCDPath,
 		CRLPath:      _DefaultCRLPath,
 		DHParamsPath: _DefaultDHParamsPath,
-		Net:          _DefaultServerNetwork,
-		Mask:         _DefaultServerNetMask,
+		Net:          dbServer.Net,
+		Mask:         dbServer.Mask,
 		Port:         port,
 		Proto:        proto,
 	}
@@ -531,6 +571,11 @@ func emitCCD() error {
 			}
 		}
 	}
+	server, err := GetServerInstance()
+	if err != nil {
+		return fmt.Errorf("can not get server instance: %v", err)
+	}
+
 	// Render ccd templates for the users.
 	for _, user := range users {
 		var associatedRoutes [][3]string
@@ -555,7 +600,7 @@ func emitCCD() error {
 			NetMask    string
 			Routes     [][3]string // [0] is IP, [1] is Netmask, [2] is Via
 			RedirectGW bool
-		}{IP: user.getIP().String(), NetMask: _DefaultServerNetMask, Routes: associatedRoutes, RedirectGW: !user.NoGW}
+		}{IP: user.getIP().String(), NetMask: server.Mask, Routes: associatedRoutes, RedirectGW: !user.NoGW}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
