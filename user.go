@@ -244,6 +244,8 @@ func (u *DBUser) ResetPassword(password string) error {
 //
 // This is often used to sign users when the current CA is changed while there are
 // still  existing users in the database.
+//
+// Also it can be used when a user cert is expired or user's private key stolen, missing etc.
 func (u *DBUser) Renew() error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
