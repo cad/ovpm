@@ -114,7 +114,7 @@ func NewProcess(executable string, dir string, args []string) (*Process, error) 
 	return &p, nil
 }
 
-// isExist returns wether the given executable binary is found on the filesystem or not.
+// isExist returns whether the given executable binary is found on the filesystem or not.
 func isExist(executable string) bool {
 	if _, err := os.Stat(executable); !os.IsNotExist(err) {
 		return true

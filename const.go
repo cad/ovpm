@@ -28,6 +28,6 @@ const (
 	_DefaultCRLPath      = varBasePath + "crl.pem"
 )
 
-// Testing is used to determine wether we are testing or running normally.
+// Testing is used to determine whether we are testing or running normally.
 // Set it to true when testing.
 var Testing = false

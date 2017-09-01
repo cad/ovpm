@@ -56,7 +56,7 @@ func (u *DBUser) setPassword(password string) error {
 	return nil
 }
 
-// CheckPassword returns wether the given password is correct for the user.
+// CheckPassword returns whether the given password is correct for the user.
 func (u *DBUser) CheckPassword(password string) bool {
 	_, err := passlib.Verify(password, u.Hash)
 	if err != nil {
@@ -356,7 +356,7 @@ func (u *DBUser) GetIPNet() string {
 	return ipn.String()
 }
 
-// IsNoGW returns wether user is set to get the vpn server as their default gateway.
+// IsNoGW returns whether user is set to get the vpn server as their default gateway.
 func (u *DBUser) IsNoGW() bool {
 	return u.NoGW
 }

@@ -188,7 +188,7 @@ var userUpdateCommand = cli.Command{
 			os.Exit(1)
 		}
 
-		// Check wether if all flags are are empty.
+		// Check whether if all flags are are empty.
 		if !(password != "" || gw || nogw || static != "" || noStatic || admin || noAdmin) {
 			fmt.Println("nothing is updated!")
 			fmt.Println()
@@ -196,7 +196,7 @@ var userUpdateCommand = cli.Command{
 			os.Exit(1)
 		}
 
-		// Given that static is set, check wether it's IPv4.
+		// Given that static is set, check whether it's IPv4.
 		if static != "" && !govalidator.IsIPv4(static) {
 			fmt.Println("--static flag takes a valid ipv4 address")
 			fmt.Println()
