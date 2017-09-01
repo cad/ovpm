@@ -183,7 +183,7 @@ func TestNetAssociate(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, err := CreateNewUser(userName, "123", false, 0)
+	user, err := CreateNewUser(userName, "123", false, 0, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +224,7 @@ func TestNetDissociate(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, err := CreateNewUser(userName, "123", false, 0)
+	user, err := CreateNewUser(userName, "123", false, 0, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,7 +274,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, _ := CreateNewUser(userName, "123", false, 0)
+	user, _ := CreateNewUser(userName, "123", false, 0, true)
 
 	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
 	n.Associate(user.Username)
