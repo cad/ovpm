@@ -1,11 +1,14 @@
 # Change Log
 
-## [v0.1.11](https://github.com/cad/ovpm/tree/v0.1.11) (2017-08-31)
-[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.10...v0.1.11)
+## [v0.1.12](https://github.com/cad/ovpm/tree/v0.1.12) (2017-09-02)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.11...v0.1.12)
 
 **Implemented enhancements:**
 
 - be able to change initial ip block [\#29](https://github.com/cad/ovpm/issues/29)
+
+## [v0.1.11](https://github.com/cad/ovpm/tree/v0.1.11) (2017-08-31)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.10...v0.1.11)
 
 **Fixed bugs:**
 
