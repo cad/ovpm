@@ -27,6 +27,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Possible VPN protocols.
 const (
 	TCPProto string = "tcp"
 	UDPProto string = "udp"
