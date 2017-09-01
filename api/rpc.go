@@ -166,7 +166,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		SerialNumber: server.SerialNumber,
 		Hostname:     server.Hostname,
 		Port:         server.Port,
-		Proto:        server.Proto,
+		Proto:        server.GetProto(),
 		Cert:         server.Cert,
 		CACert:       server.CACert,
 		Net:          server.Net,

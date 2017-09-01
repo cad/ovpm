@@ -473,6 +473,14 @@ func GetServerInstance() (*DBServer, error) {
 	return &server, nil
 }
 
+// GetProto returns the current VPN proto.
+func (s *DBServer) GetProto() string {
+	if s.Proto != "" {
+		return s.Proto
+	}
+	return UDPProto
+}
+
 // IsInitialized checks if there is a default server in the database or not.
 func IsInitialized() bool {
 	var server DBServer
