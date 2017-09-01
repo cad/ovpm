@@ -29,9 +29,10 @@ This is tested only on Ubuntu >=16.04.3 LTS
 ```bash
 # Add APT Repo
 $ sudo sh -c 'echo "deb [trusted=yes] https://cad.github.io/ovpm/deb/ ovpm main" >> /etc/apt/sources.list'
+$ sudo apt update
 
 # Install OVPM
-$ sudo yum install ovpm
+$ sudo apt install ovpm
 ```
 
 **from Source (go get):**
