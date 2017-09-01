@@ -13,6 +13,7 @@ message UserCreateRequest {
   string Password = 2;
   bool NoGW = 3;
   uint32 HostID = 4;
+  bool IsAdmin = 5;
 }
 
 message UserUpdateRequest {
@@ -31,6 +32,12 @@ message UserUpdateRequest {
     STATIC = 2;
   }
   StaticPref staticpref = 5;
+  enum AdminPref {
+    NOPREFADMIN = 0;
+    NOADMIN = 1;
+    ADMIN = 2;
+  }
+  AdminPref adminpref = 6;
 }
 
 
@@ -98,6 +105,7 @@ message UserResponse {
     string IPNet = 5;
     bool NoGW = 6;
     uint32 HostID = 7;
+    bool IsAdmin = 8;
   }
 
   repeated User users = 1;

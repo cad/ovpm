@@ -46,7 +46,11 @@ var userListCommand = cli.Command{
 			if user.HostID != 0 {
 				static = "s"
 			}
-			data := []string{fmt.Sprintf("%v", i+1), user.Username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGW)}
+			username := user.Username
+			if user.IsAdmin {
+				username = fmt.Sprintf("%s *", username)
+			}
+			data := []string{fmt.Sprintf("%v", i+1), username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGW)}
 			table.Append(data)
 		}
 		table.Render()
@@ -76,6 +80,10 @@ var userCreateCommand = cli.Command{
 			Name:  "static",
 			Usage: "ip address for the vpn user",
 		},
+		cli.BoolFlag{
+			Name:  "admin, a",
+			Usage: "this user has admin rights",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "user:create"
@@ -83,6 +91,7 @@ var userCreateCommand = cli.Command{
 		password := c.String("password")
 		noGW := c.Bool("no-gw")
 		static := c.String("static")
+		admin := c.Bool("admin")
 
 		if username == "" || password == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
@@ -112,7 +121,9 @@ var userCreateCommand = cli.Command{
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
 
-		response, err := userSvc.Create(context.Background(), &pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid})
+		response, err := userSvc.Create(context.Background(),
+			&pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid, IsAdmin: admin},
+		)
 		if err != nil {
 			logrus.Errorf("user can not be created '%s': %v", username, err)
 			os.Exit(1)
@@ -152,6 +163,14 @@ var userUpdateCommand = cli.Command{
 			Name:  "no-static",
 			Usage: "do not set static ip address for the vpn user",
 		},
+		cli.BoolFlag{
+			Name:  "admin",
+			Usage: "this user has admin rights",
+		},
+		cli.BoolFlag{
+			Name:  "no-admin",
+			Usage: "this user has no admin rights",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "user:update"
@@ -161,6 +180,8 @@ var userUpdateCommand = cli.Command{
 		gw := c.Bool("gw")
 		static := c.String("static")
 		noStatic := c.Bool("no-static")
+		admin := c.Bool("admin")
+		noAdmin := c.Bool("no-admin")
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
@@ -168,7 +189,7 @@ var userUpdateCommand = cli.Command{
 		}
 
 		// Check wether if all flags are are empty.
-		if !(password != "" || gw || nogw || static != "" || noStatic) {
+		if !(password != "" || gw || nogw || static != "" || noStatic || admin || noAdmin) {
 			fmt.Println("nothing is updated!")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
@@ -218,6 +239,7 @@ var userUpdateCommand = cli.Command{
 			staticPref = pb.UserUpdateRequest_NOPREFSTATIC
 			hostid = 0
 		}
+
 		var gwPref pb.UserUpdateRequest_GWPref
 
 		switch {
@@ -236,6 +258,23 @@ var userUpdateCommand = cli.Command{
 
 		}
 
+		var adminPref pb.UserUpdateRequest_AdminPref
+
+		switch {
+		case admin && !noAdmin:
+			adminPref = pb.UserUpdateRequest_ADMIN
+		case !admin && noAdmin:
+			adminPref = pb.UserUpdateRequest_NOADMIN
+		case !admin && !noAdmin:
+			adminPref = pb.UserUpdateRequest_NOPREFADMIN
+		case admin && noAdmin:
+			// Ambigius.
+			fmt.Println("you can't use --admin together with --no-admin")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
 		//conn := getConn(c.String("port"))
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
@@ -247,6 +286,7 @@ var userUpdateCommand = cli.Command{
 			Gwpref:     gwPref,
 			HostID:     hostid,
 			Staticpref: staticPref,
+			Adminpref:  adminPref,
 		})
 
 		if err != nil {

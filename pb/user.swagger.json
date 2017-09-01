@@ -198,8 +198,21 @@
         "HostID": {
           "type": "integer",
           "format": "int64"
+        },
+        "IsAdmin": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
+    },
+    "UserUpdateRequestAdminPref": {
+      "type": "string",
+      "enum": [
+        "NOPREFADMIN",
+        "NOADMIN",
+        "ADMIN"
+      ],
+      "default": "NOPREFADMIN"
     },
     "UserUpdateRequestGWPref": {
       "type": "string",
@@ -235,6 +248,10 @@
         "HostID": {
           "type": "integer",
           "format": "int64"
+        },
+        "IsAdmin": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     },
@@ -302,6 +319,9 @@
         },
         "staticpref": {
           "$ref": "#/definitions/UserUpdateRequestStaticPref"
+        },
+        "adminpref": {
+          "$ref": "#/definitions/UserUpdateRequestAdminPref"
         }
       }
     }
