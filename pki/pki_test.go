@@ -185,7 +185,7 @@ func TestReadCertFromPEM(t *testing.T) {
 	}
 }
 
-// isPEMEncodedProperly takes an PEM encoded string s and the expected block type typ (e.g. "RSA PRIVATE KEY") and returns wether it can be decodable.
+// isPEMEncodedProperly takes an PEM encoded string s and the expected block type typ (e.g. "RSA PRIVATE KEY") and returns whether it can be decodable.
 func isPEMEncodedProperly(t *testing.T, s string, typ string) bool {
 	block, _ := pem.Decode([]byte(s))
 

@@ -27,6 +27,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Possible VPN protocols.
 const (
 	TCPProto string = "tcp"
 	UDPProto string = "udp"
@@ -220,6 +221,7 @@ func DumpsClientConfig(username string) (string, error) {
 		Key      string
 		Cert     string
 		NoGW     bool
+		Proto    string
 	}{
 		Hostname: server.Hostname,
 		Port:     server.Port,
@@ -227,6 +229,7 @@ func DumpsClientConfig(username string) (string, error) {
 		Key:      user.Key,
 		Cert:     user.Cert,
 		NoGW:     user.NoGW,
+		Proto:    server.GetProto(),
 	}
 	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {
@@ -471,6 +474,14 @@ func GetServerInstance() (*DBServer, error) {
 		return nil, fmt.Errorf("can not retrieve server from db")
 	}
 	return &server, nil
+}
+
+// GetProto returns the current VPN proto.
+func (s *DBServer) GetProto() string {
+	if s.Proto != "" {
+		return s.Proto
+	}
+	return UDPProto
 }
 
 // IsInitialized checks if there is a default server in the database or not.

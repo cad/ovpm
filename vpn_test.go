@@ -62,7 +62,7 @@ func TestVPNDeinit(t *testing.T) {
 	// Prepare:
 	// Initialize the server.
 	Init("localhost", "", UDPProto, "")
-	u, err := CreateNewUser("user", "p", false, 0)
+	u, err := CreateNewUser("user", "p", false, 0, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +175,7 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	Init("localhost", "", UDPProto, "")
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password", false, 0)
+	user, _ := CreateNewUser("user", "password", false, 0, true)
 
 	// Test:
 	clientConfigBlob, err := DumpsClientConfig(user.GetUsername())
@@ -198,7 +198,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 
 	// Prepare:
 	noGW := false
-	user, err := CreateNewUser("user", "password", noGW, 0)
+	user, err := CreateNewUser("user", "password", noGW, 0, true)
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}
@@ -226,7 +226,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	user.Delete()
 
 	noGW = true
-	user, err = CreateNewUser("user", "password", noGW, 0)
+	user, err = CreateNewUser("user", "password", noGW, 0, true)
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}

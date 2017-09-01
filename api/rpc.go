@@ -32,6 +32,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			IPNet:              user.GetIPNet(),
 			NoGW:               user.IsNoGW(),
 			HostID:             user.GetHostID(),
+			IsAdmin:            user.IsAdmin(),
 		})
 	}
 
@@ -41,7 +42,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostID)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostID, req.IsAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +52,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		NoGW:               user.IsNoGW(),
 		HostID:             user.GetHostID(),
+		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -76,7 +78,18 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	}
 
-	err = user.Update(req.Password, noGW, req.HostID)
+	var admin bool
+
+	switch req.Adminpref {
+	case pb.UserUpdateRequest_ADMIN:
+		admin = true
+	case pb.UserUpdateRequest_NOADMIN:
+		admin = false
+	case pb.UserUpdateRequest_NOPREFADMIN:
+		admin = user.IsAdmin()
+	}
+
+	err = user.Update(req.Password, noGW, req.HostID, admin)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +98,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		NoGW:               user.IsNoGW(),
 		HostID:             user.GetHostID(),
+		IsAdmin:            user.IsAdmin(),
 	}
 
 	ut = append(ut, &pbUser)
@@ -104,6 +118,7 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		HostID:             user.GetHostID(),
+		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -127,6 +142,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
 		HostID:             user.GetHostID(),
+		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -166,7 +182,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		SerialNumber: server.SerialNumber,
 		Hostname:     server.Hostname,
 		Port:         server.Port,
-		Proto:        server.Proto,
+		Proto:        server.GetProto(),
 		Cert:         server.Cert,
 		CACert:       server.CACert,
 		Net:          server.Net,

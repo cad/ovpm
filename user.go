@@ -21,6 +21,7 @@ type User interface {
 	GetIPNet() string
 	IsNoGW() bool
 	GetHostID() uint32
+	IsAdmin() bool
 }
 
 // DBUser is database model for VPN users.
@@ -36,6 +37,7 @@ type DBUser struct {
 	Key                string // not user writable
 	NoGW               bool
 	HostID             uint32 // not user writable
+	Admin              bool
 }
 
 // DBRevoked is a database model for revoked VPN users.
@@ -54,7 +56,7 @@ func (u *DBUser) setPassword(password string) error {
 	return nil
 }
 
-// CheckPassword returns wether the given password is correct for the user.
+// CheckPassword returns whether the given password is correct for the user.
 func (u *DBUser) CheckPassword(password string) bool {
 	_, err := passlib.Verify(password, u.Hash)
 	if err != nil {
@@ -89,7 +91,7 @@ func GetAllUsers() ([]*DBUser, error) {
 //
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
-func CreateNewUser(username, password string, nogw bool, hostid uint32) (*DBUser, error) {
+func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bool) (*DBUser, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -137,6 +139,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32) (*DBUser
 		ServerSerialNumber: server.SerialNumber,
 		NoGW:               nogw,
 		HostID:             hostid,
+		Admin:              admin,
 	}
 	user.setPassword(password)
 
@@ -158,7 +161,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32) (*DBUser
 // Update updates the user's attributes and writes them to the database.
 //
 // How this method works is similiar to PUT semantics of REST. It sets the user record fields to the provided function arguments.
-func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
+func (u *DBUser) Update(password string, nogw bool, hostid uint32, admin bool) error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
@@ -170,6 +173,7 @@ func (u *DBUser) Update(password string, nogw bool, hostid uint32) error {
 
 	u.NoGW = nogw
 	u.HostID = hostid
+	u.Admin = admin
 
 	if hostid != 0 {
 		server, err := GetServerInstance()
@@ -352,7 +356,7 @@ func (u *DBUser) GetIPNet() string {
 	return ipn.String()
 }
 
-// IsNoGW returns wether user is set to get the vpn server as their default gateway.
+// IsNoGW returns whether user is set to get the vpn server as their default gateway.
 func (u *DBUser) IsNoGW() bool {
 	return u.NoGW
 }
@@ -360,6 +364,11 @@ func (u *DBUser) IsNoGW() bool {
 // GetHostID returns user's Host ID.
 func (u *DBUser) GetHostID() uint32 {
 	return u.HostID
+}
+
+// IsAdmin returns whether user is admin or not.
+func (u *DBUser) IsAdmin() bool {
+	return u.Admin
 }
 
 func getStaticHostUsers() []*DBUser {
