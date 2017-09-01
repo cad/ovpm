@@ -2,7 +2,7 @@
 
 client
 dev tun
-proto udp
+proto {{ .Proto }}
 remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
 ns-cert-type server
