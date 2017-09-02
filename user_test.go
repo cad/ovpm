@@ -11,8 +11,8 @@ import (
 
 func TestCreateNewUser(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 	server, _ := ovpm.GetServerInstance()
 
@@ -30,11 +30,6 @@ func TestCreateNewUser(t *testing.T) {
 	// Is user nil?
 	if user == nil {
 		t.Fatalf("user is expected to be 'NOT nil' but it is 'nil' %+v", user)
-	}
-
-	// Is user empty?
-	if *user == (ovpm.DBUser{}) {
-		t.Fatalf("user is expected to be 'NOT EMPTY' but it is 'EMPTY' %+v", user)
 	}
 
 	// Is user acutally exist in the system?
@@ -87,8 +82,8 @@ func TestCreateNewUser(t *testing.T) {
 
 func TestUserUpdate(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -125,8 +120,8 @@ func TestUserUpdate(t *testing.T) {
 
 func TestUserPasswordCorrect(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -142,8 +137,8 @@ func TestUserPasswordCorrect(t *testing.T) {
 
 func TestUserPasswordReset(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -169,8 +164,8 @@ func TestUserPasswordReset(t *testing.T) {
 
 func TestUserDelete(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -207,8 +202,8 @@ func TestUserDelete(t *testing.T) {
 
 func TestUserGet(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -231,13 +226,13 @@ func TestUserGet(t *testing.T) {
 
 func TestUserGetAll(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 	count := 5
 
 	// Prepare:
-	var users []*ovpm.DBUser
+	var users []*ovpm.User
 	for i := 0; i < count; i++ {
 		username := fmt.Sprintf("user%d", i)
 		password := fmt.Sprintf("password%d", i)
@@ -269,8 +264,8 @@ func TestUserGetAll(t *testing.T) {
 
 func TestUserRenew(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -291,8 +286,8 @@ func TestUserRenew(t *testing.T) {
 
 func TestUserIPAllocator(t *testing.T) {
 	// Initialize:
-	ovpm.SetupDB("sqlite3", ":memory:")
-	defer ovpm.CeaseDB()
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	ovpm.Init("localhost", "", ovpm.UDPProto, "")
 
 	// Prepare:
@@ -326,21 +321,18 @@ func TestUserIPAllocator(t *testing.T) {
 }
 
 // areUsersEqual compares given users and returns true if they are the same.
-func areUsersEqual(user1, user2 *ovpm.DBUser) bool {
-	if user1.Cert != user2.Cert {
-		logrus.Info("Cert %v != %v", user1.Cert, user2.Cert)
+func areUsersEqual(user1, user2 *ovpm.User) bool {
+	if user1.GetCert() != user2.GetCert() {
+		logrus.Info("Cert %v != %v", user1.GetCert(), user2.GetCert())
 		return false
 	}
-	if user1.Username != user2.Username {
-		logrus.Infof("Username %v != %v", user1.Username, user2.Username)
+	if user1.GetUsername() != user2.GetUsername() {
+		logrus.Infof("Username %v != %v", user1.GetUsername(), user2.GetUsername())
 		return false
 	}
-	if user1.Hash != user2.Hash {
-		logrus.Infof("Password %v != %v", user1.Hash, user2.Hash)
-		return false
-	}
-	if user1.ServerSerialNumber != user2.ServerSerialNumber {
-		logrus.Infof("ServerSerialNumber %v != %v", user1.ServerSerialNumber, user2.ServerSerialNumber)
+
+	if user1.GetServerSerialNumber() != user2.GetServerSerialNumber() {
+		logrus.Infof("ServerSerialNumber %v != %v", user1.GetServerSerialNumber(), user2.GetServerSerialNumber())
 		return false
 	}
 	logrus.Infof("users are the same!")

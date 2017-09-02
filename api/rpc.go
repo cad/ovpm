@@ -2,7 +2,6 @@ package api
 
 import (
 	"os"
-	"time"
 
 	"google.golang.org/grpc"
 
@@ -178,16 +177,16 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 	}
 
 	response := pb.VPNStatusResponse{
-		Name:         server.Name,
-		SerialNumber: server.SerialNumber,
-		Hostname:     server.Hostname,
-		Port:         server.Port,
+		Name:         server.GetServerName(),
+		SerialNumber: server.GetSerialNumber(),
+		Hostname:     server.GetHostname(),
+		Port:         server.GetPort(),
 		Proto:        server.GetProto(),
-		Cert:         server.Cert,
-		CACert:       server.CACert,
-		Net:          server.Net,
-		Mask:         server.Mask,
-		CreatedAt:    server.CreatedAt.Format(time.UnixDate),
+		Cert:         server.GetCert(),
+		CACert:       server.GetCACert(),
+		Net:          server.GetNet(),
+		Mask:         server.GetMask(),
+		CreatedAt:    server.GetCreatedAt(),
 	}
 	return &response, nil
 }

@@ -8,30 +8,40 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-var db *gorm.DB
+var db *DB
 
-// SetupDB prepares database for use.
+// DB represents a persistent storage.
+type DB struct {
+	*gorm.DB
+}
+
+// CreateDB prepares and returns new storage.
 //
 // It should be run at the start of the program.
-func SetupDB(dialect string, args ...interface{}) {
+func CreateDB(dialect string, args ...interface{}) *DB {
 	if len(args) > 0 && args[0] == "" {
 		args[0] = _DefaultDBPath
 	}
 	var err error
-	db, err = gorm.Open(dialect, args...)
+
+	dbase, err := gorm.Open(dialect, args...)
 	if err != nil {
 		logrus.Fatalf("couldn't open sqlite database %v: %v", args, err)
 	}
 
-	db.AutoMigrate(&DBUser{})
-	db.AutoMigrate(&DBServer{})
-	db.AutoMigrate(&DBRevoked{})
-	db.AutoMigrate(&DBNetwork{})
+	dbase.AutoMigrate(&dbUserModel{})
+	dbase.AutoMigrate(&dbServerModel{})
+	dbase.AutoMigrate(&dbRevokedModel{})
+	dbase.AutoMigrate(&dbNetworkModel{})
+
+	dbPTR := &DB{DB: dbase}
+	db = dbPTR
+	return dbPTR
 }
 
-// CeaseDB closes the database.
+// Cease closes the database.
 //
 // It should be run at the exit of the program.
-func CeaseDB() {
-	db.Close()
+func (db *DB) Cease() {
+	db.DB.Close()
 }
