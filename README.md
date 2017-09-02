@@ -81,6 +81,12 @@ It complains about an error due to server not being initialized, it's completely
 
 ## Usage
 
+**Demo**
+Here is a little demo of what it looks on terminal to init the server,  create a vpn user and generate **.ovpn** file for the created user.
+
+[![asciicast](https://asciinema.org/a/136016.png)](https://asciinema.org/a/136016)
+
+
 ### Init Server
 If you just installed the ovpm from scratch you have started the **ovpm server** (ovpmd) then now you need to initialize the server.
 
