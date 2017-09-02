@@ -24,6 +24,7 @@ import (
 )
 
 var action string
+var db *ovpm.DB
 
 func main() {
 	app := cli.NewApp()
@@ -45,11 +46,11 @@ func main() {
 		if c.GlobalBool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
-		ovpm.SetupDB("sqlite3", "")
+		db = ovpm.CreateDB("sqlite3", "")
 		return nil
 	}
 	app.After = func(c *cli.Context) error {
-		ovpm.CeaseDB()
+		db.Cease()
 		return nil
 	}
 	app.Action = func(c *cli.Context) error {
