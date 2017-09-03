@@ -41,9 +41,9 @@ cp $DIR/contrib/yumrepo.repo $RELEASEDIR/rpm/ovpm.repo
 cp $DIR/contrib/deb-repo-config $RELEASEDIR/deb/conf/distributions
 
 #package
-fpm -s dir -t rpm -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh -p $RELEASEDIR/rpm -C $RELEASEDIR/build .
+fpm -s dir -t rpm -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/rpm -C $RELEASEDIR/build .
 
-fpm -s dir -t deb -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh -p $RELEASEDIR/deb -C $RELEASEDIR/build .
+fpm -s dir -t deb -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/deb -C $RELEASEDIR/build .
 
 #create rpm repo
 createrepo --database $RELEASEDIR/rpm

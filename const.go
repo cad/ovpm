@@ -2,7 +2,7 @@ package ovpm
 
 const (
 	// Version defines the version of ovpm.
-	Version = "0.1.12"
+	Version = "0.1.13"
 
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
@@ -12,6 +12,9 @@ const (
 
 	// DefaultVPNNetwork is the default OpenVPN network to use.
 	DefaultVPNNetwork = "10.9.0.0/24"
+
+	// DefaultVPNDNS is the default DNS to push to clients.
+	DefaultVPNDNS = "8.8.8.8"
 
 	etcBasePath = "/etc/ovpm/"
 	varBasePath = "/var/db/ovpm/"

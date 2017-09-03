@@ -2,7 +2,6 @@ package api
 
 import (
 	"os"
-	"time"
 
 	"google.golang.org/grpc"
 
@@ -178,16 +177,17 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 	}
 
 	response := pb.VPNStatusResponse{
-		Name:         server.Name,
-		SerialNumber: server.SerialNumber,
-		Hostname:     server.Hostname,
-		Port:         server.Port,
+		Name:         server.GetServerName(),
+		SerialNumber: server.GetSerialNumber(),
+		Hostname:     server.GetHostname(),
+		Port:         server.GetPort(),
 		Proto:        server.GetProto(),
-		Cert:         server.Cert,
-		CACert:       server.CACert,
-		Net:          server.Net,
-		Mask:         server.Mask,
-		CreatedAt:    server.CreatedAt.Format(time.UnixDate),
+		Cert:         server.GetCert(),
+		CACert:       server.GetCACert(),
+		Net:          server.GetNet(),
+		Mask:         server.GetMask(),
+		CreatedAt:    server.GetCreatedAt(),
+		DNS:          server.GetDNS(),
 	}
 	return &response, nil
 }
@@ -204,10 +204,18 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		proto = ovpm.UDPProto
 	}
 
-	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock); err != nil {
+	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock, req.DNS); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
+}
+
+func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.VPNUpdateResponse, error) {
+	logrus.Debugf("rpc call: vpn update")
+	if err := ovpm.Update(req.IPBlock, req.DNS); err != nil {
+		logrus.Errorf("server can not be updated: %v", err)
+	}
+	return &pb.VPNUpdateResponse{}, nil
 }
 
 type NetworkService struct{}

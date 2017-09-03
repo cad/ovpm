@@ -10,7 +10,7 @@ func TestDBSetup(t *testing.T) {
 	// Test:
 
 	// Create database.
-	SetupDB("sqlite3", ":memory:")
+	CreateDB("sqlite3", ":memory:")
 
 	// Is database created?
 	if db == nil {
@@ -23,15 +23,15 @@ func TestDBCease(t *testing.T) {
 	Testing = true
 
 	// Prepare:
-	SetupDB("sqlite3", ":memory:")
-	user := DBUser{Username: "testUser"}
+	CreateDB("sqlite3", ":memory:")
+	user := dbUserModel{Username: "testUser"}
 	db.Save(&user)
 
 	// Test:
 	// Close database.
-	CeaseDB()
+	db.Cease()
 
-	var users []DBUser
+	var users []dbUserModel
 	db.Find(&users)
 
 	// Is length zero?

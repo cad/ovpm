@@ -20,8 +20,10 @@ It has these top-level messages:
 	UserGenConfigResponse
 	VPNStatusRequest
 	VPNInitRequest
+	VPNUpdateRequest
 	VPNStatusResponse
 	VPNInitResponse
+	VPNUpdateResponse
 	NetworkCreateRequest
 	NetworkListRequest
 	NetworkDeleteRequest

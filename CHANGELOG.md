@@ -1,6 +1,13 @@
 # Change Log
 
-## [v0.1.12](https://github.com/cad/ovpm/tree/v0.1.12) (2017-09-02)
+## [v0.1.13](https://github.com/cad/ovpm/tree/v0.1.13) (2017-09-03)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.12...v0.1.13)
+
+**Implemented enhancements:**
+
+- change dns to push to clients [\#41](https://github.com/cad/ovpm/issues/41)
+
+## [v0.1.12](https://github.com/cad/ovpm/tree/v0.1.12) (2017-09-01)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.11...v0.1.12)
 
 **Implemented enhancements:**

@@ -7,9 +7,9 @@ import (
 func TestVPNCreateNewNetwork(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:
@@ -30,7 +30,7 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 		t.Fatalf("network CIDR is expected to be '%s' but it's '%s' instead", cidrStr, n.CIDR)
 	}
 
-	var network DBNetwork
+	var network dbNetworkModel
 	db.First(&network)
 
 	if db.NewRecord(&network) {
@@ -54,9 +54,9 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 func TestVPNDeleteNetwork(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:
@@ -69,7 +69,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
 
-	var network DBNetwork
+	var network dbNetworkModel
 	db.First(&network)
 
 	if db.NewRecord(&network) {
@@ -82,7 +82,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	}
 
 	// Empty the existing network object.
-	network = DBNetwork{}
+	network = dbNetworkModel{}
 	db.First(&network)
 	if !db.NewRecord(&network) {
 		t.Fatalf("network is not deleted from the database. %+v", network)
@@ -92,9 +92,9 @@ func TestVPNDeleteNetwork(t *testing.T) {
 func TestVPNGetNetwork(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:
@@ -107,7 +107,7 @@ func TestVPNGetNetwork(t *testing.T) {
 		t.Fatalf("unexpected error when creating a new network: %v", err)
 	}
 
-	var network DBNetwork
+	var network dbNetworkModel
 	db.First(&network)
 
 	if db.NewRecord(&network) {
@@ -119,7 +119,7 @@ func TestVPNGetNetwork(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if db.NewRecord(&n) {
+	if db.NewRecord(&n.dbNetworkModel) {
 		t.Fatalf("network is not correctly returned from db.")
 	}
 }
@@ -127,9 +127,9 @@ func TestVPNGetNetwork(t *testing.T) {
 func TestVPNGetAllNetworks(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:
@@ -173,9 +173,9 @@ func TestVPNGetAllNetworks(t *testing.T) {
 func TestNetAssociate(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:
@@ -188,20 +188,27 @@ func TestNetAssociate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
-	err = n.Associate(user.Username)
+	n, err := CreateNewNetwork(netName, cidrStr, netType, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = n.Associate(user.dbUserModel.Username)
 	if err != nil {
 		t.Fatal(err)
 	}
 	n = nil
 
-	n, _ = GetNetwork(netName)
+	n, err = GetNetwork(netName)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Does number of associated users in the network object matches the number that we have created?
-	if count := len(n.Users); count != 1 {
+	if count := len(n.dbNetworkModel.Users); count != 1 {
 		t.Fatalf("network.Users count is expexted to be %d, but it's %d", 1, count)
 	}
-	err = n.Associate(user.Username)
+	err = n.Associate(user.dbUserModel.Username)
 	if err == nil {
 		t.Fatalf("expected to get error but got no error instead")
 	}
@@ -211,9 +218,9 @@ func TestNetAssociate(t *testing.T) {
 func TestNetDissociate(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	err := Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	err := Init("localhost", "", UDPProto, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,9 +271,9 @@ func TestNetDissociate(t *testing.T) {
 func TestNetGetAssociatedUsers(t *testing.T) {
 	// Initialize:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	// Test:

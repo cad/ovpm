@@ -11,6 +11,16 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 
 *This software is not stable yet. We recommend against using it for anything serious until, version 1.0 is released.*
 
+**Roadmap**
+
+- [x] OpenVPN management functionality
+- [x] User management functionality
+- [x] Network management functionality
+- [x] Command Line Interface (CLI)
+- [ ] Web User Interface (WebUI)
+- [ ] Import/Export/Backup OVPM config
+- [ ] Effortless client profile (.ovpn file) delivery over Web
+ 
 ## Installation
 **from RPM (CentOS/Fedora):**
 
@@ -70,6 +80,12 @@ It complains about an error due to server not being initialized, it's completely
 
 
 ## Usage
+
+**Demo**
+Here is a little demo of what it looks on terminal to init the server,  create a vpn user and generate **.ovpn** file for the created user.
+
+[![asciicast](https://asciinema.org/a/136016.png)](https://asciinema.org/a/136016)
+
 
 ### Init Server
 If you just installed the ovpm from scratch you have started the **ovpm server** (ovpmd) then now you need to initialize the server.

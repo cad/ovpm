@@ -20,13 +20,13 @@ func setupTestCase() {
 func TestVPNInit(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 	// Prepare:
 	// Test:
 
 	// Check database if the database has no server.
-	var server DBServer
+	var server dbServerModel
 	db.First(&server)
 
 	// Isn't server empty struct?
@@ -35,16 +35,16 @@ func TestVPNInit(t *testing.T) {
 	}
 
 	// Wrongfully initialize server.
-	err := Init("localhost", "asdf", UDPProto, "")
+	err := Init("localhost", "asdf", UDPProto, "", "")
 	if err == nil {
 		t.Fatalf("error is expected to be not nil but it's nil instead")
 	}
 
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 
 	// Check database if the database has no server.
-	var server2 DBServer
+	var server2 dbServerModel
 	db.First(&server2)
 
 	// Is server empty struct?
@@ -56,12 +56,12 @@ func TestVPNInit(t *testing.T) {
 func TestVPNDeinit(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 
 	// Prepare:
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 	u, err := CreateNewUser("user", "p", false, 0, true)
 	if err != nil {
 		t.Fatal(err)
@@ -69,7 +69,7 @@ func TestVPNDeinit(t *testing.T) {
 	u.Delete()
 
 	// Test:
-	var server DBServer
+	var server dbServerModel
 	db.First(&server)
 
 	// Isn't server empty struct?
@@ -78,7 +78,7 @@ func TestVPNDeinit(t *testing.T) {
 	}
 
 	// Test if Revoked table contains the removed user's entries.
-	var revoked DBRevoked
+	var revoked dbRevokedModel
 	db.First(&revoked)
 
 	if db.NewRecord(&revoked) {
@@ -89,7 +89,7 @@ func TestVPNDeinit(t *testing.T) {
 	Deinit()
 
 	// Get server from db.
-	var server2 DBServer
+	var server2 dbServerModel
 	db.First(&server2)
 
 	// Isn't server empty struct?
@@ -98,7 +98,7 @@ func TestVPNDeinit(t *testing.T) {
 	}
 
 	// Test if Revoked table contains the removed user's entries.
-	var revoked2 DBRevoked
+	var revoked2 dbRevokedModel
 	db.First(&revoked2)
 
 	// Is revoked empty?
@@ -106,12 +106,52 @@ func TestVPNDeinit(t *testing.T) {
 		t.Errorf("revoked should be empty")
 	}
 }
+func TestVPNUpdate(t *testing.T) {
+	// Init:
+	setupTestCase()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	// Prepare:
+	Init("localhost", "", UDPProto, "", "")
+	// Test:
+
+	var updatetests = []struct {
+		vpnnet     string
+		dns        string
+		vpnChanged bool
+		dnsChanged bool
+	}{
+		{"", "", false, false},
+		{"192.168.9.0/24", "", true, false},
+		{"", "2.2.2.2", false, true},
+		{"9.9.9.0/24", "1.1.1.1", true, true},
+	}
+	for _, tt := range updatetests {
+		server, err := GetServerInstance()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		oldIP := server.Net
+		oldDNS := server.DNS
+		Update(tt.vpnnet, tt.dns)
+		server = nil
+		server, err = GetServerInstance()
+		if (server.Net != oldIP) != tt.vpnChanged {
+			t.Fatalf("expected vpn change: %t but opposite happened", tt.vpnChanged)
+		}
+		if (server.DNS != oldDNS) != tt.dnsChanged {
+			t.Fatalf("expected vpn change: %t but opposite happened", tt.dnsChanged)
+		}
+	}
+
+}
 
 func TestVPNIsInitialized(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 
 	// Prepare:
 
@@ -122,7 +162,7 @@ func TestVPNIsInitialized(t *testing.T) {
 	}
 
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 
 	// Isn't initialized?
 	if !IsInitialized() {
@@ -133,8 +173,8 @@ func TestVPNIsInitialized(t *testing.T) {
 func TestVPNGetServerInstance(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 
 	// Prepare:
 
@@ -152,7 +192,7 @@ func TestVPNGetServerInstance(t *testing.T) {
 	}
 
 	// Initialize server.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 
 	server, err = GetServerInstance()
 
@@ -170,9 +210,9 @@ func TestVPNGetServerInstance(t *testing.T) {
 func TestVPNDumpsClientConfig(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	user, _ := CreateNewUser("user", "password", false, 0, true)
@@ -192,9 +232,9 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 func TestVPNDumpClientConfig(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	noGW := false
@@ -250,8 +290,8 @@ func TestVPNDumpClientConfig(t *testing.T) {
 func TestVPNGetSystemCA(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 
 	// Prepare:
 
@@ -262,7 +302,7 @@ func TestVPNGetSystemCA(t *testing.T) {
 	}
 
 	// Initialize system.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 
 	ca, err = GetSystemCA()
 	if err != nil {
@@ -282,8 +322,8 @@ func TestVPNGetSystemCA(t *testing.T) {
 func TestVPNStartVPNProc(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
 
 	// Prepare:
 
@@ -302,7 +342,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 	}
 
 	// Initialize OVPM server.
-	Init("localhost", "", UDPProto, "")
+	Init("localhost", "", UDPProto, "", "")
 
 	// Call start again..
 	StartVPNProc()
@@ -316,9 +356,9 @@ func TestVPNStartVPNProc(t *testing.T) {
 func TestVPNStopVPNProc(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	vpnProc.Start()
@@ -340,9 +380,9 @@ func TestVPNStopVPNProc(t *testing.T) {
 
 func TestVPNRestartVPNProc(t *testing.T) {
 	// Init:
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 
@@ -369,9 +409,9 @@ func TestVPNRestartVPNProc(t *testing.T) {
 func TestVPNEmit(t *testing.T) {
 	// Init:
 	setupTestCase()
-	SetupDB("sqlite3", ":memory:")
-	defer CeaseDB()
-	Init("localhost", "", UDPProto, "")
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 

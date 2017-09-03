@@ -63,6 +63,7 @@ func (nt NetworkType) String() string {
 	return "UNDEFINEDNET"
 }
 
+// Description gives description about the network type.
 func (nt NetworkType) Description() string {
 	for _, v := range networkTypes {
 		if v.Type == nt {
@@ -72,21 +73,26 @@ func (nt NetworkType) Description() string {
 	return "UNDEFINEDNET"
 }
 
-// DBNetwork is database model for external networks on the VPN server.
-type DBNetwork struct {
+// dbNetworkModel is database model for external networks on the VPN server.
+type dbNetworkModel struct {
 	gorm.Model
 	ServerID uint
-	Server   DBServer
+	Server   dbServerModel
 
 	Name  string `gorm:"unique_index"`
 	CIDR  string
 	Type  NetworkType
 	Via   string
-	Users []*DBUser `gorm:"many2many:network_users;"`
+	Users []*dbUserModel `gorm:"many2many:network_users;"`
+}
+
+// Network represents a VPN related network.
+type Network struct {
+	dbNetworkModel
 }
 
 // GetNetwork returns a network specified by its name.
-func GetNetwork(name string) (*DBNetwork, error) {
+func GetNetwork(name string) (*Network, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -98,26 +104,29 @@ func GetNetwork(name string) (*DBNetwork, error) {
 		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
 	}
 
-	var network DBNetwork
-	db.Preload("Users").Where(&DBNetwork{Name: name}).First(&network)
+	var network dbNetworkModel
+	db.Preload("Users").Where(&dbNetworkModel{Name: name}).First(&network)
 
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("network not found %s", name)
 	}
 
-	return &network, nil
+	return &Network{dbNetworkModel: network}, nil
 }
 
 // GetAllNetworks returns all networks defined in the system.
-func GetAllNetworks() []*DBNetwork {
-	var networks []*DBNetwork
-	db.Preload("Users").Find(&networks)
-
+func GetAllNetworks() []*Network {
+	var networks []*Network
+	var dbNetworks []*dbNetworkModel
+	db.Preload("Users").Find(&dbNetworks)
+	for _, n := range dbNetworks {
+		networks = append(networks, &Network{dbNetworkModel: *n})
+	}
 	return networks
 }
 
 // CreateNewNetwork creates a new network definition in the system.
-func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNetwork, error) {
+func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Network, error) {
 	if !IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
@@ -158,11 +167,11 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 		via = ""
 	}
 
-	network := DBNetwork{
+	network := dbNetworkModel{
 		Name:  name,
 		CIDR:  ipnet.String(),
 		Type:  nettype,
-		Users: []*DBUser{},
+		Users: []*dbUserModel{},
 		Via:   via,
 	}
 	db.Save(&network)
@@ -172,24 +181,24 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*DBNe
 	}
 	Emit()
 	logrus.Infof("network defined: %s (%s)", network.Name, network.CIDR)
-	return &network, nil
+	return &Network{dbNetworkModel: network}, nil
 
 }
 
 // Delete deletes a network definition in the system.
-func (n *DBNetwork) Delete() error {
+func (n *Network) Delete() error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 
-	db.Unscoped().Delete(n)
+	db.Unscoped().Delete(n.dbNetworkModel)
 	Emit()
 	logrus.Infof("network deleted: %s", n.Name)
 	return nil
 }
 
 // Associate allows the given user access to this network.
-func (n *DBNetwork) Associate(username string) error {
+func (n *Network) Associate(username string) error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
@@ -198,8 +207,8 @@ func (n *DBNetwork) Associate(username string) error {
 		return fmt.Errorf("user can not be fetched: %v", err)
 	}
 
-	var users []DBUser
-	userAssoc := db.Model(&n).Association("Users")
+	var users []dbUserModel
+	userAssoc := db.Model(&n.dbNetworkModel).Association("Users")
 	userAssoc.Find(&users)
 	var found bool
 	for _, u := range users {
@@ -212,7 +221,7 @@ func (n *DBNetwork) Associate(username string) error {
 		return fmt.Errorf("user %s is already associated with the network %s", user.Username, n.Name)
 	}
 
-	userAssoc.Append(user)
+	userAssoc.Append(user.dbUserModel)
 	if userAssoc.Error != nil {
 		return fmt.Errorf("association failed: %v", userAssoc.Error)
 	}
@@ -222,7 +231,7 @@ func (n *DBNetwork) Associate(username string) error {
 }
 
 // Dissociate breaks up the given users association to the said network.
-func (n *DBNetwork) Dissociate(username string) error {
+func (n *Network) Dissociate(username string) error {
 	if !IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
@@ -232,8 +241,8 @@ func (n *DBNetwork) Dissociate(username string) error {
 		return fmt.Errorf("user can not be fetched: %v", err)
 	}
 
-	var users []DBUser
-	userAssoc := db.Model(&n).Association("Users")
+	var users []dbUserModel
+	userAssoc := db.Model(&n.dbNetworkModel).Association("Users")
 	userAssoc.Find(&users)
 	var found bool
 	for _, u := range users {
@@ -246,7 +255,7 @@ func (n *DBNetwork) Dissociate(username string) error {
 		return fmt.Errorf("user %s is already not associated with the network %s", user.Username, n.Name)
 	}
 
-	userAssoc.Delete(user)
+	userAssoc.Delete(user.dbUserModel)
 	if userAssoc.Error != nil {
 		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
 	}
@@ -256,32 +265,36 @@ func (n *DBNetwork) Dissociate(username string) error {
 }
 
 // GetName returns network's name.
-func (n *DBNetwork) GetName() string {
+func (n *Network) GetName() string {
 	return n.Name
 }
 
 // GetCIDR returns network's CIDR.
-func (n *DBNetwork) GetCIDR() string {
+func (n *Network) GetCIDR() string {
 	return n.CIDR
 }
 
 // GetCreatedAt returns network's name.
-func (n *DBNetwork) GetCreatedAt() string {
+func (n *Network) GetCreatedAt() string {
 	return n.CreatedAt.Format(time.UnixDate)
 }
 
 // GetType returns network's network type.
-func (n *DBNetwork) GetType() NetworkType {
+func (n *Network) GetType() NetworkType {
 	return NetworkType(n.Type)
 }
 
 // GetAssociatedUsers returns network's associated users.
-func (n *DBNetwork) GetAssociatedUsers() []*DBUser {
-	return n.Users
+func (n *Network) GetAssociatedUsers() []*User {
+	var users []*User
+	for _, u := range n.Users {
+		users = append(users, &User{dbUserModel: *u})
+	}
+	return users
 }
 
 // GetAssociatedUsernames returns network's associated user names.
-func (n *DBNetwork) GetAssociatedUsernames() []string {
+func (n *Network) GetAssociatedUsernames() []string {
 	var usernames []string
 
 	for _, user := range n.GetAssociatedUsers() {
@@ -291,7 +304,7 @@ func (n *DBNetwork) GetAssociatedUsernames() []string {
 }
 
 // GetVia returns network' via.
-func (n *DBNetwork) GetVia() string {
+func (n *Network) GetVia() string {
 	return n.Via
 }
 
