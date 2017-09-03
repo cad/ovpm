@@ -187,6 +187,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		Net:          server.GetNet(),
 		Mask:         server.GetMask(),
 		CreatedAt:    server.GetCreatedAt(),
+		DNS:          server.GetDNS(),
 	}
 	return &response, nil
 }
@@ -203,10 +204,18 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		proto = ovpm.UDPProto
 	}
 
-	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock); err != nil {
+	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock, req.DNS); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
+}
+
+func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.VPNUpdateResponse, error) {
+	logrus.Debugf("rpc call: vpn update")
+	if err := ovpm.Update(req.IPBlock, req.DNS); err != nil {
+		logrus.Errorf("server can not be updated: %v", err)
+	}
+	return &pb.VPNUpdateResponse{}, nil
 }
 
 type NetworkService struct{}
