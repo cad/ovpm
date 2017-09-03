@@ -106,6 +106,46 @@ func TestVPNDeinit(t *testing.T) {
 		t.Errorf("revoked should be empty")
 	}
 }
+func TestVPNUpdate(t *testing.T) {
+	// Init:
+	setupTestCase()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	// Prepare:
+	Init("localhost", "", UDPProto, "", "")
+	// Test:
+
+	var updatetests = []struct {
+		vpnnet     string
+		dns        string
+		vpnChanged bool
+		dnsChanged bool
+	}{
+		{"", "", false, false},
+		{"192.168.9.0/24", "", true, false},
+		{"", "2.2.2.2", false, true},
+		{"9.9.9.0/24", "1.1.1.1", true, true},
+	}
+	for _, tt := range updatetests {
+		server, err := GetServerInstance()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		oldIP := server.Net
+		oldDNS := server.DNS
+		Update(tt.vpnnet, tt.dns)
+		server = nil
+		server, err = GetServerInstance()
+		if (server.Net != oldIP) != tt.vpnChanged {
+			t.Fatalf("expected vpn change: %t but opposite happened", tt.vpnChanged)
+		}
+		if (server.DNS != oldDNS) != tt.dnsChanged {
+			t.Fatalf("expected vpn change: %t but opposite happened", tt.dnsChanged)
+		}
+	}
+
+}
 
 func TestVPNIsInitialized(t *testing.T) {
 	// Init:
