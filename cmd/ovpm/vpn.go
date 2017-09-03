@@ -169,6 +169,30 @@ var vpnUpdateCommand = cli.Command{
 			os.Exit(1)
 		}
 
+		if ipblock != "" {
+			var response string
+			for {
+				fmt.Println("If you proceed, you will loose all your static ip definitions.")
+				fmt.Println("Any user that is defined to have a static ip will be set to be dynamic again.")
+				fmt.Println()
+				fmt.Println("Are you sure ? (y/N)")
+				_, err := fmt.Scanln(&response)
+				if err != nil {
+					logrus.Fatal(err)
+					os.Exit(1)
+					return err
+				}
+				okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+				nokayResponses := []string{"n", "N", "no", "No", "NO"}
+				if stringInSlice(response, okayResponses) {
+					break
+				} else if stringInSlice(response, nokayResponses) {
+					return fmt.Errorf("user decided to cancel")
+				}
+			}
+
+		}
+
 		dns := c.String("dns")
 		if dns != "" && !govalidator.IsIPv4(dns) {
 			fmt.Println("--dns takes an IPv4 address. e.g. 8.8.8.8")
