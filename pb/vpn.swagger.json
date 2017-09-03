@@ -83,6 +83,9 @@
         },
         "IPBlock": {
           "type": "string"
+        },
+        "DNS": {
+          "type": "string"
         }
       }
     },
@@ -132,6 +135,9 @@
           "type": "string"
         },
         "Proto": {
+          "type": "string"
+        },
+        "DNS": {
           "type": "string"
         }
       }

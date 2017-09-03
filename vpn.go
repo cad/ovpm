@@ -52,6 +52,7 @@ type dbServerModel struct {
 	Net      string // VPN network.
 	Mask     string // VPN network mask.
 	CRL      string // Certificate Revocation List
+	DNS      string // DNS servers to push to the clients.
 }
 
 // Server represents VPN server.
@@ -134,23 +135,17 @@ func (s *Server) GetCRL() string {
 	return s.CRL
 }
 
+// GetDNS returns vpn server's dns.
+func (s *Server) GetDNS() string {
+	if s.DNS != "" {
+		return s.DNS
+	}
+	return DefaultVPNDNS
+}
+
 // GetCreatedAt returns server's created at.
 func (s *Server) GetCreatedAt() string {
 	return s.CreatedAt.Format(time.UnixDate)
-}
-
-type _VPNServerConfig struct {
-	CertPath     string
-	KeyPath      string
-	CACertPath   string
-	CAKeyPath    string
-	CCDPath      string
-	CRLPath      string
-	DHParamsPath string
-	Net          string
-	Mask         string
-	Port         string
-	Proto        string
 }
 
 // Init regenerates keys and certs for a Root CA, gets initial settings for the VPN server
@@ -163,9 +158,13 @@ type _VPNServerConfig struct {
 //
 // Please note that, Init is potentially destructive procedure, it will cause invalidation of
 // existing .ovpn profiles of the current users. So it should be used carefully.
-func Init(hostname string, port string, proto string, ipblock string) error {
+func Init(hostname string, port string, proto string, ipblock string, dns string) error {
 	if port == "" {
 		port = DefaultVPNPort
+	}
+
+	if dns == "" {
+		dns = DefaultVPNDNS
 	}
 
 	switch proto {
@@ -222,6 +221,10 @@ func Init(hostname string, port string, proto string, ipblock string) error {
 		return fmt.Errorf("validation error: hostname:`%s` should be either an ip address or a FQDN", hostname)
 	}
 
+	if !govalidator.IsIPv4(dns) {
+		return fmt.Errorf("validation error: dns:`%s` should be an ip address", dns)
+	}
+
 	ca, err := pki.NewCA()
 	if err != nil {
 		return fmt.Errorf("can not create ca creds: %s", err)
@@ -246,6 +249,7 @@ func Init(hostname string, port string, proto string, ipblock string) error {
 		CAKey:        ca.Key,
 		Net:          ipnet.IP.To4().String(),
 		Mask:         net.IP(ipnet.Mask).To4().String(),
+		DNS:          dns,
 	}
 
 	db.Create(&serverInstance)
@@ -515,9 +519,27 @@ func emitServerConf() error {
 		proto = serverInstance.Proto
 	}
 
+	dns := DefaultVPNDNS
+	if serverInstance.DNS != "" {
+		dns = serverInstance.DNS
+	}
+
 	var result bytes.Buffer
 
-	server := _VPNServerConfig{
+	server := struct {
+		CertPath     string
+		KeyPath      string
+		CACertPath   string
+		CAKeyPath    string
+		CCDPath      string
+		CRLPath      string
+		DHParamsPath string
+		Net          string
+		Mask         string
+		Port         string
+		Proto        string
+		DNS          string
+	}{
 		CertPath:     _DefaultCertPath,
 		KeyPath:      _DefaultKeyPath,
 		CACertPath:   _DefaultCACertPath,
@@ -529,6 +551,7 @@ func emitServerConf() error {
 		Mask:         dbServer.Mask,
 		Port:         port,
 		Proto:        proto,
+		DNS:          dns,
 	}
 	data, err := bindata.Asset("template/server.conf.tmpl")
 	if err != nil {

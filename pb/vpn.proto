@@ -16,6 +16,7 @@ message VPNInitRequest {
   string Port = 2;
   VPNProto Protopref = 3;
   string IPBlock = 4;
+  string DNS = 5;
 }
 
 service VPNService {
@@ -42,5 +43,6 @@ message VPNStatusResponse {
   string Mask = 8;
   string CreatedAt = 9;
   string Proto = 10;
+  string DNS = 11;
 }
 message VPNInitResponse {}

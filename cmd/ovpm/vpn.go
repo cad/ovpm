@@ -37,6 +37,7 @@ var vpnStatusCommand = cli.Command{
 		table.Append([]string{"Network", res.Net})
 		table.Append([]string{"Netmask", res.Mask})
 		table.Append([]string{"Created At", res.CreatedAt})
+		table.Append([]string{"DNS", res.DNS})
 		table.Render()
 
 		return nil
@@ -64,6 +65,10 @@ var vpnInitCommand = cli.Command{
 		cli.StringFlag{
 			Name:  "net, n",
 			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+		},
+		cli.StringFlag{
+			Name:  "dns, d",
+			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -96,6 +101,14 @@ var vpnInitCommand = cli.Command{
 			os.Exit(1)
 		}
 
+		dns := c.String("dns")
+		if dns != "" && !govalidator.IsIPv4(dns) {
+			fmt.Println("--dns takes an IPv4 address. e.g. 8.8.8.8")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
 		vpnSvc := pb.NewVPNServiceClient(conn)
@@ -115,7 +128,7 @@ var vpnInitCommand = cli.Command{
 			okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 			nokayResponses := []string{"n", "N", "no", "No", "NO"}
 			if stringInSlice(response, okayResponses) {
-				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto, IPBlock: ipblock}); err != nil {
+				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto, IPBlock: ipblock, DNS: dns}); err != nil {
 					logrus.Errorf("server can not be initialized: %v", err)
 					os.Exit(1)
 					return err
