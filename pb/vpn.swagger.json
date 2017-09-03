@@ -66,6 +66,32 @@
           "VPNService"
         ]
       }
+    },
+    "/v1/vpn/update": {
+      "post": {
+        "operationId": "Update",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbVPNUpdateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbVPNUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VPNService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -141,6 +167,20 @@
           "type": "string"
         }
       }
+    },
+    "pbVPNUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "IPBlock": {
+          "type": "string"
+        },
+        "DNS": {
+          "type": "string"
+        }
+      }
+    },
+    "pbVPNUpdateResponse": {
+      "type": "object"
     }
   }
 }

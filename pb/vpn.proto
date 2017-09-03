@@ -19,6 +19,12 @@ message VPNInitRequest {
   string DNS = 5;
 }
 
+message VPNUpdateRequest {
+  string IPBlock = 1;
+  string DNS = 2;
+}
+
+
 service VPNService {
   rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {
     option (google.api.http) = {
@@ -30,6 +36,12 @@ service VPNService {
       post: "/v1/vpn/init"
       body: "*"
     };}
+  rpc Update (VPNUpdateRequest) returns (VPNUpdateResponse) {
+    option (google.api.http) = {
+      post: "/v1/vpn/update"
+      body: "*"
+    };}
+
 }
 
 message VPNStatusResponse {
@@ -46,3 +58,4 @@ message VPNStatusResponse {
   string DNS = 11;
 }
 message VPNInitResponse {}
+message VPNUpdateResponse {}

@@ -276,6 +276,41 @@ func Init(hostname string, port string, proto string, ipblock string, dns string
 	return nil
 }
 
+// Update updates VPN server attributes.
+func Update(ipblock string, dns string) error {
+	if !IsInitialized() {
+		return fmt.Errorf("server is not initialized")
+	}
+
+	server, err := GetServerInstance()
+	if err != nil {
+		return err
+	}
+
+	var changed bool
+	if ipblock != "" && govalidator.IsCIDR(ipblock) {
+		var ipnet *net.IPNet
+		_, ipnet, err = net.ParseCIDR(ipblock)
+		if err != nil {
+			return fmt.Errorf("can not parse CIDR %s: %v", ipblock, err)
+		}
+		server.dbServerModel.Net = ipnet.IP.To4().String()
+		server.dbServerModel.Mask = net.IP(ipnet.Mask).To4().String()
+		changed = true
+	}
+
+	if dns != "" && govalidator.IsIPv4(dns) {
+		server.dbServerModel.DNS = dns
+		changed = true
+	}
+	if changed {
+		db.Save(server.dbServerModel)
+		Emit()
+		logrus.Infof("server updated")
+	}
+	return nil
+}
+
 // Deinit deletes the VPN server from the database and frees the allocated resources.
 func Deinit() error {
 	if !IsInitialized() {

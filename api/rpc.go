@@ -210,6 +210,14 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 	return &pb.VPNInitResponse{}, nil
 }
 
+func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.VPNUpdateResponse, error) {
+	logrus.Debugf("rpc call: vpn update")
+	if err := ovpm.Update(req.IPBlock, req.DNS); err != nil {
+		logrus.Errorf("server can not be updated: %v", err)
+	}
+	return &pb.VPNUpdateResponse{}, nil
+}
+
 type NetworkService struct{}
 
 func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (*pb.NetworkListResponse, error) {

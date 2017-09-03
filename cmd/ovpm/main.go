@@ -54,6 +54,7 @@ func main() {
 			Subcommands: []cli.Command{
 				vpnStatusCommand,
 				vpnInitCommand,
+				vpnUpdateCommand,
 			},
 		},
 		{

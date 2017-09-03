@@ -143,3 +143,56 @@ var vpnInitCommand = cli.Command{
 		return nil
 	},
 }
+
+var vpnUpdateCommand = cli.Command{
+	Name:    "update",
+	Usage:   "Update VPN server.",
+	Aliases: []string{"i"},
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "net, n",
+			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+		},
+		cli.StringFlag{
+			Name:  "dns, d",
+			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
+		},
+	},
+	Action: func(c *cli.Context) error {
+		action = "vpn:update"
+
+		ipblock := c.String("net")
+		if ipblock != "" && !govalidator.IsCIDR(ipblock) {
+			fmt.Println("--net takes an ip network in the CIDR form. e.g. 10.9.0.0/24")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
+		dns := c.String("dns")
+		if dns != "" && !govalidator.IsIPv4(dns) {
+			fmt.Println("--dns takes an IPv4 address. e.g. 8.8.8.8")
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
+		if !(ipblock != "" || dns != "") {
+			fmt.Println()
+			fmt.Println(cli.ShowSubcommandHelp(c))
+			os.Exit(1)
+		}
+
+		conn := getConn(c.GlobalString("daemon-port"))
+		defer conn.Close()
+		vpnSvc := pb.NewVPNServiceClient(conn)
+
+		if _, err := vpnSvc.Update(context.Background(), &pb.VPNUpdateRequest{IPBlock: ipblock, DNS: dns}); err != nil {
+			logrus.Errorf("server can not be updated: %v", err)
+			os.Exit(1)
+			return err
+		}
+		logrus.Info("ovpm server updated")
+		return nil
+	},
+}
