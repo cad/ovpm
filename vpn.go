@@ -270,6 +270,9 @@ func Init(hostname string, port string, proto string, ipblock string, dns string
 			logrus.Errorf("can not sign user %s: %v", user.Username, err)
 			continue
 		}
+		// Set dynamic ip to user.
+		user.HostID = 0
+		db.Save(&user.dbUserModel)
 	}
 	Emit()
 	logrus.Infof("server initialized")
@@ -305,6 +308,18 @@ func Update(ipblock string, dns string) error {
 	}
 	if changed {
 		db.Save(server.dbServerModel)
+		users, err := GetAllUsers()
+		if err != nil {
+			return err
+		}
+
+		// Set all users to dynamic ip address.
+		// This way we prevent any ip range mismatch.
+		for _, user := range users {
+			user.HostID = 0
+			db.Save(user.dbUserModel)
+		}
+
 		Emit()
 		logrus.Infof("server updated")
 	}
