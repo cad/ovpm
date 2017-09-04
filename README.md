@@ -20,6 +20,7 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 - [ ] Web User Interface (WebUI)
 - [ ] Import/Export/Backup OVPM config
 - [ ] Effortless client profile (.ovpn file) delivery over Web
+- [ ] Monitoring and Quota functionality
  
 ## Installation
 **from RPM (CentOS/Fedora):**
