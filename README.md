@@ -32,7 +32,7 @@ $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 $ sudo yum install ovpm
 ```
 
-**from DEB (Ubuntu/DEBIAN):**
+**from DEB (Ubuntu/Debian):**
 
 This is tested only on Ubuntu >=16.04.3 LTS
 
@@ -56,7 +56,7 @@ $ go get -u github.com/cad/ovpm/...
 ## Start the Server
 You need to start the start OVPM server, which is called **ovpmd**, before doing anything.
 
-**CentOS/Fedora (RPM Package)**
+**CentOS/Fedora/Ubuntu/Debian (RPM or DEB Package)**
 
 Just use systemd to manage ovpmd.
 

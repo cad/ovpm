@@ -37,7 +37,7 @@ type dbUserModel struct {
 
 // User represents a vpn user.
 type User struct {
-	dbUserModel
+	dbUserModel // persisted fields
 }
 
 func (u *dbUserModel) setPassword(password string) error {
