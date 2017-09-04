@@ -93,7 +93,9 @@ If you just installed the ovpm from scratch you have started the **ovpm server**
 You can do so by invoking;
 
 ```bash
-$ ovpm vpn init -s <your-vpn-server's-fqdn-or-ip-addr>
+# Initialize the server by giving your VPN server's domain or IP address to ovpm.
+
+$ ovpm vpn init -s <domain-or-ip>  
 
 This operation will cause invalidation of existing user certificates.
 After this opeartion, new client config files (.ovpn) should be generated for each existing user.
