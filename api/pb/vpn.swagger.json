@@ -42,7 +42,7 @@
       }
     },
     "/v1/vpn/status": {
-      "post": {
+      "get": {
         "operationId": "Status",
         "responses": {
           "200": {
@@ -52,16 +52,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbVPNStatusRequest"
-            }
-          }
-        ],
         "tags": [
           "VPNService"
         ]
@@ -126,9 +116,6 @@
         "TCP"
       ],
       "default": "NOPREF"
-    },
-    "pbVPNStatusRequest": {
-      "type": "object"
     },
     "pbVPNStatusResponse": {
       "type": "object",
