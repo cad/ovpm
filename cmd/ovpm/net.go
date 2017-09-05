@@ -8,7 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/pb"
+	"github.com/cad/ovpm/api/pb"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )

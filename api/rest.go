@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/cad/ovpm/pb"
+	"github.com/cad/ovpm/api/pb"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
