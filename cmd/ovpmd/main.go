@@ -19,7 +19,6 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/urfave/cli"
 )
 
@@ -71,7 +70,7 @@ type server struct {
 	grpcPort   string
 	lis        net.Listener
 	grpcServer *grpc.Server
-	restServer *runtime.ServeMux
+	restServer http.Handler
 	restCancel context.CancelFunc
 	restPort   string
 	signal     chan os.Signal
@@ -91,13 +90,17 @@ func newServer(port string) *server {
 		done <- true
 	}()
 	if !ovpm.Testing {
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+		// NOTE(cad): gRPC endpoint listens on localhost. This is important
+		// because we don't authanticate requests coming from localhost.
+		// So gRPC endpoint should never listen on something else then
+		// localhost.
+		lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%s", port))
 		if err != nil {
 			logrus.Fatalf("could not listen to port %s: %v", port, err)
 		}
 
 		rpcServer := api.NewRPCServer()
-		restServer, restCancel, err := api.NewRESTServer()
+		restServer, restCancel, err := api.NewRESTServer(port)
 		if err != nil {
 			logrus.Fatalf("could not get new rest server :%v", err)
 		}

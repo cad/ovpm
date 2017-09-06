@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "user.proto";
+
+message AuthStatusRequest {
+}
+
+message AuthAuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+service AuthService {
+  rpc Status (AuthStatusRequest) returns (AuthStatusResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/status"
+      //body: "*"
+    };}
+
+  rpc Authenticate (AuthAuthenticateRequest) returns (AuthAuthenticateResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/authenticate"
+      body: "*"
+    };}
+}
+
+message AuthStatusResponse {
+  bool is_authenticated = 1;
+  UserResponse.User user = 2;
+}
+
+message AuthAuthenticateResponse {
+  string token = 1;
+}

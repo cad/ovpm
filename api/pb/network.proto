@@ -5,27 +5,27 @@ package pb;
 import "google/api/annotations.proto";
 
 message NetworkCreateRequest {
-  string Name = 1;
-  string CIDR = 2;
-  string Type = 3;
-  string Via = 4;
+  string name = 1;
+  string cidr = 2;
+  string type = 3;
+  string via = 4;
 }
 message NetworkListRequest {}
 message NetworkDeleteRequest {
-  string Name = 1;
+  string name = 1;
 }
 message NetworkGetAllTypesRequest {}
 message NetworkAssociateRequest {
-  string Name = 1;
-  string Username = 2;
+  string name = 1;
+  string username = 2;
 }
 message NetworkDissociateRequest {
-  string Name = 1;
-  string Username = 2;
+  string name = 1;
+  string username = 2;
 }
 
 message NetworkGetAssociatedUsersRequest {
-  string Name = 1;
+  string name = 1;
 }
 service NetworkService {
   rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {
@@ -79,32 +79,32 @@ service NetworkService {
   }
 }
 message Network {
-  string Name = 1;
-  string CIDR = 2;
-  string Type = 3;
-  string CreatedAt = 4;
-  repeated string AssociatedUsernames = 5;
-  string Via = 6;
+  string name = 1;
+  string cidr = 2;
+  string type = 3;
+  string created_at = 4;
+  repeated string associated_usernames = 5;
+  string via = 6;
 }
 
 message NetworkType {
-  string Type = 1;
-  string Description = 2;
+  string type = 1;
+  string description = 2;
 }
 message NetworkCreateResponse {
-  Network Network = 1;
+  Network network = 1;
 }
 message NetworkListResponse {
-  repeated Network Networks = 1;
+  repeated Network networks = 1;
 }
 message NetworkDeleteResponse {
-  Network Network = 1;
+  Network network = 1;
 }
 message NetworkGetAllTypesResponse {
-  repeated NetworkType Types = 1;
+  repeated NetworkType types = 1;
 }
 message NetworkAssociateResponse {}
 message NetworkDissociateResponse {}
 message NetworkGetAssociatedUsersResponse {
-  repeated string Usernames = 1;
+  repeated string usernames = 1;
 }
