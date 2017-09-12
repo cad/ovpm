@@ -9,55 +9,55 @@ message UserListRequest {
 }
 
 message UserCreateRequest {
-  string Username = 1;
-  string Password = 2;
-  bool NoGW = 3;
-  uint32 HostID = 4;
-  bool IsAdmin = 5;
+  string username = 1;
+  string password = 2;
+  bool no_gW = 3;
+  uint32 host_id = 4;
+  bool is_admin = 5;
 }
 
 message UserUpdateRequest {
-  string Username = 1;
-  string Password = 2;
+  string username = 1;
+  string password = 2;
   enum GWPref {
     NOPREF = 0;
     NOGW = 1;
     GW = 2;
   }
   GWPref gwpref = 3;
-  uint32 HostID = 4;
+  uint32 host_id = 4;
   enum StaticPref {
     NOPREFSTATIC = 0;
     NOSTATIC = 1;
     STATIC = 2;
   }
-  StaticPref staticpref = 5;
+  StaticPref static_pref = 5;
   enum AdminPref {
     NOPREFADMIN = 0;
     NOADMIN = 1;
     ADMIN = 2;
   }
-  AdminPref adminpref = 6;
+  AdminPref admin_pref = 6;
 }
 
 
 message UserDeleteRequest {
-  string Username = 1;
+  string username = 1;
 }
 
 message UserRenewRequest {
-  string Username = 1;
+  string username = 1;
 }
 
 message UserGenConfigRequest {
-  string Username = 1;
+  string username = 1;
 }
 
 service UserService {
   rpc List (UserListRequest) returns (UserResponse) {
     option (google.api.http) = {
-      post: "/v1/user/list"
-      body: "*"
+      get: "/v1/user/list"
+      //body: "*"
     };
 
   }
@@ -98,19 +98,19 @@ service UserService {
 
 message UserResponse {
   message User {
-    string Username = 1;
-    string ServerSerialNumber = 2;
-    string Cert = 3;
-    string CreatedAt = 4;
-    string IPNet = 5;
-    bool NoGW = 6;
-    uint32 HostID = 7;
-    bool IsAdmin = 8;
+    string username = 1;
+    string server_serial_number = 2;
+    string cert = 3;
+    string created_at = 4;
+    string ip_net = 5;
+    bool no_gw = 6;
+    uint32 host_id = 7;
+    bool is_admin = 8;
   }
 
   repeated User users = 1;
 }
 
 message UserGenConfigResponse {
-  string ClientConfig = 1;
+  string client_config = 1;
 }

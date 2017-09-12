@@ -43,14 +43,14 @@ var userListCommand = cli.Command{
 		//table.SetBorder(false)
 		for i, user := range resp.Users {
 			static := ""
-			if user.HostID != 0 {
+			if user.HostId != 0 {
 				static = "s"
 			}
 			username := user.Username
 			if user.IsAdmin {
 				username = fmt.Sprintf("%s *", username)
 			}
-			data := []string{fmt.Sprintf("%v", i+1), username, fmt.Sprintf("%s %s", user.IPNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGW)}
+			data := []string{fmt.Sprintf("%v", i+1), username, fmt.Sprintf("%s %s", user.IpNet, static), user.CreatedAt, fmt.Sprintf("%t", user.ServerSerialNumber == server.SerialNumber), fmt.Sprintf("%t", !user.NoGw)}
 			table.Append(data)
 		}
 		table.Render()
@@ -122,7 +122,7 @@ var userCreateCommand = cli.Command{
 		userSvc := pb.NewUserServiceClient(conn)
 
 		response, err := userSvc.Create(context.Background(),
-			&pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostID: hostid, IsAdmin: admin},
+			&pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostId: hostid, IsAdmin: admin},
 		)
 		if err != nil {
 			logrus.Errorf("user can not be created '%s': %v", username, err)
@@ -284,9 +284,9 @@ var userUpdateCommand = cli.Command{
 			Username:   username,
 			Password:   password,
 			Gwpref:     gwPref,
-			HostID:     hostid,
-			Staticpref: staticPref,
-			Adminpref:  adminPref,
+			HostId:     hostid,
+			StaticPref: staticPref,
+			AdminPref:  adminPref,
 		})
 
 		if err != nil {

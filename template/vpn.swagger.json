@@ -88,19 +88,19 @@
     "pbVPNInitRequest": {
       "type": "object",
       "properties": {
-        "Hostname": {
+        "hostname": {
           "type": "string"
         },
-        "Port": {
+        "port": {
           "type": "string"
         },
-        "Protopref": {
+        "proto_pref": {
           "$ref": "#/definitions/pbVPNProto"
         },
-        "IPBlock": {
+        "ip_block": {
           "type": "string"
         },
-        "DNS": {
+        "dns": {
           "type": "string"
         }
       }
@@ -120,37 +120,37 @@
     "pbVPNStatusResponse": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         },
-        "SerialNumber": {
+        "serial_number": {
           "type": "string"
         },
-        "Hostname": {
+        "hostname": {
           "type": "string"
         },
-        "Port": {
+        "port": {
           "type": "string"
         },
-        "Cert": {
+        "cert": {
           "type": "string"
         },
-        "CACert": {
+        "ca_cert": {
           "type": "string"
         },
-        "Net": {
+        "net": {
           "type": "string"
         },
-        "Mask": {
+        "mask": {
           "type": "string"
         },
-        "CreatedAt": {
+        "created_at": {
           "type": "string"
         },
-        "Proto": {
+        "proto": {
           "type": "string"
         },
-        "DNS": {
+        "dns": {
           "type": "string"
         }
       }
@@ -158,10 +158,10 @@
     "pbVPNUpdateRequest": {
       "type": "object",
       "properties": {
-        "IPBlock": {
+        "ip_block": {
           "type": "string"
         },
-        "DNS": {
+        "dns": {
           "type": "string"
         }
       }

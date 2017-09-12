@@ -37,7 +37,7 @@ var vpnStatusCommand = cli.Command{
 		table.Append([]string{"Network", res.Net})
 		table.Append([]string{"Netmask", res.Mask})
 		table.Append([]string{"Created At", res.CreatedAt})
-		table.Append([]string{"DNS", res.DNS})
+		table.Append([]string{"DNS", res.Dns})
 		table.Render()
 
 		return nil
@@ -128,7 +128,7 @@ var vpnInitCommand = cli.Command{
 			okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 			nokayResponses := []string{"n", "N", "no", "No", "NO"}
 			if stringInSlice(response, okayResponses) {
-				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, Protopref: proto, IPBlock: ipblock, DNS: dns}); err != nil {
+				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, ProtoPref: proto, IpBlock: ipblock, Dns: dns}); err != nil {
 					logrus.Errorf("server can not be initialized: %v", err)
 					os.Exit(1)
 					return err
@@ -211,7 +211,7 @@ var vpnUpdateCommand = cli.Command{
 		defer conn.Close()
 		vpnSvc := pb.NewVPNServiceClient(conn)
 
-		if _, err := vpnSvc.Update(context.Background(), &pb.VPNUpdateRequest{IPBlock: ipblock, DNS: dns}); err != nil {
+		if _, err := vpnSvc.Update(context.Background(), &pb.VPNUpdateRequest{IpBlock: ipblock, Dns: dns}); err != nil {
 			logrus.Errorf("server can not be updated: %v", err)
 			os.Exit(1)
 			return err
