@@ -1,0 +1,126 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "auth.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/auth/authenticate": {
+      "post": {
+        "operationId": "Authenticate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbAuthAuthenticateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbAuthAuthenticateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/v1/auth/status": {
+      "get": {
+        "operationId": "Status",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbAuthStatusResponse"
+            }
+          }
+        },
+        "tags": [
+          "AuthService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserResponseUser": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "server_serial_number": {
+          "type": "string"
+        },
+        "cert": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "ip_net": {
+          "type": "string"
+        },
+        "no_gw": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "host_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "is_admin": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "pbAuthAuthenticateRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAuthAuthenticateResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAuthStatusResponse": {
+      "type": "object",
+      "properties": {
+        "is_authenticated": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "user": {
+          "$ref": "#/definitions/UserResponseUser"
+        }
+      }
+    }
+  }
+}

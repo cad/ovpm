@@ -4,12 +4,56 @@ import (
 	"os"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/pb"
+	"github.com/cad/ovpm/api/pb"
 	"golang.org/x/net/context"
 )
+
+type AuthService struct{}
+
+func (s *AuthService) Status(ctx context.Context, req *pb.AuthStatusRequest) (*pb.AuthStatusResponse, error) {
+	logrus.Debug("rpc call: auth status")
+
+	username, err := GetUsernameFromContext(ctx)
+	if err != nil {
+		logrus.Debugln(err)
+		return nil, grpc.Errorf(codes.Unauthenticated, "username not found with the provided credentials")
+	}
+
+	user, err := ovpm.GetUser(username)
+	if err != nil {
+		logrus.Debugln(err)
+		return nil, grpc.Errorf(codes.Unauthenticated, "user not found with the provided credentials")
+	}
+
+	userResp := pb.UserResponse_User{
+		Username: user.GetUsername(),
+		IsAdmin:  user.IsAdmin(),
+	}
+	return &pb.AuthStatusResponse{User: &userResp}, nil
+}
+
+func (s *AuthService) Authenticate(ctx context.Context, req *pb.AuthAuthenticateRequest) (*pb.AuthAuthenticateResponse, error) {
+	logrus.Debug("rpc call: auth authenticate")
+
+	user, err := ovpm.GetUser(req.Username)
+	if err != nil {
+		return nil, grpc.Errorf(codes.InvalidArgument, "user not found with the provided credentials")
+	}
+	if !user.CheckPassword(req.Password) {
+		return nil, grpc.Errorf(codes.InvalidArgument, "user not found with the provided credentials")
+	}
+
+	token, err := user.RenewToken()
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, "token can not be generated")
+	}
+
+	return &pb.AuthAuthenticateResponse{Token: token}, nil
+}
 
 type UserService struct{}
 
@@ -28,9 +72,9 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
 			CreatedAt:          user.GetCreatedAt(),
-			IPNet:              user.GetIPNet(),
-			NoGW:               user.IsNoGW(),
-			HostID:             user.GetHostID(),
+			IpNet:              user.GetIPNet(),
+			NoGw:               user.IsNoGW(),
+			HostId:             user.GetHostID(),
 			IsAdmin:            user.IsAdmin(),
 		})
 	}
@@ -41,7 +85,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostID, req.IsAdmin)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGW, req.HostId, req.IsAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +93,8 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
-		NoGW:               user.IsNoGW(),
-		HostID:             user.GetHostID(),
+		NoGw:               user.IsNoGW(),
+		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
@@ -79,7 +123,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	var admin bool
 
-	switch req.Adminpref {
+	switch req.AdminPref {
 	case pb.UserUpdateRequest_ADMIN:
 		admin = true
 	case pb.UserUpdateRequest_NOADMIN:
@@ -88,15 +132,15 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 		admin = user.IsAdmin()
 	}
 
-	err = user.Update(req.Password, noGW, req.HostID, admin)
+	err = user.Update(req.Password, noGW, req.HostId, admin)
 	if err != nil {
 		return nil, err
 	}
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
-		NoGW:               user.IsNoGW(),
-		HostID:             user.GetHostID(),
+		NoGw:               user.IsNoGW(),
+		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
 	}
 
@@ -116,7 +160,7 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
-		HostID:             user.GetHostID(),
+		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
@@ -140,7 +184,7 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 	pbUser := pb.UserResponse_User{
 		Username:           user.GetUsername(),
 		ServerSerialNumber: user.GetServerSerialNumber(),
-		HostID:             user.GetHostID(),
+		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
 	}
 	ut = append(ut, &pbUser)
@@ -183,11 +227,11 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		Port:         server.GetPort(),
 		Proto:        server.GetProto(),
 		Cert:         server.GetCert(),
-		CACert:       server.GetCACert(),
+		CaCert:       server.GetCACert(),
 		Net:          server.GetNet(),
 		Mask:         server.GetMask(),
 		CreatedAt:    server.GetCreatedAt(),
-		DNS:          server.GetDNS(),
+		Dns:          server.GetDNS(),
 	}
 	return &response, nil
 }
@@ -195,7 +239,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNInitResponse, error) {
 	logrus.Debugf("rpc call: vpn init")
 	var proto string
-	switch req.Protopref {
+	switch req.ProtoPref {
 	case pb.VPNProto_TCP:
 		proto = ovpm.TCPProto
 	case pb.VPNProto_UDP:
@@ -204,7 +248,7 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		proto = ovpm.UDPProto
 	}
 
-	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IPBlock, req.DNS); err != nil {
+	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
@@ -212,7 +256,7 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 
 func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.VPNUpdateResponse, error) {
 	logrus.Debugf("rpc call: vpn update")
-	if err := ovpm.Update(req.IPBlock, req.DNS); err != nil {
+	if err := ovpm.Update(req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be updated: %v", err)
 	}
 	return &pb.VPNUpdateResponse{}, nil
@@ -228,7 +272,7 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 	for _, network := range networks {
 		nt = append(nt, &pb.Network{
 			Name:                network.GetName(),
-			CIDR:                network.GetCIDR(),
+			Cidr:                network.GetCIDR(),
 			Type:                network.GetType().String(),
 			CreatedAt:           network.GetCreatedAt(),
 			AssociatedUsernames: network.GetAssociatedUsernames(),
@@ -241,14 +285,14 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 
 func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
 	logrus.Debugf("rpc call: network create: %s", req.Name)
-	network, err := ovpm.CreateNewNetwork(req.Name, req.CIDR, ovpm.NetworkTypeFromString(req.Type), req.Via)
+	network, err := ovpm.CreateNewNetwork(req.Name, req.Cidr, ovpm.NetworkTypeFromString(req.Type), req.Via)
 	if err != nil {
 		return nil, err
 	}
 
 	n := pb.Network{
 		Name:                network.GetName(),
-		CIDR:                network.GetCIDR(),
+		Cidr:                network.GetCIDR(),
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
@@ -272,7 +316,7 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 
 	n := pb.Network{
 		Name:                network.GetName(),
-		CIDR:                network.GetCIDR(),
+		Cidr:                network.GetCIDR(),
 		Type:                network.GetType().String(),
 		CreatedAt:           network.GetCreatedAt(),
 		AssociatedUsernames: network.GetAssociatedUsernames(),
@@ -338,9 +382,13 @@ func (s *NetworkService) Dissociate(ctx context.Context, req *pb.NetworkDissocia
 
 // NewRPCServer returns a new gRPC server.
 func NewRPCServer() *grpc.Server {
-	s := grpc.NewServer()
+	var opts []grpc.ServerOption
+	opts = append(opts, grpc.UnaryInterceptor(AuthUnaryInterceptor))
+	s := grpc.NewServer(opts...)
+	//s := grpc.NewServer()
 	pb.RegisterUserServiceServer(s, &UserService{})
 	pb.RegisterVPNServiceServer(s, &VPNService{})
 	pb.RegisterNetworkServiceServer(s, &NetworkService{})
+	pb.RegisterAuthServiceServer(s, &AuthService{})
 	return s
 }

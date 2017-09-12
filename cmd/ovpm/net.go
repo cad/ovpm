@@ -8,7 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/pb"
+	"github.com/cad/ovpm/api/pb"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
@@ -77,13 +77,13 @@ var netDefineCommand = cli.Command{
 		defer conn.Close()
 		netSvc := pb.NewNetworkServiceClient(conn)
 
-		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, CIDR: cidr, Type: typ, Via: via})
+		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, Cidr: cidr, Type: typ, Via: via})
 		if err != nil {
 			logrus.Errorf("network can not be created '%s': %v", name, err)
 			os.Exit(1)
 			return err
 		}
-		logrus.Infof("network created: %s (%s)", response.Network.Name, response.Network.CIDR)
+		logrus.Infof("network created: %s (%s)", response.Network.Name, response.Network.Cidr)
 		return nil
 	},
 }
@@ -127,13 +127,13 @@ var netListCommand = cli.Command{
 					usernameList = usernameList + fmt.Sprintf("%s, ", uname)
 				}
 			}
-			var cidr = network.CIDR
+			var cidr = network.Cidr
 			var via = network.Via
 			if via == "" {
 				via = "vpn-server"
 			}
 			if ovpm.NetworkTypeFromString(network.Type) == ovpm.ROUTE {
-				cidr = fmt.Sprintf("%s via %s", network.CIDR, via)
+				cidr = fmt.Sprintf("%s via %s", network.Cidr, via)
 			}
 			data := []string{fmt.Sprintf("%v", i+1), network.Name, cidr, network.Type, usernameList, network.CreatedAt}
 			table.Append(data)
@@ -202,7 +202,7 @@ var netUndefineCommand = cli.Command{
 			os.Exit(1)
 			return err
 		}
-		logrus.Infof("network deleted: %s (%s)", resp.Network.Name, resp.Network.CIDR)
+		logrus.Infof("network deleted: %s (%s)", resp.Network.Name, resp.Network.Cidr)
 
 		return nil
 	},

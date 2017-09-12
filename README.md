@@ -20,6 +20,7 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 - [ ] Web User Interface (WebUI)
 - [ ] Import/Export/Backup OVPM config
 - [ ] Effortless client profile (.ovpn file) delivery over Web
+- [ ] Monitoring and Quota functionality
  
 ## Installation
 **from RPM (CentOS/Fedora):**
@@ -32,7 +33,7 @@ $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 $ sudo yum install ovpm
 ```
 
-**from DEB (Ubuntu/DEBIAN):**
+**from DEB (Ubuntu/Debian):**
 
 This is tested only on Ubuntu >=16.04.3 LTS
 
@@ -56,7 +57,7 @@ $ go get -u github.com/cad/ovpm/...
 ## Start the Server
 You need to start the start OVPM server, which is called **ovpmd**, before doing anything.
 
-**CentOS/Fedora (RPM Package)**
+**CentOS/Fedora/Ubuntu/Debian (RPM or DEB Package)**
 
 Just use systemd to manage ovpmd.
 
@@ -93,7 +94,9 @@ If you just installed the ovpm from scratch you have started the **ovpm server**
 You can do so by invoking;
 
 ```bash
-$ ovpm vpn init -s <your-vpn-server's-fqdn-or-ip-addr>
+# Initialize the server by giving your VPN server's domain or IP address to ovpm.
+
+$ ovpm vpn init -s <domain-or-ip>  
 
 This operation will cause invalidation of existing user certificates.
 After this opeartion, new client config files (.ovpn) should be generated for each existing user.

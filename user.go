@@ -10,6 +10,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/pki"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
 
@@ -33,11 +34,12 @@ type dbUserModel struct {
 	NoGW               bool
 	HostID             uint32 // not user writable
 	Admin              bool
+	AuthToken          string // auth token
 }
 
 // User represents a vpn user.
 type User struct {
-	dbUserModel
+	dbUserModel // persisted fields
 }
 
 func (u *dbUserModel) setPassword(password string) error {
@@ -48,6 +50,25 @@ func (u *dbUserModel) setPassword(password string) error {
 
 	u.Hash = hashedPassword
 	return nil
+}
+
+// RenewToken generates a new AuthToken and sets it to the db.
+func (u *User) RenewToken() (string, error) {
+	token := uuid.New().String()
+	u.AuthToken = token
+	db.Save(u.dbUserModel)
+	if db.Error != nil {
+		return "", db.Error
+	}
+	return token, nil
+}
+
+// ValidateToken returns whether the given token is valid or not.
+func (u *User) ValidateToken(token string) bool {
+	if u.AuthToken == "" {
+		return false
+	}
+	return u.AuthToken == token
 }
 
 // CheckPassword returns whether the given password is correct for the user.
@@ -67,6 +88,21 @@ func GetUser(username string) (*User, error) {
 	if db.NewRecord(&user) {
 		// user is not found
 		return nil, fmt.Errorf("user not found: %s", username)
+	}
+	return &User{dbUserModel: user}, nil
+}
+
+// GetUserByToken finds and returns the user with the given token from database.
+func GetUserByToken(token string) (*User, error) {
+	if token == "" {
+		return nil, fmt.Errorf("token can not be empty")
+	}
+
+	user := dbUserModel{}
+	db.Where(&dbUserModel{AuthToken: token}).First(&user)
+	if db.NewRecord(&user) {
+		// user is not found
+		return nil, fmt.Errorf("user not found by token: <token>")
 	}
 	return &User{dbUserModel: user}, nil
 }

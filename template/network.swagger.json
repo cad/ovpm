@@ -202,25 +202,25 @@
     "pbNetwork": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         },
-        "CIDR": {
+        "cidr": {
           "type": "string"
         },
-        "Type": {
+        "type": {
           "type": "string"
         },
-        "CreatedAt": {
+        "created_at": {
           "type": "string"
         },
-        "AssociatedUsernames": {
+        "associated_usernames": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "Via": {
+        "via": {
           "type": "string"
         }
       }
@@ -228,10 +228,10 @@
     "pbNetworkAssociateRequest": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         },
-        "Username": {
+        "username": {
           "type": "string"
         }
       }
@@ -242,16 +242,16 @@
     "pbNetworkCreateRequest": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         },
-        "CIDR": {
+        "cidr": {
           "type": "string"
         },
-        "Type": {
+        "type": {
           "type": "string"
         },
-        "Via": {
+        "via": {
           "type": "string"
         }
       }
@@ -259,7 +259,7 @@
     "pbNetworkCreateResponse": {
       "type": "object",
       "properties": {
-        "Network": {
+        "network": {
           "$ref": "#/definitions/pbNetwork"
         }
       }
@@ -267,7 +267,7 @@
     "pbNetworkDeleteRequest": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         }
       }
@@ -275,7 +275,7 @@
     "pbNetworkDeleteResponse": {
       "type": "object",
       "properties": {
-        "Network": {
+        "network": {
           "$ref": "#/definitions/pbNetwork"
         }
       }
@@ -283,10 +283,10 @@
     "pbNetworkDissociateRequest": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         },
-        "Username": {
+        "username": {
           "type": "string"
         }
       }
@@ -300,7 +300,7 @@
     "pbNetworkGetAllTypesResponse": {
       "type": "object",
       "properties": {
-        "Types": {
+        "types": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/pbNetworkType"
@@ -311,7 +311,7 @@
     "pbNetworkGetAssociatedUsersRequest": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string"
         }
       }
@@ -319,7 +319,7 @@
     "pbNetworkGetAssociatedUsersResponse": {
       "type": "object",
       "properties": {
-        "Usernames": {
+        "usernames": {
           "type": "array",
           "items": {
             "type": "string"
@@ -333,7 +333,7 @@
     "pbNetworkListResponse": {
       "type": "object",
       "properties": {
-        "Networks": {
+        "networks": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/pbNetwork"
@@ -344,10 +344,10 @@
     "pbNetworkType": {
       "type": "object",
       "properties": {
-        "Type": {
+        "type": {
           "type": "string"
         },
-        "Description": {
+        "description": {
           "type": "string"
         }
       }

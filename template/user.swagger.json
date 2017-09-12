@@ -94,7 +94,7 @@
       }
     },
     "/v1/user/list": {
-      "post": {
+      "get": {
         "operationId": "List",
         "responses": {
           "200": {
@@ -104,16 +104,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbUserListRequest"
-            }
-          }
-        ],
         "tags": [
           "UserService"
         ]
@@ -176,30 +166,30 @@
     "UserResponseUser": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         },
-        "ServerSerialNumber": {
+        "server_serial_number": {
           "type": "string"
         },
-        "Cert": {
+        "cert": {
           "type": "string"
         },
-        "CreatedAt": {
+        "created_at": {
           "type": "string"
         },
-        "IPNet": {
+        "ip_net": {
           "type": "string"
         },
-        "NoGW": {
+        "no_gw": {
           "type": "boolean",
           "format": "boolean"
         },
-        "HostID": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "IsAdmin": {
+        "is_admin": {
           "type": "boolean",
           "format": "boolean"
         }
@@ -235,21 +225,21 @@
     "pbUserCreateRequest": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         },
-        "Password": {
+        "password": {
           "type": "string"
         },
-        "NoGW": {
+        "no_gW": {
           "type": "boolean",
           "format": "boolean"
         },
-        "HostID": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "IsAdmin": {
+        "is_admin": {
           "type": "boolean",
           "format": "boolean"
         }
@@ -258,7 +248,7 @@
     "pbUserDeleteRequest": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         }
       }
@@ -266,7 +256,7 @@
     "pbUserGenConfigRequest": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         }
       }
@@ -274,18 +264,15 @@
     "pbUserGenConfigResponse": {
       "type": "object",
       "properties": {
-        "ClientConfig": {
+        "client_config": {
           "type": "string"
         }
       }
     },
-    "pbUserListRequest": {
-      "type": "object"
-    },
     "pbUserRenewRequest": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         }
       }
@@ -304,23 +291,23 @@
     "pbUserUpdateRequest": {
       "type": "object",
       "properties": {
-        "Username": {
+        "username": {
           "type": "string"
         },
-        "Password": {
+        "password": {
           "type": "string"
         },
         "gwpref": {
           "$ref": "#/definitions/UserUpdateRequestGWPref"
         },
-        "HostID": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "staticpref": {
+        "static_pref": {
           "$ref": "#/definitions/UserUpdateRequestStaticPref"
         },
-        "adminpref": {
+        "admin_pref": {
           "$ref": "#/definitions/UserUpdateRequestAdminPref"
         }
       }

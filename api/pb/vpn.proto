@@ -12,24 +12,24 @@ enum VPNProto {
 
 message VPNStatusRequest {}
 message VPNInitRequest {
-  string Hostname = 1;
-  string Port = 2;
-  VPNProto Protopref = 3;
-  string IPBlock = 4;
-  string DNS = 5;
+  string hostname = 1;
+  string port = 2;
+  VPNProto proto_pref = 3;
+  string ip_block = 4;
+  string dns = 5;
 }
 
 message VPNUpdateRequest {
-  string IPBlock = 1;
-  string DNS = 2;
+  string ip_block = 1;
+  string dns = 2;
 }
 
 
 service VPNService {
   rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {
     option (google.api.http) = {
-      post: "/v1/vpn/status"
-      body: "*"
+      get: "/v1/vpn/status"
+      //body: "*"
     };}
   rpc Init (VPNInitRequest) returns (VPNInitResponse) {
     option (google.api.http) = {
@@ -45,17 +45,17 @@ service VPNService {
 }
 
 message VPNStatusResponse {
-  string Name = 1;
-  string SerialNumber = 2;
-  string Hostname = 3;
-  string Port = 4;
-  string Cert = 5;
-  string CACert = 6;
-  string Net = 7;
-  string Mask = 8;
-  string CreatedAt = 9;
-  string Proto = 10;
-  string DNS = 11;
+  string name = 1;
+  string serial_number = 2;
+  string hostname = 3;
+  string port = 4;
+  string cert = 5;
+  string ca_cert = 6;
+  string net = 7;
+  string mask = 8;
+  string created_at = 9;
+  string proto = 10;
+  string dns = 11;
 }
 message VPNInitResponse {}
 message VPNUpdateResponse {}
