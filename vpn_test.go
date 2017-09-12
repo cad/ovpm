@@ -279,12 +279,6 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	// Read file.
 	clientConfigBlob = fs["/tmp/user.ovpn"]
 
-	// Is noGW honored?
-	if strings.Contains(clientConfigBlob, "route-nopull") != noGW {
-		logrus.Info(clientConfigBlob)
-		t.Fatalf("client config generator doesn't honor NoGW")
-	}
-
 }
 
 func TestVPNGetSystemCA(t *testing.T) {
