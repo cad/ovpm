@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
@@ -24,7 +25,7 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 	}
 	endPoint := fmt.Sprintf("localhost:%s", grpcPort)
 	ctx = NewOriginTypeContext(ctx, OriginTypeREST)
-	gmux := runtime.NewServeMux()
+	gmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterVPNServiceHandlerFromEndpoint(ctx, gmux, endPoint, opts)
 	if err != nil {
@@ -68,11 +69,11 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 		Path:     "auth",
 	}, mware)
 	mux.Handle("/", mware)
-	return mux, cancel, nil
+
+	return allowCORS(mux), cancel, nil
 }
 
 func specsHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json")
 	switch r.URL.Path {
 	case "/specs/user.swagger.json":
@@ -101,4 +102,26 @@ func specsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(vpnData)
 	}
+}
+
+func preflightHandler(w http.ResponseWriter, r *http.Request) {
+	headers := []string{"Content-Type", "Accept", "Authorization"}
+	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
+	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
+	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
+	logrus.Debugf("rest: preflight request for %s", r.URL.Path)
+	return
+}
+
+func allowCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			if r.Method == "OPTIONS" && r.Header.Get("Access-Control-Request-Method") != "" {
+				preflightHandler(w, r)
+				return
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
 }

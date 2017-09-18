@@ -28,8 +28,7 @@ service AuthService {
 }
 
 message AuthStatusResponse {
-  bool is_authenticated = 1;
-  UserResponse.User user = 2;
+  UserResponse.User user = 1;
 }
 
 message AuthAuthenticateResponse {

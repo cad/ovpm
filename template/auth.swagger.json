@@ -113,10 +113,6 @@
     "pbAuthStatusResponse": {
       "type": "object",
       "properties": {
-        "is_authenticated": {
-          "type": "boolean",
-          "format": "boolean"
-        },
         "user": {
           "$ref": "#/definitions/UserResponseUser"
         }
