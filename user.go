@@ -135,6 +135,9 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	if !govalidator.IsAlphanumeric(username) {
 		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", username)
 	}
+	if username == "root" {
+		return nil, fmt.Errorf("forbidden: username root is reserved and can not be used")
+	}
 
 	ca, err := GetSystemCA()
 	if err != nil {

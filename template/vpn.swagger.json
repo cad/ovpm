@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/vpn/init": {
+    "/api/v1/vpn/init": {
       "post": {
         "operationId": "Init",
         "responses": {
@@ -41,7 +41,7 @@
         ]
       }
     },
-    "/v1/vpn/status": {
+    "/api/v1/vpn/status": {
       "get": {
         "operationId": "Status",
         "responses": {
@@ -57,7 +57,7 @@
         ]
       }
     },
-    "/v1/vpn/update": {
+    "/api/v1/vpn/update": {
       "post": {
         "operationId": "Update",
         "responses": {

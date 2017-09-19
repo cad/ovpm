@@ -56,41 +56,41 @@ message UserGenConfigRequest {
 service UserService {
   rpc List (UserListRequest) returns (UserResponse) {
     option (google.api.http) = {
-      get: "/v1/user/list"
+      get: "/api/v1/user/list"
       //body: "*"
     };
 
   }
   rpc Create (UserCreateRequest) returns (UserResponse) {
         option (google.api.http) = {
-          post: "/v1/user/create"
+          post: "/api/v1/user/create"
           body: "*"
         };
   }
   rpc Update (UserUpdateRequest) returns (UserResponse) {
         option (google.api.http) = {
-      post: "/v1/user/update"
+      post: "/api/v1/user/update"
       body: "*"
     };
 
   }
   rpc Delete (UserDeleteRequest) returns (UserResponse) {
         option (google.api.http) = {
-      post: "/v1/user/delete"
+      post: "/api/v1/user/delete"
       body: "*"
     };
 
   }
   rpc Renew (UserRenewRequest) returns (UserResponse) {
         option (google.api.http) = {
-      post: "/v1/user/renew"
+      post: "/api/v1/user/renew"
       body: "*"
     };
 
   }
   rpc GenConfig (UserGenConfigRequest) returns (UserGenConfigResponse) {
         option (google.api.http) = {
-      post: "/v1/user/genconfig"
+      post: "/api/v1/user/genconfig"
       body: "*"
     };
   }
