@@ -1,3 +1,4 @@
+#!/bin/bash
 export USER="nobody"
 export GROUP="nobody"
 id -u $USER &>/dev/null || useradd $USER
