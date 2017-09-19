@@ -47,28 +47,29 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 		return nil, cancel, err
 	}
 
-	mux.HandleFunc("/specs/", specsHandler)
+	mux.HandleFunc("/api/specs/", specsHandler)
 	mware := middleware.Redoc(middleware.RedocOpts{
-		BasePath: "/docs/",
-		SpecURL:  "/specs/user.swagger.json",
+		BasePath: "/api/docs/",
+		SpecURL:  "/api/specs/user.swagger.json",
 		Path:     "user",
 	}, gmux)
 	mware = middleware.Redoc(middleware.RedocOpts{
-		BasePath: "/docs/",
-		SpecURL:  "/specs/vpn.swagger.json",
+		BasePath: "/api/docs/",
+		SpecURL:  "/api/specs/vpn.swagger.json",
 		Path:     "vpn",
 	}, mware)
 	mware = middleware.Redoc(middleware.RedocOpts{
-		BasePath: "/docs/",
-		SpecURL:  "/specs/network.swagger.json",
+		BasePath: "/api/docs/",
+		SpecURL:  "/api/specs/network.swagger.json",
 		Path:     "network",
 	}, mware)
 	mware = middleware.Redoc(middleware.RedocOpts{
-		BasePath: "/docs/",
-		SpecURL:  "/specs/auth.swagger.json",
+		BasePath: "/api/docs/",
+		SpecURL:  "/api/specs/auth.swagger.json",
 		Path:     "auth",
 	}, mware)
-	mux.Handle("/", mware)
+	mux.Handle("/api/", mware)
+	mux.HandleFunc("/", webuiHandler)
 
 	return allowCORS(mux), cancel, nil
 }
@@ -76,31 +77,49 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 func specsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.URL.Path {
-	case "/specs/user.swagger.json":
+	case "/api/specs/user.swagger.json":
 		userData, err := bindata.Asset("template/user.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(userData)
 
-	case "/specs/network.swagger.json":
+	case "/api/specs/network.swagger.json":
 		networkData, err := bindata.Asset("template/network.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(networkData)
-	case "/specs/vpn.swagger.json":
+	case "/api/specs/vpn.swagger.json":
 		vpnData, err := bindata.Asset("template/vpn.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(vpnData)
-	case "/specs/auth.swagger.json":
+	case "/api/specs/auth.swagger.json":
 		vpnData, err := bindata.Asset("template/auth.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(vpnData)
+	}
+}
+
+func webuiHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/bundle.js":
+		userData, err := bindata.Asset("template/bundle.js")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Write(userData)
+
+	default:
+		networkData, err := bindata.Asset("template/index.html")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Write(networkData)
 	}
 }
 

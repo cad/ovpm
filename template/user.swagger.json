@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/user/create": {
+    "/api/v1/user/create": {
       "post": {
         "operationId": "Create",
         "responses": {
@@ -41,7 +41,7 @@
         ]
       }
     },
-    "/v1/user/delete": {
+    "/api/v1/user/delete": {
       "post": {
         "operationId": "Delete",
         "responses": {
@@ -67,7 +67,7 @@
         ]
       }
     },
-    "/v1/user/genconfig": {
+    "/api/v1/user/genconfig": {
       "post": {
         "operationId": "GenConfig",
         "responses": {
@@ -93,7 +93,7 @@
         ]
       }
     },
-    "/v1/user/list": {
+    "/api/v1/user/list": {
       "get": {
         "operationId": "List",
         "responses": {
@@ -109,7 +109,7 @@
         ]
       }
     },
-    "/v1/user/renew": {
+    "/api/v1/user/renew": {
       "post": {
         "operationId": "Renew",
         "responses": {
@@ -135,7 +135,7 @@
         ]
       }
     },
-    "/v1/user/update": {
+    "/api/v1/user/update": {
       "post": {
         "operationId": "Update",
         "responses": {

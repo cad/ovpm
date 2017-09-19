@@ -23,6 +23,13 @@ func (s *AuthService) Status(ctx context.Context, req *pb.AuthStatusRequest) (*p
 		return nil, grpc.Errorf(codes.Unauthenticated, "username not found with the provided credentials")
 	}
 
+	if username == "root" {
+		userResp := pb.UserResponse_User{
+			Username: username,
+			IsAdmin:  true,
+		}
+		return &pb.AuthStatusResponse{User: &userResp, IsRoot: true}, nil
+	}
 	user, err := ovpm.GetUser(username)
 	if err != nil {
 		logrus.Debugln(err)

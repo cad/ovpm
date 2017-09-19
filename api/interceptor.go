@@ -35,7 +35,7 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 		// Check if the remote user IP addr is a loopback IP addr.
 		if ip := net.ParseIP(userAgentIP); !ip.IsLoopback() {
 			enableAuthCheck = true
-			logrus.Debugf("grpc request user agent ips include non-link local ip, enabling auth check module '%s'", userAgentIP)
+			logrus.Debugf("grpc request user agent ips include non-loopback ip, enabling auth check module '%s'", userAgentIP)
 			break
 		}
 
@@ -49,6 +49,7 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 
 	if !enableAuthCheck {
 		logrus.Debugf("rpc: auth-check not enabled: %s", md["x-forwarded-for"])
+		ctx = NewUsernameContext(ctx, "root")
 	}
 
 	if enableAuthCheck {

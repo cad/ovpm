@@ -28,17 +28,17 @@ message VPNUpdateRequest {
 service VPNService {
   rpc Status (VPNStatusRequest) returns (VPNStatusResponse) {
     option (google.api.http) = {
-      get: "/v1/vpn/status"
+      get: "/api/v1/vpn/status"
       //body: "*"
     };}
   rpc Init (VPNInitRequest) returns (VPNInitResponse) {
     option (google.api.http) = {
-      post: "/v1/vpn/init"
+      post: "/api/v1/vpn/init"
       body: "*"
     };}
   rpc Update (VPNUpdateRequest) returns (VPNUpdateResponse) {
     option (google.api.http) = {
-      post: "/v1/vpn/update"
+      post: "/api/v1/vpn/update"
       body: "*"
     };}
 

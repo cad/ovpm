@@ -142,9 +142,9 @@ func RegisterAuthServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn
 }
 
 var (
-	pattern_AuthService_Status_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "status"}, ""))
+	pattern_AuthService_Status_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "auth", "status"}, ""))
 
-	pattern_AuthService_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "authenticate"}, ""))
+	pattern_AuthService_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "auth", "authenticate"}, ""))
 )
 
 var (

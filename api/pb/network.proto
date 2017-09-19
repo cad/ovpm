@@ -30,49 +30,49 @@ message NetworkGetAssociatedUsersRequest {
 service NetworkService {
   rpc Create (NetworkCreateRequest) returns (NetworkCreateResponse) {
     option (google.api.http) = {
-      post: "/v1/network/create"
+      post: "/api/v1/network/create"
       body: "*"
     };
 
   }
   rpc List (NetworkListRequest) returns (NetworkListResponse) {
     option (google.api.http) = {
-      post: "/v1/network/list"
-      body: "*"
+      get: "/api/v1/network/list"
+      //body: "*"
     };
 
   }
   rpc Delete (NetworkDeleteRequest) returns (NetworkDeleteResponse) {
     option (google.api.http) = {
-      post: "/v1/network/delete"
+      post: "/api/v1/network/delete"
       body: "*"
     };
 
   }
   rpc GetAllTypes(NetworkGetAllTypesRequest) returns (NetworkGetAllTypesResponse) {
     option (google.api.http) = {
-      post: "/v1/network/getalltypes"
-      body: "*"
+      get: "/api/v1/network/getalltypes"
+      //body: "*"
     };
 
   }
   rpc GetAssociatedUsers(NetworkGetAssociatedUsersRequest) returns (NetworkGetAssociatedUsersResponse) {
     option (google.api.http) = {
-      post: "/v1/network/getassociatedusers"
-      body: "*"
+      get: "/api/v1/network/getassociatedusers"
+      //body: "*"
     };
 
   }
   rpc Associate (NetworkAssociateRequest) returns (NetworkAssociateResponse) {
     option (google.api.http) = {
-      post: "/v1/network/associate"
+      post: "/api/v1/network/associate"
       body: "*"
     };
 
   }
   rpc Dissociate (NetworkDissociateRequest) returns (NetworkDissociateResponse) {
     option (google.api.http) = {
-      post: "/v1/network/dissociate"
+      post: "/api/v1/network/dissociate"
       body: "*"
     };
 
