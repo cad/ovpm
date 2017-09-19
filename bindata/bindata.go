@@ -91,7 +91,7 @@ func templateAuthSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2404, mode: os.FileMode(420), modTime: time.Unix(1505803820, 0)}
+	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2404, mode: os.FileMode(420), modTime: time.Unix(1505820134, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -191,7 +191,7 @@ func templateNetworkSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/network.swagger.json", size: 7498, mode: os.FileMode(420), modTime: time.Unix(1505803820, 0)}
+	info := bindataFileInfo{name: "template/network.swagger.json", size: 7498, mode: os.FileMode(420), modTime: time.Unix(1505820134, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -211,7 +211,7 @@ func templateServerConfTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9598, mode: os.FileMode(420), modTime: time.Unix(1505767450, 0)}
+	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9598, mode: os.FileMode(420), modTime: time.Unix(1505803900, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -231,7 +231,7 @@ func templateUserSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/user.swagger.json", size: 6532, mode: os.FileMode(420), modTime: time.Unix(1505803820, 0)}
+	info := bindataFileInfo{name: "template/user.swagger.json", size: 6532, mode: os.FileMode(420), modTime: time.Unix(1505820134, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -251,7 +251,7 @@ func templateVpnSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3322, mode: os.FileMode(420), modTime: time.Unix(1505803820, 0)}
+	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3322, mode: os.FileMode(420), modTime: time.Unix(1505820134, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
