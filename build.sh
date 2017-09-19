@@ -1,23 +1,21 @@
 #!/bin/bash
 set -ex
 
+## After Docker
 echo "travis build no: $TRAVIS_BUILD_NUMBER"
 echo "travis tag: $TRAVIS_TAG"
 echo "travis go version: $TRAVIS_GO_VERSION"
 
-# deps
-rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
-curl -s https://mirror.go-repo.io/fedora/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
-yum -y install golang ruby ruby-devel gcc make redhat-rpm-config git rpm-build rpmdevtools createrepo reprepro
-gem install fpm
-
-# prep
-export DIR="/fs/src/github.com/cad/ovpm"
-export RELEASEDIR=$DIR/release
-export UNITDIR="/usr/lib/systemd/system/"
-export GOPATH="/fs/"
 export RELEASEVER=${TRAVIS_BUILD_NUMBER:-"1"}
 echo "releasever: $RELEASEVER"
+
+export VERSION="0.0"
+export LOCAL_GIT_TAG=`git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2`
+if [ "$LOCAL_GIT_TAG" != "undefined" ]; then
+    export VERSION=$LOCAL_GIT_TAG
+fi
+echo "Version is $VERSION"
+
 mkdir -p $RELEASEDIR/
 mkdir -p $RELEASEDIR/build/
 mkdir -p $RELEASEDIR/rpm/
@@ -41,9 +39,9 @@ cp $DIR/contrib/yumrepo.repo $RELEASEDIR/rpm/ovpm.repo
 cp $DIR/contrib/deb-repo-config $RELEASEDIR/deb/conf/distributions
 
 #package
-fpm -s dir -t rpm -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/rpm -C $RELEASEDIR/build .
+fpm -s dir -t rpm -n ovpm --version $VERSION  --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --before-install $DIR/contrib/beforeinstall.sh --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/rpm -C $RELEASEDIR/build .
 
-fpm -s dir -t deb -n ovpm --version `git name-rev --tags --name-only $(git rev-parse HEAD) | cut -d 'v' -f 2` --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/deb -C $RELEASEDIR/build .
+fpm -s dir -t deb -n ovpm --version $VERSION --iteration $RELEASEVER --depends openvpn --description "OVPM makes all aspects of OpenVPN server administration a breeze." --before-install $DIR/contrib/beforeinstall.sh --after-install $DIR/contrib/afterinstall.sh --before-remove $DIR/contrib/beforeremove.sh --after-upgrade $DIR/contrib/afterupgrade.sh -p $RELEASEDIR/deb -C $RELEASEDIR/build .
 
 #create rpm repo
 createrepo --database $RELEASEDIR/rpm
@@ -53,3 +51,4 @@ reprepro -b $RELEASEDIR/deb/ includedeb ovpm $RELEASEDIR/deb/*.deb
 
 # clean
 rm -rf $RELEASEDIR/build
+echo "packages are ready at ./deb/ and ./rpm/"
