@@ -41,10 +41,10 @@ func (s *AuthService) Authenticate(ctx context.Context, req *pb.AuthAuthenticate
 
 	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
-		return nil, grpc.Errorf(codes.InvalidArgument, "user not found with the provided credentials")
+		return nil, grpc.Errorf(codes.Unauthenticated, "user not found with the provided credentials")
 	}
 	if !user.CheckPassword(req.Password) {
-		return nil, grpc.Errorf(codes.InvalidArgument, "user not found with the provided credentials")
+		return nil, grpc.Errorf(codes.Unauthenticated, "user not found with the provided credentials")
 	}
 
 	token, err := user.RenewToken()
