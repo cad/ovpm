@@ -17,7 +17,7 @@ func authRequired(ctx gcontext.Context, req interface{}, handler grpc.UnaryHandl
 	token, err := authzTokenFromContext(ctx)
 	if err != nil {
 		logrus.Debugln("rpc: auth denied because token can not be gathered from header contest")
-		return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
+		return nil, grpc.Errorf(codes.Unauthenticated, err.Error())
 	}
 	user, err := ovpm.GetUserByToken(token)
 	if err != nil {
