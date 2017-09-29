@@ -50,6 +50,7 @@ type dbServerModel struct {
 // Server represents VPN server.
 type Server struct {
 	dbServerModel
+	webPort string
 }
 
 // CheckSerial takes a serial number and checks it against the current server's serial number.
@@ -816,7 +817,11 @@ func emitIptables() error {
 			if err != nil {
 				return err
 			}
+
+			// Find associated users and emit iptables configs for the users
+			// regarding the network's type and attributes.
 			for _, user := range users {
+				// Find out if the user is associated or not.
 				var found bool
 				for _, auser := range associatedUsernames {
 					if user.Username == auser {

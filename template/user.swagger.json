@@ -231,7 +231,7 @@
         "password": {
           "type": "string"
         },
-        "no_gW": {
+        "no_gw": {
           "type": "boolean",
           "format": "boolean"
         },

@@ -122,7 +122,7 @@ var userCreateCommand = cli.Command{
 		userSvc := pb.NewUserServiceClient(conn)
 
 		response, err := userSvc.Create(context.Background(),
-			&pb.UserCreateRequest{Username: username, Password: password, NoGW: noGW, HostId: hostid, IsAdmin: admin},
+			&pb.UserCreateRequest{Username: username, Password: password, NoGw: noGW, HostId: hostid, IsAdmin: admin},
 		)
 		if err != nil {
 			logrus.Errorf("user can not be created '%s': %v", username, err)

@@ -11,7 +11,7 @@ message UserListRequest {
 message UserCreateRequest {
   string username = 1;
   string password = 2;
-  bool no_gW = 3;
+  bool no_gw = 3;
   uint32 host_id = 4;
   bool is_admin = 5;
 }

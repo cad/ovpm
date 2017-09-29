@@ -17,7 +17,7 @@ export default class UserEdit extends React.Component {
             password: "",
             staticIP: this.props.staticIP ? this.props.staticIP : "",
             ipAllocationMethod: this.props.ipAllocationMethod ? this.props.ipAllocationMethod : "dynamic",
-            pushGW: this.props.pushGW ? this.props.pushGW : false,
+            pushGW: this.props.pushGW != undefined ? this.props.pushGW : true,
             isAdmin: this.props.isAdmin ? this.props.isAdmin : false,
         }
 
