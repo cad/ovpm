@@ -147,7 +147,7 @@ var vpnInitCommand = cli.Command{
 var vpnUpdateCommand = cli.Command{
 	Name:    "update",
 	Usage:   "Update VPN server.",
-	Aliases: []string{"i"},
+	Aliases: []string{"u"},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "net, n",

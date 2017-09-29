@@ -1,0 +1,9 @@
+{
+  "presets": [
+    ["es2015", {"modules": false}],
+    // webpack understands the native import syntax, and uses it for tree shaking
+
+    "react"
+    // Transpile React components to JavaScript
+  ]
+}

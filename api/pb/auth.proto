@@ -16,19 +16,20 @@ message AuthAuthenticateRequest {
 service AuthService {
   rpc Status (AuthStatusRequest) returns (AuthStatusResponse) {
     option (google.api.http) = {
-      get: "/v1/auth/status"
+      get: "/api/v1/auth/status"
       //body: "*"
     };}
 
   rpc Authenticate (AuthAuthenticateRequest) returns (AuthAuthenticateResponse) {
     option (google.api.http) = {
-      post: "/v1/auth/authenticate"
+      post: "/api/v1/auth/authenticate"
       body: "*"
     };}
 }
 
 message AuthStatusResponse {
   UserResponse.User user = 1;
+  bool is_root = 2;
 }
 
 message AuthAuthenticateResponse {

@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/auth/authenticate": {
+    "/api/v1/auth/authenticate": {
       "post": {
         "operationId": "Authenticate",
         "responses": {
@@ -41,7 +41,7 @@
         ]
       }
     },
-    "/v1/auth/status": {
+    "/api/v1/auth/status": {
       "get": {
         "operationId": "Status",
         "responses": {
@@ -115,6 +115,10 @@
       "properties": {
         "user": {
           "$ref": "#/definitions/UserResponseUser"
+        },
+        "is_root": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     }

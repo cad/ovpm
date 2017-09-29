@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/network/associate": {
+    "/api/v1/network/associate": {
       "post": {
         "operationId": "Associate",
         "responses": {
@@ -41,7 +41,7 @@
         ]
       }
     },
-    "/v1/network/create": {
+    "/api/v1/network/create": {
       "post": {
         "operationId": "Create",
         "responses": {
@@ -67,7 +67,7 @@
         ]
       }
     },
-    "/v1/network/delete": {
+    "/api/v1/network/delete": {
       "post": {
         "operationId": "Delete",
         "responses": {
@@ -93,7 +93,7 @@
         ]
       }
     },
-    "/v1/network/dissociate": {
+    "/api/v1/network/dissociate": {
       "post": {
         "operationId": "Dissociate",
         "responses": {
@@ -119,8 +119,8 @@
         ]
       }
     },
-    "/v1/network/getalltypes": {
-      "post": {
+    "/api/v1/network/getalltypes": {
+      "get": {
         "operationId": "GetAllTypes",
         "responses": {
           "200": {
@@ -130,23 +130,13 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbNetworkGetAllTypesRequest"
-            }
-          }
-        ],
         "tags": [
           "NetworkService"
         ]
       }
     },
-    "/v1/network/getassociatedusers": {
-      "post": {
+    "/api/v1/network/getassociatedusers": {
+      "get": {
         "operationId": "GetAssociatedUsers",
         "responses": {
           "200": {
@@ -158,12 +148,10 @@
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbNetworkGetAssociatedUsersRequest"
-            }
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -171,8 +159,8 @@
         ]
       }
     },
-    "/v1/network/list": {
-      "post": {
+    "/api/v1/network/list": {
+      "get": {
         "operationId": "List",
         "responses": {
           "200": {
@@ -182,16 +170,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbNetworkListRequest"
-            }
-          }
-        ],
         "tags": [
           "NetworkService"
         ]
@@ -294,9 +272,6 @@
     "pbNetworkDissociateResponse": {
       "type": "object"
     },
-    "pbNetworkGetAllTypesRequest": {
-      "type": "object"
-    },
     "pbNetworkGetAllTypesResponse": {
       "type": "object",
       "properties": {
@@ -305,14 +280,6 @@
           "items": {
             "$ref": "#/definitions/pbNetworkType"
           }
-        }
-      }
-    },
-    "pbNetworkGetAssociatedUsersRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
         }
       }
     },
@@ -326,9 +293,6 @@
           }
         }
       }
-    },
-    "pbNetworkListRequest": {
-      "type": "object"
     },
     "pbNetworkListResponse": {
       "type": "object",
