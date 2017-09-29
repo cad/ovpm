@@ -197,7 +197,8 @@ export default class AdminDashboard extends React.Component {
             host_id: 0, // handle this host_id problem
             is_admin: user.isAdmin,
         }
-        userObj.gwpref = user.pushGW ? "GW" : "NOGW"
+        console.log("USER", user)
+        userObj.no_gw = !user.pushGW
         userObj.admin_pref = user.isAdmin ? "ADMIN" : "NOADMIN"
         userObj.host_id = user.ipAllocationMethod === "static" ? dot2num(user.staticIP) : 0
         userObj.static_pref = user.ipAllocationMethod === "static" ? "STATIC" : "NOSTATIC"

@@ -37,7 +37,11 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "port",
-			Usage: "port number for daemon to listen on",
+			Usage: "port number for gRPC API daemon",
+		},
+		cli.StringFlag{
+			Name:  "web-port",
+			Usage: "port number for the REST API daemon",
 		},
 	}
 	app.Before = func(c *cli.Context) error {
@@ -57,7 +61,13 @@ func main() {
 		if port == "" {
 			port = "9090"
 		}
-		s := newServer(port)
+
+		webPort := c.String("web-port")
+		if webPort == "" {
+			webPort = "8080"
+		}
+
+		s := newServer(port, webPort)
 		s.start()
 		s.waitForInterrupt()
 		s.stop()
@@ -77,7 +87,7 @@ type server struct {
 	done       chan bool
 }
 
-func newServer(port string) *server {
+func newServer(port, webPort string) *server {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -110,7 +120,7 @@ func newServer(port string) *server {
 			grpcServer: rpcServer,
 			restServer: restServer,
 			restCancel: context.CancelFunc(restCancel),
-			restPort:   increasePort(port),
+			restPort:   webPort,
 			signal:     sigs,
 			done:       done,
 			grpcPort:   port,
