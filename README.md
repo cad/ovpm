@@ -18,7 +18,7 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 - [x] Network management functionality
 - [x] Command Line Interface (CLI)
 - [x] API (REST and gRPC)
-- [ ] Web User Interface (WebUI)
+- [x] Web User Interface (WebUI)
 - [ ] Import/Export/Backup OVPM config
 - [ ] Effortless client profile (.ovpn file) delivery over Web
 - [ ] Monitoring and Quota functionality
