@@ -6,6 +6,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
+	"github.com/cad/ovpm/permset"
 	gcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,7 +25,17 @@ func authRequired(ctx gcontext.Context, req interface{}, handler grpc.UnaryHandl
 		logrus.Debugln("rpc: auth denied because user with this token can not be found")
 		return nil, grpc.Errorf(codes.Unauthenticated, "access denied")
 	}
+
+	// Set user's permissions according to it's criterias.
+	var permissions permset.Permset
+	if user.IsAdmin() {
+		permissions = permset.New(ovpm.AdminPerms()...)
+	} else {
+		permissions = permset.New(ovpm.UserPerms()...)
+	}
+
 	newCtx := NewUsernameContext(ctx, user.GetUsername())
+	newCtx = permset.NewContext(newCtx, permissions)
 	return handler(newCtx, req)
 }
 

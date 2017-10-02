@@ -6,6 +6,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
+	"github.com/cad/ovpm"
+	"github.com/cad/ovpm/permset"
 	gcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -50,6 +52,8 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 	if !enableAuthCheck {
 		logrus.Debugf("rpc: auth-check not enabled: %s", md["x-forwarded-for"])
 		ctx = NewUsernameContext(ctx, "root")
+		permissions := permset.New(ovpm.AdminPerms()...)
+		ctx = permset.NewContext(ctx, permissions)
 	}
 
 	if enableAuthCheck {

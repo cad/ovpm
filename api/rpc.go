@@ -9,6 +9,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
+	"github.com/cad/ovpm/permset"
 	"golang.org/x/net/context"
 )
 
@@ -66,6 +67,16 @@ type UserService struct{}
 
 func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserResponse, error) {
 	logrus.Debug("rpc call: user list")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "permset not found within the context")
+	}
+
+	// Check perms.
+	if !perms.Contains(ovpm.GetAnyUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.GetAnyUserPerm is required for this operation")
+	}
+
 	var ut []*pb.UserResponse_User
 
 	users, err := ovpm.GetAllUsers()
@@ -91,6 +102,16 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 
 func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*pb.UserResponse, error) {
 	logrus.Debugf("rpc call: user create: %s", req.Username)
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "permset not found within the context")
+	}
+
+	// Check perms.
+	if !perms.Contains(ovpm.CreateUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.CreateUserPerm is required for this operation")
+	}
+
 	var ut []*pb.UserResponse_User
 	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGw, req.HostId, req.IsAdmin)
 	if err != nil {
@@ -139,21 +160,53 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 		admin = user.IsAdmin()
 	}
 
-	err = user.Update(req.Password, noGW, req.HostId, admin)
+	perms, err := permset.FromContext(ctx)
 	if err != nil {
-		return nil, err
-	}
-	pbUser := pb.UserResponse_User{
-		Username:           user.GetUsername(),
-		ServerSerialNumber: user.GetServerSerialNumber(),
-		NoGw:               user.IsNoGW(),
-		HostId:             user.GetHostID(),
-		IsAdmin:            user.IsAdmin(),
+		return nil, grpc.Errorf(codes.Unauthenticated, "permset not found within the context")
 	}
 
-	ut = append(ut, &pbUser)
+	username, err := GetUsernameFromContext(ctx)
+	if err != nil {
+		logrus.Debugln(err)
+		return nil, grpc.Errorf(codes.Unauthenticated, "username not found with the provided credentials")
+	}
 
-	return &pb.UserResponse{Users: ut}, nil
+	// User has admin perms?
+	if perms.Contains(ovpm.UpdateAnyUserPerm) {
+		err = user.Update(req.Password, noGW, req.HostId, admin)
+		if err != nil {
+			return nil, err
+		}
+		ut = append(ut, &pb.UserResponse_User{
+			Username:           user.GetUsername(),
+			ServerSerialNumber: user.GetServerSerialNumber(),
+			NoGw:               user.IsNoGW(),
+			HostId:             user.GetHostID(),
+			IsAdmin:            user.IsAdmin(),
+		})
+		return &pb.UserResponse{Users: ut}, nil
+	}
+
+	// User has self update perms?
+	if perms.Contains(ovpm.UpdateSelfPerm) {
+		if user.GetUsername() != username {
+			return nil, grpc.Errorf(codes.PermissionDenied, "Caller can only update their user with ovpm.UpdateSelfPerm")
+		}
+
+		err = user.Update(req.Password, noGW, req.HostId, admin)
+		if err != nil {
+			return nil, err
+		}
+		ut = append(ut, &pb.UserResponse_User{
+			Username:           user.GetUsername(),
+			ServerSerialNumber: user.GetServerSerialNumber(),
+			NoGw:               user.IsNoGW(),
+			HostId:             user.GetHostID(),
+			IsAdmin:            user.IsAdmin(),
+		})
+		return &pb.UserResponse{Users: ut}, nil
+	}
+	return nil, grpc.Errorf(codes.PermissionDenied, "Permissions are required for this operation.")
 }
 
 func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*pb.UserResponse, error) {
@@ -162,6 +215,15 @@ func (s *UserService) Delete(ctx context.Context, req *pb.UserDeleteRequest) (*p
 	user, err := ovpm.GetUser(req.Username)
 	if err != nil {
 		return nil, err
+	}
+
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.DeleteAnyUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.DeleteAnyUserPerm is required for this operation.")
 	}
 
 	pbUser := pb.UserResponse_User{
@@ -196,6 +258,15 @@ func (s *UserService) Renew(ctx context.Context, req *pb.UserRenewRequest) (*pb.
 	}
 	ut = append(ut, &pbUser)
 
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.RenewAnyUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.RenewAnyUserPerm is required for this operation.")
+	}
+
 	err = user.Renew()
 	if err != nil {
 		return nil, err
@@ -210,12 +281,37 @@ func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigReques
 	if err != nil {
 		return nil, err
 	}
-	configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
+	username, err := GetUsernameFromContext(ctx)
 	if err != nil {
-		return nil, err
+		logrus.Debugln(err)
+		return nil, grpc.Errorf(codes.Unauthenticated, "username not found with the provided credentials")
 	}
 
-	return &pb.UserGenConfigResponse{ClientConfig: configBlob}, nil
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if perms.Contains(ovpm.GenConfigAnyUserPerm) {
+		configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
+		if err != nil {
+			return nil, err
+		}
+		return &pb.UserGenConfigResponse{ClientConfig: configBlob}, nil
+	}
+
+	if perms.Contains(ovpm.GenConfigSelfPerm) {
+		if user.GetUsername() != username {
+			return nil, grpc.Errorf(codes.PermissionDenied, "Caller can only genconfig for their user.")
+		}
+		configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
+		if err != nil {
+			return nil, err
+		}
+		return &pb.UserGenConfigResponse{ClientConfig: configBlob}, nil
+	}
+
+	return nil, grpc.Errorf(codes.PermissionDenied, "Permissions are required for this operation.")
 }
 
 type VPNService struct{}
@@ -225,6 +321,15 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 	server, err := ovpm.GetServerInstance()
 	if err != nil {
 		return nil, err
+	}
+
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.GetVPNStatusPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.GetVPNStatusPerm is required for this operation.")
 	}
 
 	response := pb.VPNStatusResponse{
@@ -255,6 +360,15 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		proto = ovpm.UDPProto
 	}
 
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.InitVPNPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.InitVPNPerm is required for this operation.")
+	}
+
 	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
@@ -263,6 +377,15 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 
 func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.VPNUpdateResponse, error) {
 	logrus.Debugf("rpc call: vpn update")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.UpdateVPNPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.UpdateVPNPerm is required for this operation.")
+	}
+
 	if err := ovpm.Update(req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be updated: %v", err)
 	}
@@ -274,6 +397,15 @@ type NetworkService struct{}
 func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (*pb.NetworkListResponse, error) {
 	logrus.Debug("rpc call: network list")
 	var nt []*pb.Network
+
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.ListNetworksPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.ListNetworksPerm is required for this operation.")
+	}
 
 	networks := ovpm.GetAllNetworks()
 	for _, network := range networks {
@@ -292,6 +424,15 @@ func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (
 
 func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateRequest) (*pb.NetworkCreateResponse, error) {
 	logrus.Debugf("rpc call: network create: %s", req.Name)
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.CreateNetworkPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.CreateNetworkPerm is required for this operation.")
+	}
+
 	network, err := ovpm.CreateNewNetwork(req.Name, req.Cidr, ovpm.NetworkTypeFromString(req.Type), req.Via)
 	if err != nil {
 		return nil, err
@@ -311,6 +452,15 @@ func (s *NetworkService) Create(ctx context.Context, req *pb.NetworkCreateReques
 
 func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteRequest) (*pb.NetworkDeleteResponse, error) {
 	logrus.Debugf("rpc call: network delete: %s", req.Name)
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.DeleteNetworkPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.DeleteNetworkPerm is required for this operation.")
+	}
+
 	network, err := ovpm.GetNetwork(req.Name)
 	if err != nil {
 		return nil, err
@@ -336,6 +486,16 @@ func (s *NetworkService) Delete(ctx context.Context, req *pb.NetworkDeleteReques
 func (s *NetworkService) GetAllTypes(ctx context.Context, req *pb.NetworkGetAllTypesRequest) (*pb.NetworkGetAllTypesResponse, error) {
 	logrus.Debugf("rpc call: network get-types")
 	var networkTypes []*pb.NetworkType
+
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.GetNetworkTypesPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.GetNetworkTypesPerm is required for this operation.")
+	}
+
 	for _, nt := range ovpm.GetAllNetworkTypes() {
 		if nt == ovpm.UNDEFINEDNET {
 			continue
@@ -348,6 +508,15 @@ func (s *NetworkService) GetAllTypes(ctx context.Context, req *pb.NetworkGetAllT
 
 func (s *NetworkService) GetAssociatedUsers(ctx context.Context, req *pb.NetworkGetAssociatedUsersRequest) (*pb.NetworkGetAssociatedUsersResponse, error) {
 	logrus.Debugf("rpc call: network get-associated-users")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.GetNetworkAssociatedUsersPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.GetNetworkAssociatedUsersPerm is required for this operation.")
+	}
+
 	network, err := ovpm.GetNetwork(req.Name)
 	if err != nil {
 		return nil, err
@@ -358,6 +527,14 @@ func (s *NetworkService) GetAssociatedUsers(ctx context.Context, req *pb.Network
 
 func (s *NetworkService) Associate(ctx context.Context, req *pb.NetworkAssociateRequest) (*pb.NetworkAssociateResponse, error) {
 	logrus.Debugf("rpc call: network associate")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.AssociateNetworkUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.AssociateNetworkUserPerm is required for this operation.")
+	}
 
 	network, err := ovpm.GetNetwork(req.Name)
 	if err != nil {
@@ -373,6 +550,14 @@ func (s *NetworkService) Associate(ctx context.Context, req *pb.NetworkAssociate
 
 func (s *NetworkService) Dissociate(ctx context.Context, req *pb.NetworkDissociateRequest) (*pb.NetworkDissociateResponse, error) {
 	logrus.Debugf("rpc call: network dissociate")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.DissociateNetworkUserPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.DissociateNetworkUserPerm is required for this operation.")
+	}
 
 	network, err := ovpm.GetNetwork(req.Name)
 	if err != nil {
