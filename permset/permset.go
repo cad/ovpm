@@ -1,3 +1,4 @@
+// Package permset provides primitives for permission management.
 package permset
 
 import (
