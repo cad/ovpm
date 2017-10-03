@@ -6,4 +6,5 @@
 //go:generate cp webui/ovpm/public/index.html template/
 //go:generate cp webui/ovpm/public/bundle.js template/
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
+
 package ovpm
