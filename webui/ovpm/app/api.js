@@ -4,7 +4,7 @@
 export var baseURL = window.location.protocol + "//" + window.location.host + "/api/v1"
 
 if (process.env.NODE_ENV !== 'production') {
-    baseURL = "http://172.16.16.149:9091/api/v1"
+    baseURL = "http://172.16.16.79:9091/api/v1"
 }
 
 export const endpoints = {
