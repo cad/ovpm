@@ -3,6 +3,7 @@ import React from 'react';
 import {GetAuthToken, ClearAuthToken} from '../../../utils/auth.js';
 import {API} from '../../../utils/restClient.js';
 import {baseURL, endpoints} from '../../../api.js';
+import { Redirect } from 'react-router'
 import Panel from 'muicss/lib/react/panel';
 import Button from 'muicss/lib/react/button';
 import Container from 'muicss/lib/react/container';
@@ -68,6 +69,7 @@ export default class AdminDashboard extends React.Component {
         super(props)
 
         this.state = {
+            logout: false,
             users: [],
             networks: [],
             vpn: {},
@@ -404,11 +406,18 @@ export default class AdminDashboard extends React.Component {
         console.log(error)
     }
 
-
+    handleLogout() {
+        ClearAuthToken()
+        this.setState({logout: true})
+    }
 
 
 
     render() {
+        if (this.state.logout) {
+            return <Redirect to="/login" />
+        }
+
         let users = []
         for (var i = 0; i < this.state.users.length; i++) {
             let isStatic = ""
@@ -472,6 +481,7 @@ export default class AdminDashboard extends React.Component {
         return (
             <Container>
                 <Panel>
+                    <Button className="mui--pull-right" color="primary" onClick={this.handleLogout.bind(this)}>Logout</Button>
                     <Container>
                         <Modal isOpen={this.state.modal === CREATINGNEWUSER} contentLabel="Modal" style={modalStyle}>
                             <UserEdit title="Create New User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleNewUserSave.bind(this)} isUsernameDisabled={false}/>
