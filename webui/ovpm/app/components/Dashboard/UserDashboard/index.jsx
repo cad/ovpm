@@ -117,7 +117,7 @@ export default class UserDashboard extends React.Component {
         )
 
         return (
-            <Container>
+            <Container style={{"padding-top":"5%"}}>
                 {passwordResetModal}
                 <Panel>
                     <p>Welcome, <b>{this.props.username}</b> (<Link to="/logout">logout</Link>)!</p>

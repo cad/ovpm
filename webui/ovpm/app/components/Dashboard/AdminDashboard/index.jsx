@@ -479,7 +479,7 @@ export default class AdminDashboard extends React.Component {
         }
 
         return (
-            <Container>
+            <Container style={{"padding-top":"5%"}}>
                 <Panel>
                     <Button className="mui--pull-right" color="primary" onClick={this.handleLogout.bind(this)}>Logout</Button>
                     <Container>
