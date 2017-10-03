@@ -1,11 +1,17 @@
 # Change Log
 
+## [v0.2.0](https://github.com/cad/ovpm/tree/v0.2.0) (2017-10-03)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.18...v0.2.0)
+
+**Fixed bugs:**
+
+- Ubuntu Group needs to be "nogroup" [\#48](https://github.com/cad/ovpm/issues/48)
+
+## [v0.1.18](https://github.com/cad/ovpm/tree/v0.1.18) (2017-09-19)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.1.17...v0.1.18)
+
 ## [v0.1.17](https://github.com/cad/ovpm/tree/v0.1.17) (2017-09-19)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.16...v0.1.17)
-
-**Enhancements:**
-
-  fix package generation and improve build system
 
 ## [v0.1.16](https://github.com/cad/ovpm/tree/v0.1.16) (2017-09-19)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.15...v0.1.16)
@@ -129,4 +135,3 @@
 - implement remote control proto [\#8](https://github.com/cad/ovpm/issues/8)
 - write docs [\#4](https://github.com/cad/ovpm/issues/4)
 - write unit tests [\#3](https://github.com/cad/ovpm/issues/3)
-
