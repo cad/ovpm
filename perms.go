@@ -47,7 +47,7 @@ func AdminPerms() []permset.Perm {
 		UpdateVPNPerm,
 		ListNetworksPerm,
 		CreateNetworkPerm,
-		DeleteAnyUserPerm,
+		DeleteNetworkPerm,
 		GetNetworkTypesPerm,
 		GetNetworkAssociatedUsersPerm,
 		AssociateNetworkUserPerm,
