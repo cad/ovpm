@@ -81,17 +81,14 @@ Create a vpn user and export vpn profile for the created user.
 ```bash
 # We should init after fresh install
 $ ovpm vpn init --hostname <vpn.example.com>
-
 INFO[0004] ovpm server initialized
 
 # Now, lets create a vpn user
 $ ovpm user create -u joe -p verySecretPassword
-
 INFO[0000] user created: joe
 
 # Finally export the vpn profile for user joe
 $ ovpm user genconfig -u joe
-
 INFO[0000] exported to joe.ovpn
 ```
 
