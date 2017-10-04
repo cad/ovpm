@@ -22,6 +22,12 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 - [ ] Import/Export/Backup OVPM config
 - [ ] Effortless client profile (.ovpn file) delivery over Web
 - [ ] Monitoring and Quota functionality
+
+**Demo**
+Here is a little demo of what it looks on terminal to init the server, create a vpn user and generate **.ovpn** file for the created user.
+
+[![asciicast](https://asciinema.org/a/136016.png)](https://asciinema.org/a/136016)
+
  
 ## Installation
 **from RPM (CentOS/Fedora):**
@@ -92,11 +98,6 @@ INFO[0000] exported to joe.ovpn
 OpenVPN profile for user joe is exported to joe.ovpn file.
 You can simply use this file with OpenVPN to connect to the vpn server from 
 another computer.
-
-**Demo**
-Here is a little demo of what it looks on terminal to init the server, create a vpn user and generate **.ovpn** file for the created user.
-
-[![asciicast](https://asciinema.org/a/136016.png)](https://asciinema.org/a/136016)
 
 
 # Next Steps
