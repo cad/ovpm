@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/cad/ovpm/branch/master/graph/badge.svg)](https://codecov.io/gh/cad/ovpm)
 [![GoDoc](https://godoc.org/github.com/cad/ovpm?status.svg)](https://godoc.org/github.com/cad/ovpm)
 
-*OVPM* allows you to administrate an **OpenVPN** server on linux easily via command line. 
+*OVPM* allows you to administrate an **OpenVPN** server on linux easily via command line and Web interface. 
 
 With OVPM you can create and run an OpenVPN server, add/remove VPN users, generate client .ovpn files for your users etc. 
 
