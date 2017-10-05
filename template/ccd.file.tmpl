@@ -1,8 +1,13 @@
 ifconfig-push {{ .IP }} {{ .NetMask }}
-#iroute 192.168.90.0 255.255.255.0
+
 {{if .RedirectGW }}
 push "redirect-gateway def1 bypass-dhcp"
 {{ end }}
+
+{{range .Servernets}}
+push "route {{index . 0}} {{index . 1}}"
+{{ end }}
+
 
 {{range .Routes}}
 push "route {{index . 0}} {{index . 1}} {{index . 2}}"

@@ -731,6 +731,7 @@ func emitCCD() error {
 	// Render ccd templates for the users.
 	for _, user := range users {
 		var associatedRoutes [][3]string
+		var serverNets [][2]string
 		for _, network := range GetAllNetworks() {
 			switch network.Type {
 			case ROUTE:
@@ -744,6 +745,19 @@ func emitCCD() error {
 						associatedRoutes = append(associatedRoutes, [3]string{ip.To4().String(), net.IP(mask.Mask).To4().String(), via})
 					}
 				}
+			case SERVERNET:
+				// Push associated servernets to client when client is not getting vpn server as default gw.
+				if user.IsNoGW() {
+					for _, assocUsername := range network.GetAssociatedUsernames() {
+						if assocUsername == user.Username {
+							ip, mask, err := net.ParseCIDR(network.CIDR)
+							if err != nil {
+								return err
+							}
+							serverNets = append(serverNets, [2]string{ip.To4().String(), net.IP(mask.Mask).To4().String()})
+						}
+					}
+				}
 			}
 		}
 		var result bytes.Buffer
@@ -751,8 +765,9 @@ func emitCCD() error {
 			IP         string
 			NetMask    string
 			Routes     [][3]string // [0] is IP, [1] is Netmask, [2] is Via
+			Servernets [][2]string // [0] is IP, [1] is Netmask
 			RedirectGW bool
-		}{IP: user.getIP().String(), NetMask: server.Mask, Routes: associatedRoutes, RedirectGW: !user.NoGW}
+		}{IP: user.getIP().String(), NetMask: server.Mask, Routes: associatedRoutes, Servernets: serverNets, RedirectGW: !user.NoGW}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
