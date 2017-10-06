@@ -22,7 +22,7 @@ const (
 	_DefaultConfigPath   = etcBasePath + "ovpm.ini"
 	_DefaultDBPath       = varBasePath + "db.sqlite3"
 	_DefaultVPNConfPath  = varBasePath + "server.conf"
-	_DefaultVPNCCDPath   = varBasePath + "ccd/"
+	_DefaultVPNCCDPath   = varBasePath + "ccd"
 	_DefaultCertPath     = varBasePath + "server.crt"
 	_DefaultKeyPath      = varBasePath + "server.key"
 	_DefaultCACertPath   = varBasePath + "ca.crt"

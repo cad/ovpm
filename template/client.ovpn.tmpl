@@ -8,6 +8,7 @@ remote {{ .Hostname }} {{ .Port }}
 resolv-retry infinite
 ns-cert-type server
 nobind
+keepalive 2 20
 persist-key
 persist-tun
 comp-lzo
