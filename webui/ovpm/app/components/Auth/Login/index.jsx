@@ -79,7 +79,7 @@ export default class Login extends React.Component {
         }
     }
 
-    handleFormSubmit() {
+    handleFormSubmit(e) {
         this.setState({error: null})
         if (!this.state.username) {
             return
@@ -94,6 +94,7 @@ export default class Login extends React.Component {
         }
 
         this.api.call("authenticate", data, false, this.handleAuthenticateSuccess.bind(this), this.handleAuthenticateFailure.bind(this))
+        e.preventDefault()
     }
     render() {
         let error
@@ -113,9 +114,11 @@ export default class Login extends React.Component {
                 <Container>
                     {error}
                     <Panel>
-                        <Input label="Username" value={this.state.username} onChange={this.handleUsernameChange.bind(this)} floatingLabel={true} required={true} />
-                        <Input label="Password" value={this.state.password} onChange={this.handlePasswordChange.bind(this)} floatingLabel={true} required={true} type="password" />
-                        <Button color="primary" onClick={this.handleFormSubmit.bind(this)} required={true}>Login</Button>
+                        <form onSubmit={this.handleFormSubmit.bind(this)}>
+                            <Input label="Username" value={this.state.username} onChange={this.handleUsernameChange.bind(this)} floatingLabel={true} required={true} />
+                            <Input label="Password" value={this.state.password} onChange={this.handlePasswordChange.bind(this)} floatingLabel={true} required={true} type="password" />
+                            <Button type="submit" color="primary" required={true}>Login</Button>
+                        </form>
                     </Panel>
                 </Container>
             </div>
