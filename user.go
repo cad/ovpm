@@ -227,7 +227,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 			return fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
 		}
 
-		if hostIDsContains(getStaticHostIDs(), hostid) {
+		if u.HostID != hostid && hostIDsContains(getStaticHostIDs(), hostid) {
 			return fmt.Errorf("ip %s is already allocated", ip)
 		}
 	}

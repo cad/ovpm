@@ -108,6 +108,8 @@ func TestUserUpdate(t *testing.T) {
 		{"123", false, 0, true},
 		{"", true, 0, true},
 		{"", true, ovpm.IP2HostID(net.ParseIP("10.10.10.10").To4()), false}, // Invalid static address.
+		{"333", true, ovpm.IP2HostID(net.ParseIP("10.9.0.7").To4()), true},
+		{"222", true, ovpm.IP2HostID(net.ParseIP("10.9.0.7").To4()), true},
 	}
 
 	for _, tt := range updatetests {
