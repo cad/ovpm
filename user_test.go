@@ -17,7 +17,7 @@ func TestCreateNewUser(t *testing.T) {
 	server, _ := ovpm.GetServerInstance()
 
 	// Prepare:
-	username := "testUser"
+	username := "test.User"
 	password := "testPasswd1234"
 	noGW := false
 
