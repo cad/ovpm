@@ -1,5 +1,21 @@
 # Change Log
 
+## [v0.2.4](https://github.com/cad/ovpm/tree/v0.2.4) (2017-10-06)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.3...v0.2.4)
+
+**Fixed bugs:**
+
+- allow update if the target ip is user's already statically allocated ip [\#49](https://github.com/cad/ovpm/issues/49)
+
+## [v0.2.3](https://github.com/cad/ovpm/tree/v0.2.3) (2017-10-06)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.2...v0.2.3)
+
+## [v0.2.2](https://github.com/cad/ovpm/tree/v0.2.2) (2017-10-05)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.1...v0.2.2)
+
+## [v0.2.1](https://github.com/cad/ovpm/tree/v0.2.1) (2017-10-04)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.0...v0.2.1)
+
 ## [v0.2.0](https://github.com/cad/ovpm/tree/v0.2.0) (2017-10-03)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.18...v0.2.0)
 
@@ -9,6 +25,10 @@
 
 ## [v0.1.18](https://github.com/cad/ovpm/tree/v0.1.18) (2017-09-19)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.17...v0.1.18)
+
+**Implemented enhancements:**
+
+- web ui [\#11](https://github.com/cad/ovpm/issues/11)
 
 ## [v0.1.17](https://github.com/cad/ovpm/tree/v0.1.17) (2017-09-19)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.1.16...v0.1.17)

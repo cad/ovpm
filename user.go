@@ -132,8 +132,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	if govalidator.IsNull(username) {
 		return nil, fmt.Errorf("validation error: %s can not be null", username)
 	}
-	if !govalidator.IsAlphanumeric(username) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", username)
+	if !govalidator.Matches(username, "[\\w.]+") { // allow alphanumeric + dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", username)
 	}
 	if username == "root" {
 		return nil, fmt.Errorf("forbidden: username root is reserved and can not be used")
@@ -227,7 +227,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 			return fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
 		}
 
-		if hostIDsContains(getStaticHostIDs(), hostid) {
+		if u.HostID != hostid && hostIDsContains(getStaticHostIDs(), hostid) {
 			return fmt.Errorf("ip %s is already allocated", ip)
 		}
 	}

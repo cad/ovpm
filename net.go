@@ -134,10 +134,9 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 	if govalidator.IsNull(name) {
 		return nil, fmt.Errorf("validation error: %s can not be null", name)
 	}
-	if !govalidator.IsAlphanumeric(name) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+	if !govalidator.Matches(name, "[\\w.]+") { // allow alphanumeric + dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", name)
 	}
-
 	if !govalidator.IsCIDR(cidr) {
 		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
 	}
