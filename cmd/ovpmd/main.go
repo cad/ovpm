@@ -131,7 +131,7 @@ func newServer(port, webPort string) *server {
 }
 
 func (s *server) start() {
-	logrus.Infof("OVPM is running gRPC:%s, REST:%s ...", s.grpcPort, s.restPort)
+	logrus.Infof("OVPM %s is running gRPC:%s, REST:%s ...", ovpm.Version, s.grpcPort, s.restPort)
 	go s.grpcServer.Serve(s.lis)
 	go http.ListenAndServe(":"+s.restPort, s.restServer)
 	ovpm.StartVPNProc()
