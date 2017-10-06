@@ -12,7 +12,7 @@ Conflicts=shutdown.target
 [Service]
 TimeoutSec=5min
 PIDFile=/var/run/ovpmd.pid
-ExecStart=/usr/sbin/ovpmd
+ExecStart=/usr/sbin/ovpmd --verbose
 
 [Install]
 WantedBy=multi-user.target
