@@ -100,9 +100,10 @@ func GetNetwork(name string) (*Network, error) {
 	if govalidator.IsNull(name) {
 		return nil, fmt.Errorf("validation error: %s can not be null", name)
 	}
-	if !govalidator.IsAlphanumeric(name) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
+       	if !govalidator.Matches(name, "[\\w.]+") { // allow alphanumeric + dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", name)
 	}
+
 
 	var network dbNetworkModel
 	db.Preload("Users").Where(&dbNetworkModel{Name: name}).First(&network)
