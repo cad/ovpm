@@ -513,12 +513,12 @@ func enableNat() error {
 func HostID2IP(hostid uint32) net.IP {
 	ip := make([]byte, 4)
 	binary.BigEndian.PutUint32(ip, hostid)
-	return net.IP(ip)
+	return net.IP(ip).To4()
 }
 
 // IP2HostID converts an IP address to a host id (32-bit unsigned integer).
 func IP2HostID(ip net.IP) uint32 {
-	hostid := binary.BigEndian.Uint32(ip)
+	hostid := binary.BigEndian.Uint32(ip.To4())
 	return hostid
 }
 
