@@ -55,6 +55,7 @@ func main() {
 				vpnStatusCommand,
 				vpnInitCommand,
 				vpnUpdateCommand,
+				vpnRestartCommand,
 			},
 		},
 		{
