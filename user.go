@@ -167,6 +167,20 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		if hostIDsContains(getStaticHostIDs(), hostid) {
 			return nil, fmt.Errorf("ip %s is already allocated", ip)
 		}
+
+		// Check if requested ip is allocated to the VPN server itself.
+		serverNet := net.IPNet{
+			IP:   net.ParseIP(server.Net).To4(),
+			Mask: net.IPMask(net.ParseIP(server.Mask).To4()),
+		}
+
+		ip, ipnet, err := net.ParseCIDR(serverNet.String())
+		if err != nil {
+			return nil, fmt.Errorf("can not parse: %v", err)
+		}
+		if hostid == IP2HostID(ipnet.IP)+1 { // If it's VPN server's IP addr, then don't allow it.
+			return nil, fmt.Errorf("can't assign server's ip address to a user")
+		}
 	}
 	user := dbUserModel{
 		Username:           username,

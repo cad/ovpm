@@ -327,6 +327,7 @@ func TestUserIPAllocator(t *testing.T) {
 		{"user4", true, ovpm.IP2HostID(net.ParseIP("10.9.0.5").To4()), "10.9.0.5/24", true},
 		{"user6", true, ovpm.IP2HostID(net.ParseIP("10.9.0.7").To4()), "10.9.0.7/24", true},
 		{"user7", true, 0, "10.9.0.6/24", true},
+		{"user6", true, ovpm.IP2HostID(net.ParseIP("10.9.0.1").To4()), "10.9.0.7/24", false},
 	}
 	for _, tt := range iptests {
 		user, err := ovpm.CreateNewUser(tt.username, "pass", tt.gw, tt.hostid, true)
