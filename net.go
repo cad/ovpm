@@ -175,7 +175,7 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("can not create network in the db")
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("network defined: %s (%s)", network.Name, network.CIDR)
 	return &Network{dbNetworkModel: network}, nil
 
@@ -188,7 +188,7 @@ func (n *Network) Delete() error {
 	}
 
 	db.Unscoped().Delete(n.dbNetworkModel)
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("network deleted: %s", n.Name)
 	return nil
 }
@@ -221,7 +221,7 @@ func (n *Network) Associate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("association failed: %v", userAssoc.Error)
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("user '%s' is associated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -255,7 +255,7 @@ func (n *Network) Dissociate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("user '%s' is dissociated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }

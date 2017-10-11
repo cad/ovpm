@@ -252,8 +252,12 @@ func (p *Process) run(state State) func() {
 			}
 
 			// Process started successfully.
+			if p.cmd.Process == nil {
+				logrus.Debugf("p.cmd.Process was not created")
+				p.transitionTo(FAILED)
+				return
+			}
 			logrus.Debugf("process is started %s PID %d", p.executable, p.cmd.Process.Pid)
-
 			// Process Observer
 			go func() {
 				err := p.cmd.Wait()

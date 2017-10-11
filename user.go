@@ -200,8 +200,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	}
 	logrus.Infof("user created: %s", username)
 
-	// Emit server config
-	err = Emit()
+	// EmitWithRestart server config
+	err = EmitWithRestart()
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 	}
 	db.Save(u.dbUserModel)
 
-	err := Emit()
+	err := EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -269,7 +269,7 @@ func (u *User) Delete() error {
 	})
 	db.Unscoped().Delete(u.dbUserModel)
 	logrus.Infof("user deleted: %s", u.GetUsername())
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -285,7 +285,7 @@ func (u *User) ResetPassword(password string) error {
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
 	}
 	db.Save(u.dbUserModel)
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -324,7 +324,7 @@ func (u *User) Renew() error {
 	u.ServerSerialNumber = server.SerialNumber
 
 	db.Save(u.dbUserModel)
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
