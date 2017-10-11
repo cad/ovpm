@@ -23,6 +23,7 @@ message VPNUpdateRequest {
   string ip_block = 1;
   string dns = 2;
 }
+message VPNRestartRequest {}
 
 
 service VPNService {
@@ -41,6 +42,12 @@ service VPNService {
       post: "/api/v1/vpn/update"
       body: "*"
     };}
+  rpc Restart (VPNRestartRequest) returns (VPNRestartResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/vpn/restart"
+      //body: "*"
+    };}
+
 
 }
 
@@ -59,3 +66,4 @@ message VPNStatusResponse {
 }
 message VPNInitResponse {}
 message VPNUpdateResponse {}
+message VPNRestartResponse {}

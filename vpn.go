@@ -436,6 +436,7 @@ func RestartVPNProc() {
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
+	Emit()
 	vpnProc.Restart()
 	ensureNatEnabled()
 }
