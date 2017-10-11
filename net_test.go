@@ -1,6 +1,7 @@
 package ovpm
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -49,6 +50,27 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 		t.Fatalf("network CIDR is expected to be '%s' but it's '%s' instead", netType, network.Type)
 	}
 
+	// Test username validation.
+	var networknametests = []struct {
+		networkname string
+		ok          bool
+	}{
+		{"asdf1240asfd", true},
+		{"asdf.asfd", true},
+		{"asdf12.12asfd", true},
+		{"asd1f-as4fd", false},
+		{"as0df a01sfd", false},
+		{"as0df$a01sfd", false},
+		{"as0df#a01sfd", false},
+		{"a6sdf_as1fd", true},
+	}
+
+	for i, tt := range networknametests {
+		_, err := CreateNewNetwork(tt.networkname, fmt.Sprintf("192.168.%d.0/24", i), SERVERNET, "")
+		if ok := (err == nil); ok != tt.ok {
+			t.Fatalf("expcted condition failed '%s': %v", tt.networkname, err)
+		}
+	}
 }
 
 func TestVPNDeleteNetwork(t *testing.T) {

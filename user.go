@@ -132,8 +132,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	if govalidator.IsNull(username) {
 		return nil, fmt.Errorf("validation error: %s can not be null", username)
 	}
-	if !govalidator.Matches(username, "[\\w.]+") { // allow alphanumeric + dot
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", username)
+	if !govalidator.Matches(username, "^([\\w\\.]+)$") { // allow alphanumeric, underscore and dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers, underscores and dots", username)
 	}
 	if username == "root" {
 		return nil, fmt.Errorf("forbidden: username root is reserved and can not be used")

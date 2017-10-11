@@ -78,6 +78,25 @@ func TestCreateNewUser(t *testing.T) {
 		t.Fatalf("user creation expected to err but it didn't")
 	}
 
+	// Test username validation.
+	var usernametests = []struct {
+		username string
+		ok       bool
+	}{
+		{"asdf1240asfd", true},
+		{"asdf.asfd", true},
+		{"asdf12.12asfd", true},
+		{"asd1f-as4fd", false},
+		{"as0df a01sfd", false},
+		{"a6sdf_as1fd", true},
+	}
+
+	for _, tt := range usernametests {
+		_, err := ovpm.CreateNewUser(tt.username, "1234", false, 0, true)
+		if ok := (err == nil); ok != tt.ok {
+			t.Fatalf("expcted condition failed '%s': %v", tt.username, err)
+		}
+	}
 }
 
 func TestUserUpdate(t *testing.T) {
