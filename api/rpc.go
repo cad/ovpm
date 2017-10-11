@@ -392,6 +392,21 @@ func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.
 	return &pb.VPNUpdateResponse{}, nil
 }
 
+func (s *VPNService) Restart(ctx context.Context, req *pb.VPNRestartRequest) (*pb.VPNRestartResponse, error) {
+	logrus.Debugf("rpc call: vpn restart")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.RestartVPNPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.UpdateVPNPerm is required for this operation.")
+	}
+
+	ovpm.RestartVPNProc()
+	return &pb.VPNRestartResponse{}, nil
+}
+
 type NetworkService struct{}
 
 func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (*pb.NetworkListResponse, error) {

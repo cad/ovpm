@@ -41,6 +41,22 @@
         ]
       }
     },
+    "/api/v1/vpn/restart": {
+      "post": {
+        "operationId": "Restart",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/pbVPNRestartResponse"
+            }
+          }
+        },
+        "tags": [
+          "VPNService"
+        ]
+      }
+    },
     "/api/v1/vpn/status": {
       "get": {
         "operationId": "Status",
@@ -116,6 +132,9 @@
         "TCP"
       ],
       "default": "NOPREF"
+    },
+    "pbVPNRestartResponse": {
+      "type": "object"
     },
     "pbVPNStatusResponse": {
       "type": "object",

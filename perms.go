@@ -19,6 +19,7 @@ const (
 	GetVPNStatusPerm
 	InitVPNPerm
 	UpdateVPNPerm
+	RestartVPNPerm
 
 	// Network permissions
 	ListNetworksPerm
@@ -45,6 +46,7 @@ func AdminPerms() []permset.Perm {
 		GetVPNStatusPerm,
 		InitVPNPerm,
 		UpdateVPNPerm,
+		RestartVPNPerm,
 		ListNetworksPerm,
 		CreateNetworkPerm,
 		DeleteNetworkPerm,
