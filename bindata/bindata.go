@@ -93,7 +93,7 @@ func templateAuthSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2503, mode: os.FileMode(420), modTime: time.Unix(1507319023, 0)}
+	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2503, mode: os.FileMode(420), modTime: time.Unix(1507710563, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,7 +113,7 @@ func templateBundleJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/bundle.js", size: 298007, mode: os.FileMode(420), modTime: time.Unix(1507319080, 0)}
+	info := bindataFileInfo{name: "template/bundle.js", size: 298007, mode: os.FileMode(420), modTime: time.Unix(1507710574, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -133,7 +133,7 @@ func templateCcdFileTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 270, mode: os.FileMode(420), modTime: time.Unix(1507319011, 0)}
+	info := bindataFileInfo{name: "template/ccd.file.tmpl", size: 270, mode: os.FileMode(420), modTime: time.Unix(1507582576, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -153,7 +153,7 @@ func templateClientOvpnTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 362, mode: os.FileMode(420), modTime: time.Unix(1507319014, 0)}
+	info := bindataFileInfo{name: "template/client.ovpn.tmpl", size: 362, mode: os.FileMode(420), modTime: time.Unix(1507585630, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -173,7 +173,7 @@ func templateDh4096PemTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dh4096.pem.tmpl", size: 1468, mode: os.FileMode(420), modTime: time.Unix(1503944154, 0)}
+	info := bindataFileInfo{name: "template/dh4096.pem.tmpl", size: 1468, mode: os.FileMode(420), modTime: time.Unix(1507582576, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -193,7 +193,7 @@ func templateIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/index.html", size: 577, mode: os.FileMode(420), modTime: time.Unix(1507319080, 0)}
+	info := bindataFileInfo{name: "template/index.html", size: 577, mode: os.FileMode(420), modTime: time.Unix(1507710574, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -213,7 +213,7 @@ func templateIptablesTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/iptables.tmpl", size: 0, mode: os.FileMode(420), modTime: time.Unix(1503944154, 0)}
+	info := bindataFileInfo{name: "template/iptables.tmpl", size: 0, mode: os.FileMode(420), modTime: time.Unix(1507582576, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func templateNetworkSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/network.swagger.json", size: 6669, mode: os.FileMode(420), modTime: time.Unix(1507319023, 0)}
+	info := bindataFileInfo{name: "template/network.swagger.json", size: 6669, mode: os.FileMode(420), modTime: time.Unix(1507710563, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func templateServerConfTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9597, mode: os.FileMode(420), modTime: time.Unix(1507319014, 0)}
+	info := bindataFileInfo{name: "template/server.conf.tmpl", size: 9597, mode: os.FileMode(420), modTime: time.Unix(1507585630, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -273,7 +273,7 @@ func templateUserSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/user.swagger.json", size: 6556, mode: os.FileMode(420), modTime: time.Unix(1507319023, 0)}
+	info := bindataFileInfo{name: "template/user.swagger.json", size: 6556, mode: os.FileMode(420), modTime: time.Unix(1507710563, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -293,7 +293,7 @@ func templateVpnSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3334, mode: os.FileMode(420), modTime: time.Unix(1507319023, 0)}
+	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3334, mode: os.FileMode(420), modTime: time.Unix(1507710563, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

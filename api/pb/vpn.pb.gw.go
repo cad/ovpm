@@ -91,7 +91,15 @@ func RegisterVPNServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.Ser
 // RegisterVPNServiceHandler registers the http handlers for service VPNService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
 func RegisterVPNServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	client := NewVPNServiceClient(conn)
+	return RegisterVPNServiceHandlerClient(ctx, mux, NewVPNServiceClient(conn))
+}
+
+// RegisterVPNServiceHandler registers the http handlers for service VPNService to "mux".
+// The handlers forward requests to the grpc endpoint over the given implementation of "VPNServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "VPNServiceClient"
+// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
+// "VPNServiceClient" to call the correct interceptors.
+func RegisterVPNServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client VPNServiceClient) error {
 
 	mux.Handle("GET", pattern_VPNService_Status_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)
