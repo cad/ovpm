@@ -1,5 +1,19 @@
 # Change Log
 
+## [v0.2.5](https://github.com/cad/ovpm/tree/v0.2.5) (2017-10-13)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.4...v0.2.5)
+
+**Implemented enhancements:**
+
+- WARNING: INSECURE cipher with block size less than 128 bit \(64 bit\).  [\#56](https://github.com/cad/ovpm/issues/56)
+- expose vpn restart functionality over api [\#50](https://github.com/cad/ovpm/issues/50)
+
+**Fixed bugs:**
+
+- WEBUI \> NETWORKS [\#55](https://github.com/cad/ovpm/issues/55)
+- block giving vpn server's internal ip to some user as static ip [\#54](https://github.com/cad/ovpm/issues/54)
+- when starting ensure emit [\#51](https://github.com/cad/ovpm/issues/51)
+
 ## [v0.2.4](https://github.com/cad/ovpm/tree/v0.2.4) (2017-10-06)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.2.3...v0.2.4)
 
