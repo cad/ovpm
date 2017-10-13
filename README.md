@@ -59,7 +59,7 @@ $ systemctl enable ovpmd
 
 **from Source (go get):**
 
-Only dependency for ovpm is **OpenVPN>=2.3**.
+Only dependency for ovpm is **OpenVPN>=2.3.3**.
 
 ```bash
 $ go get -u github.com/cad/ovpm/...

@@ -44,6 +44,10 @@ export const endpoints = {
         path: "/vpn/status",
         method: "GET",
     },
+    vpnRestart: {
+        path: "/vpn/restart",
+        method: "POST",
+    },
     netDefine: {
         path: "/network/create",
         method: "POST",

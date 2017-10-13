@@ -220,3 +220,23 @@ var vpnUpdateCommand = cli.Command{
 		return nil
 	},
 }
+
+var vpnRestartCommand = cli.Command{
+	Name:    "restart",
+	Usage:   "Restart VPN server.",
+	Aliases: []string{"s"},
+	Action: func(c *cli.Context) error {
+		conn := getConn(c.GlobalString("daemon-port"))
+		defer conn.Close()
+		vpnSvc := pb.NewVPNServiceClient(conn)
+
+		_, err := vpnSvc.Restart(context.Background(), &pb.VPNRestartRequest{})
+		if err != nil {
+			os.Exit(1)
+			return err
+		}
+
+		logrus.Info("ovpm server restarted")
+		return nil
+	},
+}

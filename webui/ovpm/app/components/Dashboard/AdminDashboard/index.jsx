@@ -191,7 +191,6 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleNewUserSave(user) {
-        console.log("HERE", user)
         let userObj = {
             username: user.username,
             password: user.password,
@@ -199,7 +198,6 @@ export default class AdminDashboard extends React.Component {
             host_id: 0, // handle this host_id problem
             is_admin: user.isAdmin,
         }
-        console.log("USER", user)
         userObj.no_gw = !user.pushGW
         userObj.admin_pref = user.isAdmin ? "ADMIN" : "NOADMIN"
         userObj.host_id = user.ipAllocationMethod === "static" ? dot2num(user.staticIP) : 0
@@ -292,7 +290,6 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleDefineNetworkSave(network) {
-        console.log("NETWORK:", network)
         this.api.call("netDefine", network, true, this.handleDefineNetworkSuccess.bind(this), this.handleDefineNetworkFailure.bind(this))
         this.setState({modal: ""})
     }
@@ -372,7 +369,6 @@ export default class AdminDashboard extends React.Component {
     handleAssociateUserSave(username) {
         //call
         //refresh
-        console.log(username)
         this.api.call("netAssociate", {name: this.state.assocNetworkName, username : username}, true, this.handleAssociateUserSuccess.bind(this), this.handleAssociateUserFailure.bind(this))
         this.setState({modal: ""})
     }
@@ -405,6 +401,18 @@ export default class AdminDashboard extends React.Component {
         }
         console.log(error)
     }
+
+    handleRestartVPNServer() {
+        this.api.call("vpnRestart", {}, true, function() {
+            this.refresh()
+        }.bind(this), function() {
+            if ('response' in error && error.response.status == 401) {
+                this.handleAuthFailure(error)
+            }
+            console.log(error)
+        }.bind(this))
+    }
+
 
     handleLogout() {
         ClearAuthToken()
@@ -541,6 +549,7 @@ export default class AdminDashboard extends React.Component {
                                     </table>
                                 </Tab>
                                 <Tab value="vpn" label="VPN">
+                                    <Button className="mui--pull-right" color="primary" onClick={this.handleRestartVPNServer.bind(this)}>Restart VPN Server</Button>
                                     <table className="mui-table mui-table--bordered mui--text-justify">
                                         <thead>
                                             <tr>

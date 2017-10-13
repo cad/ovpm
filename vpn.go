@@ -267,7 +267,7 @@ func Init(hostname string, port string, proto string, ipblock string, dns string
 		user.HostID = 0
 		db.Save(&user.dbUserModel)
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("server initialized")
 	return nil
 }
@@ -313,7 +313,7 @@ func Update(ipblock string, dns string) error {
 			db.Save(user.dbUserModel)
 		}
 
-		Emit()
+		EmitWithRestart()
 		logrus.Infof("server updated")
 	}
 	return nil
@@ -327,7 +327,7 @@ func Deinit() error {
 
 	db.Unscoped().Delete(&dbServerModel{})
 	db.Unscoped().Delete(&dbRevokedModel{})
-	Emit()
+	EmitWithRestart()
 	return nil
 }
 
@@ -422,6 +422,7 @@ func StartVPNProc() {
 		logrus.Error("OpenVPN is already started")
 		return
 	}
+	Emit()
 	vpnProc.Start()
 	ensureNatEnabled()
 }
@@ -435,6 +436,7 @@ func RestartVPNProc() {
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
+	Emit()
 	vpnProc.Restart()
 	ensureNatEnabled()
 }
@@ -449,7 +451,6 @@ func StopVPNProc() {
 		return
 	}
 	vpnProc.Stop()
-
 }
 
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
@@ -509,7 +510,15 @@ func Emit() error {
 	}
 
 	logrus.Info("configurations emitted to the filesystem")
+	return nil
+}
 
+// EmitWithRestart restarts vpnProc after calling EmitWithRestart().
+func EmitWithRestart() error {
+	err := Emit()
+	if err != nil {
+		return err
+	}
 	if IsInitialized() {
 		for {
 			if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
@@ -522,6 +531,7 @@ func Emit() error {
 	}
 
 	return nil
+
 }
 
 func emitToFile(path, content string, mode uint) error {

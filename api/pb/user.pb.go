@@ -22,9 +22,11 @@ It has these top-level messages:
 	VPNStatusRequest
 	VPNInitRequest
 	VPNUpdateRequest
+	VPNRestartRequest
 	VPNStatusResponse
 	VPNInitResponse
 	VPNUpdateResponse
+	VPNRestartResponse
 	NetworkCreateRequest
 	NetworkListRequest
 	NetworkDeleteRequest

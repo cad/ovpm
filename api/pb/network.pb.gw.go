@@ -143,7 +143,15 @@ func RegisterNetworkServiceHandlerFromEndpoint(ctx context.Context, mux *runtime
 // RegisterNetworkServiceHandler registers the http handlers for service NetworkService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
 func RegisterNetworkServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	client := NewNetworkServiceClient(conn)
+	return RegisterNetworkServiceHandlerClient(ctx, mux, NewNetworkServiceClient(conn))
+}
+
+// RegisterNetworkServiceHandler registers the http handlers for service NetworkService to "mux".
+// The handlers forward requests to the grpc endpoint over the given implementation of "NetworkServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "NetworkServiceClient"
+// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
+// "NetworkServiceClient" to call the correct interceptors.
+func RegisterNetworkServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client NetworkServiceClient) error {
 
 	mux.Handle("POST", pattern_NetworkService_Create_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)

@@ -2,7 +2,7 @@ package ovpm
 
 const (
 	// Version defines the version of ovpm.
-	Version = "0.2.4"
+	Version = "0.2.5"
 
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
@@ -22,7 +22,7 @@ const (
 	_DefaultConfigPath   = etcBasePath + "ovpm.ini"
 	_DefaultDBPath       = varBasePath + "db.sqlite3"
 	_DefaultVPNConfPath  = varBasePath + "server.conf"
-	_DefaultVPNCCDPath   = varBasePath + "ccd/"
+	_DefaultVPNCCDPath   = varBasePath + "ccd"
 	_DefaultCertPath     = varBasePath + "server.crt"
 	_DefaultKeyPath      = varBasePath + "server.key"
 	_DefaultCACertPath   = varBasePath + "ca.crt"

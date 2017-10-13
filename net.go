@@ -100,9 +100,6 @@ func GetNetwork(name string) (*Network, error) {
 	if govalidator.IsNull(name) {
 		return nil, fmt.Errorf("validation error: %s can not be null", name)
 	}
-	if !govalidator.IsAlphanumeric(name) {
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters and numbers", name)
-	}
 
 	var network dbNetworkModel
 	db.Preload("Users").Where(&dbNetworkModel{Name: name}).First(&network)
@@ -134,8 +131,8 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 	if govalidator.IsNull(name) {
 		return nil, fmt.Errorf("validation error: %s can not be null", name)
 	}
-	if !govalidator.Matches(name, "[\\w.]+") { // allow alphanumeric + dot
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", name)
+	if !govalidator.Matches(name, "^([\\w\\.]+)$") { // allow alphanumeric, underscore and dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers, underscores and dots", name)
 	}
 	if !govalidator.IsCIDR(cidr) {
 		return nil, fmt.Errorf("validation error: `%s` must be a network in the CIDR form", cidr)
@@ -178,7 +175,7 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("can not create network in the db")
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("network defined: %s (%s)", network.Name, network.CIDR)
 	return &Network{dbNetworkModel: network}, nil
 
@@ -191,7 +188,7 @@ func (n *Network) Delete() error {
 	}
 
 	db.Unscoped().Delete(n.dbNetworkModel)
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("network deleted: %s", n.Name)
 	return nil
 }
@@ -224,7 +221,7 @@ func (n *Network) Associate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("association failed: %v", userAssoc.Error)
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("user '%s' is associated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -258,7 +255,7 @@ func (n *Network) Dissociate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
 	}
-	Emit()
+	EmitWithRestart()
 	logrus.Infof("user '%s' is dissociated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -516,12 +513,12 @@ func enableNat() error {
 func HostID2IP(hostid uint32) net.IP {
 	ip := make([]byte, 4)
 	binary.BigEndian.PutUint32(ip, hostid)
-	return net.IP(ip)
+	return net.IP(ip).To4()
 }
 
 // IP2HostID converts an IP address to a host id (32-bit unsigned integer).
 func IP2HostID(ip net.IP) uint32 {
-	hostid := binary.BigEndian.Uint32(ip)
+	hostid := binary.BigEndian.Uint32(ip.To4())
 	return hostid
 }
 

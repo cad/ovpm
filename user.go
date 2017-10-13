@@ -132,8 +132,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	if govalidator.IsNull(username) {
 		return nil, fmt.Errorf("validation error: %s can not be null", username)
 	}
-	if !govalidator.Matches(username, "[\\w.]+") { // allow alphanumeric + dot
-		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers and dots", username)
+	if !govalidator.Matches(username, "^([\\w\\.]+)$") { // allow alphanumeric, underscore and dot
+		return nil, fmt.Errorf("validation error: `%s` can only contain letters, numbers, underscores and dots", username)
 	}
 	if username == "root" {
 		return nil, fmt.Errorf("forbidden: username root is reserved and can not be used")
@@ -167,6 +167,20 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		if hostIDsContains(getStaticHostIDs(), hostid) {
 			return nil, fmt.Errorf("ip %s is already allocated", ip)
 		}
+
+		// Check if requested ip is allocated to the VPN server itself.
+		serverNet := net.IPNet{
+			IP:   net.ParseIP(server.Net).To4(),
+			Mask: net.IPMask(net.ParseIP(server.Mask).To4()),
+		}
+
+		ip, ipnet, err := net.ParseCIDR(serverNet.String())
+		if err != nil {
+			return nil, fmt.Errorf("can not parse: %v", err)
+		}
+		if hostid == IP2HostID(ipnet.IP)+1 { // If it's VPN server's IP addr, then don't allow it.
+			return nil, fmt.Errorf("can't assign server's ip address to a user")
+		}
 	}
 	user := dbUserModel{
 		Username:           username,
@@ -186,8 +200,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	}
 	logrus.Infof("user created: %s", username)
 
-	// Emit server config
-	err = Emit()
+	// EmitWithRestart server config
+	err = EmitWithRestart()
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +247,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 	}
 	db.Save(u.dbUserModel)
 
-	err := Emit()
+	err := EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -255,7 +269,7 @@ func (u *User) Delete() error {
 	})
 	db.Unscoped().Delete(u.dbUserModel)
 	logrus.Infof("user deleted: %s", u.GetUsername())
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -271,7 +285,7 @@ func (u *User) ResetPassword(password string) error {
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
 	}
 	db.Save(u.dbUserModel)
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
@@ -310,7 +324,7 @@ func (u *User) Renew() error {
 	u.ServerSerialNumber = server.SerialNumber
 
 	db.Save(u.dbUserModel)
-	err = Emit()
+	err = EmitWithRestart()
 	if err != nil {
 		return err
 	}
