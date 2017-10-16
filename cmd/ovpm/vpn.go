@@ -24,7 +24,7 @@ var vpnStatusCommand = cli.Command{
 
 		res, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
 		if err != nil {
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 
@@ -77,7 +77,7 @@ var vpnInitCommand = cli.Command{
 		if hostname == "" {
 			logrus.Errorf("'hostname' is required")
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 
 		}
 
@@ -98,7 +98,7 @@ var vpnInitCommand = cli.Command{
 			fmt.Println("--net takes an ip network in the CIDR form. e.g. 10.9.0.0/24")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		dns := c.String("dns")
@@ -106,7 +106,7 @@ var vpnInitCommand = cli.Command{
 			fmt.Println("--dns takes an IPv4 address. e.g. 8.8.8.8")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -122,7 +122,7 @@ var vpnInitCommand = cli.Command{
 			_, err := fmt.Scanln(&response)
 			if err != nil {
 				logrus.Fatal(err)
-				os.Exit(1)
+				exit(1)
 				return err
 			}
 			okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
@@ -130,7 +130,7 @@ var vpnInitCommand = cli.Command{
 			if stringInSlice(response, okayResponses) {
 				if _, err := vpnSvc.Init(context.Background(), &pb.VPNInitRequest{Hostname: hostname, Port: port, ProtoPref: proto, IpBlock: ipblock, Dns: dns}); err != nil {
 					logrus.Errorf("server can not be initialized: %v", err)
-					os.Exit(1)
+					exit(1)
 					return err
 				}
 				logrus.Info("ovpm server initialized")
@@ -166,7 +166,7 @@ var vpnUpdateCommand = cli.Command{
 			fmt.Println("--net takes an ip network in the CIDR form. e.g. 10.9.0.0/24")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		if ipblock != "" {
@@ -179,7 +179,7 @@ var vpnUpdateCommand = cli.Command{
 				_, err := fmt.Scanln(&response)
 				if err != nil {
 					logrus.Fatal(err)
-					os.Exit(1)
+					exit(1)
 					return err
 				}
 				okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
@@ -198,13 +198,13 @@ var vpnUpdateCommand = cli.Command{
 			fmt.Println("--dns takes an IPv4 address. e.g. 8.8.8.8")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		if !(ipblock != "" || dns != "") {
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -213,7 +213,7 @@ var vpnUpdateCommand = cli.Command{
 
 		if _, err := vpnSvc.Update(context.Background(), &pb.VPNUpdateRequest{IpBlock: ipblock, Dns: dns}); err != nil {
 			logrus.Errorf("server can not be updated: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Info("ovpm server updated")
@@ -224,7 +224,7 @@ var vpnUpdateCommand = cli.Command{
 var vpnRestartCommand = cli.Command{
 	Name:    "restart",
 	Usage:   "Restart VPN server.",
-	Aliases: []string{"s"},
+	Aliases: []string{"r"},
 	Action: func(c *cli.Context) error {
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
@@ -232,7 +232,7 @@ var vpnRestartCommand = cli.Command{
 
 		_, err := vpnSvc.Restart(context.Background(), &pb.VPNRestartRequest{})
 		if err != nil {
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 

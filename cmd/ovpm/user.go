@@ -28,14 +28,14 @@ var userListCommand = cli.Command{
 		server, err := vpnSvc.Status(context.Background(), &pb.VPNStatusRequest{})
 		if err != nil {
 			logrus.Errorf("can not get server status: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 
 		resp, err := userSvc.List(context.Background(), &pb.UserListRequest{})
 		if err != nil {
 			logrus.Errorf("users can not be fetched: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
@@ -95,13 +95,13 @@ var userCreateCommand = cli.Command{
 
 		if username == "" || password == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 		if static != "" && !govalidator.IsIPv4(static) {
 			fmt.Println("--static flag takes a valid ipv4 address")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 		var hostid uint32
 		if static != "" {
@@ -110,7 +110,7 @@ var userCreateCommand = cli.Command{
 				fmt.Printf("can not parse %s as IPv4", static)
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
-				os.Exit(1)
+				exit(1)
 			}
 
 			hostid = h
@@ -126,7 +126,7 @@ var userCreateCommand = cli.Command{
 		)
 		if err != nil {
 			logrus.Errorf("user can not be created '%s': %v", username, err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("user created: %s", response.Users[0].Username)
@@ -185,7 +185,7 @@ var userUpdateCommand = cli.Command{
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		// Check whether if all flags are are empty.
@@ -193,7 +193,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println("nothing is updated!")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		// Given that static is set, check whether it's IPv4.
@@ -201,7 +201,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println("--static flag takes a valid ipv4 address")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 		var staticPref pb.UserUpdateRequest_StaticPref
 		staticPref = pb.UserUpdateRequest_NOPREFSTATIC
@@ -216,7 +216,7 @@ var userUpdateCommand = cli.Command{
 					fmt.Printf("can't parse %s as IPv4", static)
 					fmt.Println()
 					fmt.Println(cli.ShowSubcommandHelp(c))
-					os.Exit(1)
+					exit(1)
 				}
 
 				hostid = h
@@ -232,7 +232,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println("--static flag and --no-static flag cannot be used together")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		case static == "" && !noStatic:
 		default:
 			// means no pref
@@ -252,7 +252,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println("you can't use --gw together with --no-gw")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		default:
 			gwPref = pb.UserUpdateRequest_NOPREF
 
@@ -272,7 +272,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println("you can't use --admin together with --no-admin")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		//conn := getConn(c.String("port"))
@@ -291,7 +291,7 @@ var userUpdateCommand = cli.Command{
 
 		if err != nil {
 			logrus.Errorf("user can not be updated '%s': %v", username, err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("user updated: %s", response.Users[0].Username)
@@ -315,7 +315,7 @@ var userDeleteCommand = cli.Command{
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		//conn := getConn(c.String("port"))
@@ -326,7 +326,7 @@ var userDeleteCommand = cli.Command{
 		_, err := userSvc.Delete(context.Background(), &pb.UserDeleteRequest{Username: username})
 		if err != nil {
 			logrus.Errorf("user can not be deleted '%s': %v", username, err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("user deleted: %s", username)
@@ -350,7 +350,7 @@ var userRenewCommand = cli.Command{
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		//conn := getConn(c.String("port"))
@@ -362,7 +362,7 @@ var userRenewCommand = cli.Command{
 		_, err := userSvc.Renew(context.Background(), &pb.UserRenewRequest{Username: username})
 		if err != nil {
 			logrus.Errorf("can't renew user cert '%s': %v", username, err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("user cert renewed: '%s'", username)
@@ -391,7 +391,7 @@ var userGenconfigCommand = cli.Command{
 
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 		if output == "" {
 			output = username + ".ovpn"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/Sirupsen/logrus"
@@ -10,7 +11,7 @@ import (
 
 var action string
 
-func main() {
+func NewApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = "ovpm"
 	app.Usage = "OpenVPN Manager"
@@ -72,6 +73,10 @@ func main() {
 			},
 		},
 	}
+	return app
+}
+func main() {
+	app := NewApp()
 	app.Run(os.Args)
 }
 
@@ -82,4 +87,12 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func exit(status int) {
+	if flag.Lookup("test.v") == nil {
+		os.Exit(status)
+	} else {
+
+	}
 }

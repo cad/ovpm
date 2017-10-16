@@ -44,7 +44,7 @@ var netDefineCommand = cli.Command{
 
 		if name == "" || cidr == "" || typ == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		switch ovpm.NetworkTypeFromString(typ) {
@@ -53,7 +53,7 @@ var netDefineCommand = cli.Command{
 				fmt.Printf("validation error: `%s` must be a network in the IPv4 form", via)
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
-				os.Exit(1)
+				exit(1)
 			}
 
 		case ovpm.SERVERNET:
@@ -61,7 +61,7 @@ var netDefineCommand = cli.Command{
 				fmt.Println("--via flag can only be used with --type ROUTE")
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
-				os.Exit(1)
+				exit(1)
 			}
 		default: // Means UNDEFINEDNET
 			fmt.Printf("undefined network type %s", typ)
@@ -70,7 +70,7 @@ var netDefineCommand = cli.Command{
 			fmt.Println("    ", ovpm.GetAllNetworkTypes())
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -80,7 +80,7 @@ var netDefineCommand = cli.Command{
 		response, err := netSvc.Create(context.Background(), &pb.NetworkCreateRequest{Name: name, Cidr: cidr, Type: typ, Via: via})
 		if err != nil {
 			logrus.Errorf("network can not be created '%s': %v", name, err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("network created: %s (%s)", response.Network.Name, response.Network.Cidr)
@@ -101,7 +101,7 @@ var netListCommand = cli.Command{
 		resp, err := netSvc.List(context.Background(), &pb.NetworkListRequest{})
 		if err != nil {
 			logrus.Errorf("networks can not be fetched: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 
@@ -114,7 +114,7 @@ var netListCommand = cli.Command{
 			assocUsers, err := netSvc.GetAssociatedUsers(context.Background(), &pb.NetworkGetAssociatedUsersRequest{Name: network.Name})
 			if err != nil {
 				logrus.Errorf("assoc users can not be fetched: %v", err)
-				os.Exit(1)
+				exit(1)
 				return err
 			}
 
@@ -157,7 +157,7 @@ var netTypesCommand = cli.Command{
 		resp, err := netSvc.GetAllTypes(context.Background(), &pb.NetworkGetAllTypesRequest{})
 		if err != nil {
 			logrus.Errorf("networks can not be fetched: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
@@ -189,7 +189,7 @@ var netUndefineCommand = cli.Command{
 
 		if name == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -199,7 +199,7 @@ var netUndefineCommand = cli.Command{
 		resp, err := netSvc.Delete(context.Background(), &pb.NetworkDeleteRequest{Name: name})
 		if err != nil {
 			logrus.Errorf("networks can not be deleted: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("network deleted: %s (%s)", resp.Network.Name, resp.Network.Cidr)
@@ -230,7 +230,7 @@ var netAssociateCommand = cli.Command{
 
 		if netName == "" || userName == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -240,7 +240,7 @@ var netAssociateCommand = cli.Command{
 		_, err := netSvc.Associate(context.Background(), &pb.NetworkAssociateRequest{Name: netName, Username: userName})
 		if err != nil {
 			logrus.Errorf("networks can not be associated: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("network associated: user:%s <-> network:%s", userName, netName)
@@ -271,7 +271,7 @@ var netDissociateCommand = cli.Command{
 
 		if netName == "" || userName == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
-			os.Exit(1)
+			exit(1)
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -281,7 +281,7 @@ var netDissociateCommand = cli.Command{
 		_, err := netSvc.Dissociate(context.Background(), &pb.NetworkDissociateRequest{Name: netName, Username: userName})
 		if err != nil {
 			logrus.Errorf("networks can not be dissociated: %v", err)
-			os.Exit(1)
+			exit(1)
 			return err
 		}
 		logrus.Infof("network dissociated: user:%s <-> network:%s", userName, netName)
