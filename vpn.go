@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -793,7 +794,7 @@ func emitCCD() error {
 			return fmt.Errorf("can not render ccd file %s: %s", user.Username, err)
 		}
 
-		err = emitToFile(_DefaultVPNCCDPath+user.Username, result.String(), 0)
+		err = emitToFile(filepath.Join(_DefaultVPNCCDPath, user.Username), result.String(), 0)
 		if err != nil {
 			return err
 		}
