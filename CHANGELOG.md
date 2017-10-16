@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.2.6](https://github.com/cad/ovpm/tree/v0.2.6) (2017-10-16)
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.5...v0.2.6)
+
+**Fixed bugs:**
+
+- ccd emit doesn't work correctly [\#57](https://github.com/cad/ovpm/issues/57)
+
 ## [v0.2.5](https://github.com/cad/ovpm/tree/v0.2.5) (2017-10-13)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.2.4...v0.2.5)
 
@@ -169,3 +176,4 @@
 - implement remote control proto [\#8](https://github.com/cad/ovpm/issues/8)
 - write docs [\#4](https://github.com/cad/ovpm/issues/4)
 - write unit tests [\#3](https://github.com/cad/ovpm/issues/3)
+
