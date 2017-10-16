@@ -83,6 +83,8 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 			return authRequired(ctx, req, handler)
 		case "/pb.VPNService/Update":
 			return authRequired(ctx, req, handler)
+		case "/pb.VPNService/Restart":
+			return authRequired(ctx, req, handler)
 
 		// NetworkService methods
 		case "/pb.NetworkService/Create":
