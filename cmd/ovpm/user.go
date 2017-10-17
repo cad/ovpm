@@ -96,14 +96,18 @@ var userCreateCommand = cli.Command{
 		if username == "" || password == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("username and password is required")
 		}
+
 		if static != "" && !govalidator.IsIPv4(static) {
-			fmt.Println("--static flag takes a valid ipv4 address")
+			fmt.Println("--static flag takes a valid IPv4 address")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("static should be either valid ipv4 addr or emptystring")
 		}
 		var hostid uint32
+		fmt.Println("static:", static)
 		if static != "" {
 			h := ovpm.IP2HostID(net.ParseIP(static).To4())
 			if h == 0 {
@@ -111,6 +115,7 @@ var userCreateCommand = cli.Command{
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				exit(1)
+				return fmt.Errorf("can't parse ipv4")
 			}
 
 			hostid = h
@@ -186,6 +191,7 @@ var userUpdateCommand = cli.Command{
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("username is required")
 		}
 
 		// Check whether if all flags are are empty.
@@ -194,14 +200,16 @@ var userUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("nothing is supplied")
 		}
 
 		// Given that static is set, check whether it's IPv4.
 		if static != "" && !govalidator.IsIPv4(static) {
-			fmt.Println("--static flag takes a valid ipv4 address")
+			fmt.Println("--static flag takes a valid IPv4 address")
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("static can either be a valid IPv4 addr or empty string")
 		}
 		var staticPref pb.UserUpdateRequest_StaticPref
 		staticPref = pb.UserUpdateRequest_NOPREFSTATIC
@@ -217,6 +225,7 @@ var userUpdateCommand = cli.Command{
 					fmt.Println()
 					fmt.Println(cli.ShowSubcommandHelp(c))
 					exit(1)
+					return fmt.Errorf("can't parse IP addr")
 				}
 
 				hostid = h
@@ -233,6 +242,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("static and no-static are mutually exclusive")
 		case static == "" && !noStatic:
 		default:
 			// means no pref
@@ -253,6 +263,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("gw and no-gw are mutually exclusive")
 		default:
 			gwPref = pb.UserUpdateRequest_NOPREF
 
@@ -273,6 +284,7 @@ var userUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("admin and no-admin are mutually exclusive")
 		}
 
 		//conn := getConn(c.String("port"))
@@ -316,6 +328,7 @@ var userDeleteCommand = cli.Command{
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("username is required")
 		}
 
 		//conn := getConn(c.String("port"))
@@ -351,6 +364,7 @@ var userRenewCommand = cli.Command{
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("username is required")
 		}
 
 		//conn := getConn(c.String("port"))
@@ -392,6 +406,7 @@ var userGenconfigCommand = cli.Command{
 		if username == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("username is required")
 		}
 		if output == "" {
 			output = username + ".ovpn"

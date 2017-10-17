@@ -78,7 +78,7 @@ var vpnInitCommand = cli.Command{
 			logrus.Errorf("'hostname' is required")
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
-
+			return fmt.Errorf("hostname is required")
 		}
 
 		port := c.String("port")
@@ -99,6 +99,7 @@ var vpnInitCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("net should be CIDR")
 		}
 
 		dns := c.String("dns")
@@ -107,6 +108,7 @@ var vpnInitCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("dns IPv4 address")
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -167,6 +169,7 @@ var vpnUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("hostname is required")
 		}
 
 		if ipblock != "" {
@@ -199,12 +202,14 @@ var vpnUpdateCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("dns should be IPv4")
 		}
 
 		if !(ipblock != "" || dns != "") {
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("ipblock and dns should be provided")
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))

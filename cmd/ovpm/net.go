@@ -45,6 +45,7 @@ var netDefineCommand = cli.Command{
 		if name == "" || cidr == "" || typ == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("name, cidr, type are required")
 		}
 
 		switch ovpm.NetworkTypeFromString(typ) {
@@ -54,6 +55,7 @@ var netDefineCommand = cli.Command{
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				exit(1)
+				return fmt.Errorf("via is a IPv4 addr")
 			}
 
 		case ovpm.SERVERNET:
@@ -62,6 +64,7 @@ var netDefineCommand = cli.Command{
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				exit(1)
+				return fmt.Errorf("via can only be used when type is ROUTE")
 			}
 		default: // Means UNDEFINEDNET
 			fmt.Printf("undefined network type %s", typ)
@@ -71,6 +74,7 @@ var netDefineCommand = cli.Command{
 			fmt.Println()
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("undefined network type")
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
@@ -190,6 +194,7 @@ var netUndefineCommand = cli.Command{
 		if name == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
+			return fmt.Errorf("name is required")
 		}
 
 		conn := getConn(c.GlobalString("daemon-port"))
