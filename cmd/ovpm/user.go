@@ -66,11 +66,11 @@ var userCreateCommand = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "username, u",
-			Usage: "username for the vpn user",
+			Usage: "username for the vpn user (required)",
 		},
 		cli.StringFlag{
 			Name:  "password, p",
-			Usage: "password for the vpn user",
+			Usage: "password for the vpn user (required)",
 		},
 		cli.BoolFlag{
 			Name:  "no-gw",
@@ -85,47 +85,56 @@ var userCreateCommand = cli.Command{
 			Usage: "this user has admin rights",
 		},
 	},
+	// userCreate action has two modes. Bulk mode
 	Action: func(c *cli.Context) error {
 		action = "user:create"
+
+		// Init subcmd flags.
 		username := c.String("username")
 		password := c.String("password")
 		noGW := c.Bool("no-gw")
 		static := c.String("static")
 		admin := c.Bool("admin")
+		var hostid uint32
 
+		// Check required flags.
 		if username == "" || password == "" {
 			fmt.Println(cli.ShowSubcommandHelp(c))
 			exit(1)
 			return fmt.Errorf("username and password is required")
 		}
 
-		if static != "" && !govalidator.IsIPv4(static) {
-			fmt.Println("--static flag takes a valid IPv4 address")
-			fmt.Println()
-			fmt.Println(cli.ShowSubcommandHelp(c))
-			exit(1)
-			return fmt.Errorf("static should be either valid ipv4 addr or emptystring")
-		}
-		var hostid uint32
-		fmt.Println("static:", static)
+		// Should set static ip?
 		if static != "" {
+			// Is ip addr valid?
+			if !govalidator.IsIPv4(static) {
+				fmt.Println("--static flag takes a valid IPv4 address")
+				fmt.Println()
+				fmt.Println(cli.ShowSubcommandHelp(c))
+				exit(1)
+				return fmt.Errorf("static should be either valid ipv4 addr or emptystring")
+			}
+			// Convert ip addr to hostid(uint32).
 			h := ovpm.IP2HostID(net.ParseIP(static).To4())
 			if h == 0 {
+				// hostid being 0 points to dynamic ip addr,
+				// hence ambiguous meaning here.
+				// This is perceived as an error.
 				fmt.Printf("can not parse %s as IPv4", static)
 				fmt.Println()
 				fmt.Println(cli.ShowSubcommandHelp(c))
 				exit(1)
 				return fmt.Errorf("can't parse ipv4")
 			}
-
-			hostid = h
+			hostid = h // set hostid of the user
 		}
 
-		//conn := getConn(c.String("port"))
+		// Prepare a gRPC call for creating the user.
 		conn := getConn(c.GlobalString("daemon-port"))
 		defer conn.Close()
 		userSvc := pb.NewUserServiceClient(conn)
 
+		// Call the gRPC daemon.
 		response, err := userSvc.Create(context.Background(),
 			&pb.UserCreateRequest{Username: username, Password: password, NoGw: noGW, HostId: hostid, IsAdmin: admin},
 		)
