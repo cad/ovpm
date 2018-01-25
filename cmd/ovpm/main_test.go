@@ -9,8 +9,6 @@ import (
 )
 
 func TestMainCmd(t *testing.T) {
-	app := NewApp()
-
 	output := new(bytes.Buffer)
 	app.Writer = output
 

@@ -1,3 +1,4 @@
+vendor/
 compress
 data_import/
 *.db

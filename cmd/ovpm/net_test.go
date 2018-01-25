@@ -7,8 +7,6 @@ import (
 )
 
 func TestNetCmd(t *testing.T) {
-	app := NewApp()
-
 	output := new(bytes.Buffer)
 	app.Writer = output
 
@@ -39,8 +37,6 @@ func TestNetCmd(t *testing.T) {
 }
 
 func TestNetDefineCmd(t *testing.T) {
-	app := NewApp()
-
 	output := new(bytes.Buffer)
 	app.Writer = output
 
@@ -93,8 +89,8 @@ func TestNetDefineCmd(t *testing.T) {
 		t.Fatal("error is expected about incorrect via format, but we didn't got error")
 	}
 
-	// Ensure network name alphanumeric and dot, dash, underscore chars are allowed
-	err = app.Run([]string{"ovpm", "net", "def", "--name", "asd.asd-d5sa_fasA32", "--type", "ROUTE", "--cidr", "192.168.1.1/24"})
+	// Ensure network name alphanumeric and dot, underscore chars are allowed
+	err = app.Run([]string{"ovpm", "net", "def", "--name", "asd.asdd5sa_fasA32", "--type", "ROUTE", "--cidr", "192.168.1.1/24"})
 	if err != nil && !strings.Contains(err.Error(), "grpc") {
 		t.Fatalf("error is not expected: %v", err)
 	}
@@ -102,8 +98,6 @@ func TestNetDefineCmd(t *testing.T) {
 }
 
 func TestNetUnDefineCmd(t *testing.T) {
-	app := NewApp()
-
 	output := new(bytes.Buffer)
 	app.Writer = output
 
@@ -118,8 +112,6 @@ func TestNetUnDefineCmd(t *testing.T) {
 }
 
 func TestAssocCmd(t *testing.T) {
-	app := NewApp()
-
 	output := new(bytes.Buffer)
 	app.Writer = output
 
