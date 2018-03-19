@@ -1,7 +1,7 @@
 #!/bin/bash
 export USER="nobody"
-export GROUP="nobody"
+export GROUP="nogroup"
 id -u $USER &>/dev/null || useradd $USER
-id -u $GROUP &>/dev/null || useradd $GROUP
+id -g $GROUP &>/dev/null || groudadd $GROUP
 
 systemctl daemon-reload
