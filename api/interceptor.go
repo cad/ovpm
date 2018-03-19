@@ -83,6 +83,8 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 			return authRequired(ctx, req, handler)
 		case "/pb.VPNService/Update":
 			return authRequired(ctx, req, handler)
+		case "/pb.VPNService/Restart":
+			return authRequired(ctx, req, handler)
 
 		// NetworkService methods
 		case "/pb.NetworkService/Create":
@@ -100,7 +102,7 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 		case "/pb.NetworkService/Dissociate":
 			return authRequired(ctx, req, handler)
 		default:
-			logrus.Debugln("rpc: auth is not required for this endpoint: '%s'", info.FullMethod)
+			logrus.Debugf("rpc: auth not required for endpoint: '%s'", info.FullMethod)
 		}
 	}
 	return handler(ctx, req)

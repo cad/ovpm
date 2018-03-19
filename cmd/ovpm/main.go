@@ -8,10 +8,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-var action string
+var app = cli.NewApp()
 
 func main() {
-	app := cli.NewApp()
+	app.Run(os.Args)
+}
+
+func init() {
 	app.Name = "ovpm"
 	app.Usage = "OpenVPN Manager"
 	app.Version = ovpm.Version
@@ -20,9 +23,13 @@ func main() {
 			Name:  "verbose",
 			Usage: "verbose output",
 		},
-		cli.StringFlag{
+		cli.IntFlag{
 			Name:  "daemon-port",
 			Usage: "port number for OVPM daemon to call",
+		},
+		cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "just validate command flags; not make any calls to the daemon behind",
 		},
 	}
 	app.Before = func(c *cli.Context) error {
@@ -31,55 +38,5 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 		return nil
-
 	}
-	app.Commands = []cli.Command{
-		{
-			Name:    "user",
-			Usage:   "User Operations",
-			Aliases: []string{"u"},
-			Subcommands: []cli.Command{
-				userListCommand,
-				userCreateCommand,
-				userUpdateCommand,
-				userDeleteCommand,
-				userRenewCommand,
-				userGenconfigCommand,
-			},
-		},
-		{
-			Name:    "vpn",
-			Usage:   "VPN Operations",
-			Aliases: []string{"v"},
-			Subcommands: []cli.Command{
-				vpnStatusCommand,
-				vpnInitCommand,
-				vpnUpdateCommand,
-				vpnRestartCommand,
-			},
-		},
-		{
-			Name:    "net",
-			Usage:   "Network Operations",
-			Aliases: []string{"n"},
-			Subcommands: []cli.Command{
-				netListCommand,
-				netTypesCommand,
-				netDefineCommand,
-				netUndefineCommand,
-				netAssociateCommand,
-				netDissociateCommand,
-			},
-		},
-	}
-	app.Run(os.Args)
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

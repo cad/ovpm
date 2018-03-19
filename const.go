@@ -16,6 +16,9 @@ const (
 	// DefaultVPNDNS is the default DNS to push to clients.
 	DefaultVPNDNS = "8.8.8.8"
 
+	// DefaultDaemonPort is the port OVPMD will listen by default if something else is not specified.
+	DefaultDaemonPort = 9090
+
 	etcBasePath = "/etc/ovpm/"
 	varBasePath = "/var/db/ovpm/"
 

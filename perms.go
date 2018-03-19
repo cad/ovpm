@@ -31,7 +31,7 @@ const (
 	DissociateNetworkUserPerm
 )
 
-// AdminPerms is a collection of permissions for Admin.
+// AdminPerms returns the list of permissions that admin type user has.
 func AdminPerms() []permset.Perm {
 	return []permset.Perm{
 		CreateUserPerm,
@@ -57,7 +57,7 @@ func AdminPerms() []permset.Perm {
 	}
 }
 
-// UserPerms is a collection of permissions for User.
+// UserPerms returns the collection of permissions that the regular users have.
 func UserPerms() []permset.Perm {
 	return []permset.Perm{
 		GetSelfPerm,

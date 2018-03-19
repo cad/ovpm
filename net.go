@@ -73,6 +73,16 @@ func (nt NetworkType) Description() string {
 	return "UNDEFINEDNET"
 }
 
+// IsNetworkType returns if the s is a valid network type or not.
+func IsNetworkType(s string) bool {
+	for _, v := range networkTypes {
+		if s == v.String {
+			return true
+		}
+	}
+	return false
+}
+
 // dbNetworkModel is database model for external networks on the VPN server.
 type dbNetworkModel struct {
 	gorm.Model
@@ -502,6 +512,7 @@ func enableNat() error {
 	if err := ipt.AppendUnique("filter", "FORWARD", "-i", rif.Name, "-o", vpnIfc.Name, "-m", "state", "--state", "RELATED,ESTABLISHED", "-j", "ACCEPT"); err != nil {
 		return err
 	}
+
 	if err := ipt.AppendUnique("filter", "FORWARD", "-i", vpnIfc.Name, "-o", rif.Name, "-j", "ACCEPT"); err != nil {
 		return err
 	}
