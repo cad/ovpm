@@ -636,6 +636,33 @@ func GetServerInstance() (*Server, error) {
 	return &Server{dbServerModel: server}, nil
 }
 
+// GetConnectedUsers will return a list of users who are currently connected
+// to the VPN service.
+func GetConnectedUsers() ([]User, error) {
+	var users []User
+	cl, _ := parseStatusLog(_DefaultStatusLogPath)
+
+	for _, c := range cl {
+		var u dbUserModel
+		q := db.Where(dbUserModel{Username: c.CommonName}).First(&u)
+		if q.RecordNotFound() {
+			return nil, fmt.Errorf("common name reported by the OpenVPN is not found in the database: username='%s'", c.CommonName)
+		}
+		if err := q.Error; err != nil {
+			return nil, fmt.Errorf("unknown db error: %v", err)
+		}
+
+		users = append(users, User{
+			dbUserModel:    u,
+			isConnected:    true,
+			connectedSince: c.ConnectedSince,
+			bytesReceived:  c.BytesReceived,
+			bytesSent:      c.BytesSent,
+		})
+	}
+	return users, nil
+}
+
 // IsInitialized checks if there is a default VPN server configured in the database or not.
 func IsInitialized() bool {
 	var server dbServerModel

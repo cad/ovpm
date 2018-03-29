@@ -212,6 +212,7 @@ client-to-client
 # Ping every 10 seconds, assume that remote
 # peer is down if no ping received during
 # a 120 second time period.
+;keepalive 10 120
 keepalive 2 20
 
 # For extra security beyond that provided
@@ -262,7 +263,7 @@ persist-tun
 # Output a short status file showing
 # current connections, truncated
 # and rewritten every minute.
-status openvpn-status.log
+status openvpn-status.log 5
 
 # By default, log messages will go to the syslog (or
 # on Windows, if running as a service, they will go to

@@ -106,6 +106,10 @@ message UserResponse {
     bool no_gw = 6;
     uint32 host_id = 7;
     bool is_admin = 8;
+    bool is_connected = 9;
+    string connected_since = 10;
+    uint64 bytes_sent = 11;
+    uint64 bytes_received = 12;
   }
 
   repeated User users = 1;

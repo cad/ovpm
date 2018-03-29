@@ -40,6 +40,11 @@ type dbUserModel struct {
 // User represents a vpn user.
 type User struct {
 	dbUserModel // persisted fields
+
+	isConnected    bool
+	connectedSince time.Time
+	bytesReceived  uint64
+	bytesSent      uint64
 }
 
 func (u *dbUserModel) setPassword(password string) error {
@@ -423,6 +428,21 @@ func (u *User) IsAdmin() bool {
 
 func (u *User) getKey() string {
 	return u.Key
+}
+
+// ConnectionStatus returns information about user's connection to the VPN server.
+func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, bytesSent uint64, bytesReceived uint64) {
+	var found *clEntry
+	cl, _ := parseStatusLog(_DefaultStatusLogPath)
+	for _, c := range cl {
+		if c.CommonName == u.Username {
+			found = &c
+		}
+	}
+	if found == nil {
+		return false, time.Time{}, 0, 0
+	}
+	return true, found.ConnectedSince, found.BytesSent, found.BytesReceived
 }
 
 func getStaticHostUsers() []*User {

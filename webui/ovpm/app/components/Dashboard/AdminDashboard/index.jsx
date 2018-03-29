@@ -15,6 +15,8 @@ import UserEdit from './UserEdit';
 import NetworkEdit from './NetworkEdit';
 import UserPicker from './UserPicker';
 
+import moment from 'moment';
+
 const modalStyle = {
     content : {
         top                   : '50%',
@@ -443,12 +445,21 @@ export default class AdminDashboard extends React.Component {
                 noGW = (<span className="glyphicon glyphicon-ok" data-toggle="tooltip" title="True"></span>)
             }
 
+            let isOnline = (<span className="text-muted" style={{"font-size":"2em", "vertical-align": "middle"}} data-toggle="tooltip" title="Offline">◦</span>)
+            if (this.state.users[i].is_connected) {
+                let onlineSince = "Online, since " + moment(this.state.users[i].connected_since).fromNow() + "."
+                console.log(onlineSince)
+                isOnline = (<span className="text-success" style={{"font-size":"2em", "vertical-align": "middle"}} data-toggle="tooltip" title={onlineSince}>•</span>)
+            }
+
+            let createdAt = (<span data-toggle="tooltip" title={this.state.users[i].created_at}>{moment(this.state.users[i].created_at).fromNow()}</span>)
+
             users.push(
                 <tr key={"user" + i}>
                     <td>{i+1}</td>
-                    <td>{this.state.users[i].username} {isAdmin}</td>
+                    <td>{isOnline} {this.state.users[i].username} {isAdmin}</td>
                     <td>{this.state.users[i].ip_net} {isStatic}</td>
-                    <td>{this.state.users[i].created_at}</td>
+                    <td>{createdAt}</td>
                     <td className="mui--align-middle">{noGW}</td>
                     <td>
                         <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-floppy-save" data-toggle="tooltip" title="Download VPN Profile" onClick={this.handleDownloadProfileClick.bind(this, this.state.users[i].username)}></span></a>

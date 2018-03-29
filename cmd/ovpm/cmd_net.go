@@ -97,6 +97,11 @@ var netListCommand = cli.Command{
 			daemonPort = port
 		}
 
+		// If dry run, then don't call the action, just preprocess.
+		if c.GlobalBool("dry-run") {
+			return nil
+		}
+
 		return netListAction(fmt.Sprintf("grpc://localhost:%d", daemonPort))
 	},
 }
@@ -233,7 +238,7 @@ var netDissociateCommand = cli.Command{
 			exit(1)
 			return err
 		}
-		if username := c.String("username"); govalidator.IsNull(username) {
+		if username := c.String("user"); govalidator.IsNull(username) {
 			err := errors.EmptyValue("username", username)
 			exit(1)
 			return err

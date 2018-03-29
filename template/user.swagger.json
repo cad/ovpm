@@ -192,6 +192,21 @@
         "is_admin": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "is_connected": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "connected_since": {
+          "type": "string"
+        },
+        "bytes_sent": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "bytes_received": {
+          "type": "string",
+          "format": "uint64"
         }
       }
     },

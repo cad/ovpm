@@ -13,10 +13,12 @@
   "dependencies": {
     "axios": "^0.16.2",
     "download": "^6.2.5",
+    "moment": "^2.21.0",
     "muicss": "^0.9.25",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-modal": "^2.3.2",
+    "react-moment": "^0.7.0",
     "react-router-dom": "^4.2.2",
     "string-template": "^1.0.0",
     "validator": "^8.2.0"

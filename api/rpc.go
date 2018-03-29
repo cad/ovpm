@@ -2,6 +2,7 @@ package api
 
 import (
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -86,6 +87,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 		return nil, err
 	}
 	for _, user := range users {
+		isConnected, connectedSince, bytesSent, bytesReceived := user.ConnectionStatus()
 		ut = append(ut, &pb.UserResponse_User{
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
@@ -94,6 +96,10 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			NoGw:               user.IsNoGW(),
 			HostId:             user.GetHostID(),
 			IsAdmin:            user.IsAdmin(),
+			IsConnected:        isConnected,
+			ConnectedSince:     connectedSince.UTC().Format(time.RFC3339),
+			BytesSent:          bytesSent,
+			BytesReceived:      bytesReceived,
 		})
 	}
 

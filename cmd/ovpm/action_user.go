@@ -6,11 +6,13 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -52,24 +54,46 @@ func userListAction(rpcServURLStr string) error {
 	}
 
 	// Prepare table data.
-	header := []string{"#", "username", "ip", "created at", "valid crt", "push gw"}
+	header := []string{"#", "username", "ip", "created", "crt", "push gw", "admin"}
 	rows := [][]string{}
 	for i, user := range userListResp.Users {
+		isConnected := " "
+		if user.IsConnected {
+			//isConnected = fmt.Sprintf("%s●%s", "\x1b[32m", "\x1b[0m\x1b[0m") // green ascii dot
+			isConnected = fmt.Sprintf("%s●%s", "", "") // colorless ascii dot
+		}
 		static := ""
 		if user.HostId != 0 {
 			static = "s"
 		}
-		username := user.Username
+		isAdmin := "✘"
 		if user.IsAdmin {
-			username = fmt.Sprintf("%s *", username)
+			isAdmin = "✔"
 		}
+
+		isValidCRT := "✘"
+		if user.ServerSerialNumber == vpnStatusResp.SerialNumber {
+			isValidCRT = "✔"
+		}
+
+		isPushGW := "✘"
+		if !user.NoGw {
+			isPushGW = "✔"
+		}
+
+		createdAt := user.CreatedAt
+		if t, err := time.Parse(time.RubyDate, user.CreatedAt); err == nil {
+			createdAt = humanize.Time(t)
+		}
+
 		row := []string{
 			fmt.Sprintf("%v", i+1),
-			username,
+			isConnected + " " + user.Username,
 			fmt.Sprintf("%s %s", user.IpNet, static),
-			user.CreatedAt,
-			fmt.Sprintf("%t", user.ServerSerialNumber == vpnStatusResp.SerialNumber),
-			fmt.Sprintf("%t", !user.NoGw),
+			createdAt,
+			isValidCRT,
+			isPushGW,
+			isAdmin,
 		}
 		rows = append(rows, row)
 	}
