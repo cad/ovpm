@@ -347,6 +347,7 @@ func interfaceOfIP(ipnet *net.IPNet) *net.Interface {
 	return nil
 }
 
+// routedInterface returns the interface who has a routable IP address on it.
 func routedInterface(network string, flags net.Flags) *net.Interface {
 	switch network {
 	case "ip", "ip4", "ip6":
@@ -369,6 +370,7 @@ func routedInterface(network string, flags net.Flags) *net.Interface {
 	return nil
 }
 
+// getOutboundInterface will return the outbound interface if there is one.
 func getOutboundInterface() *net.Interface {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
@@ -384,6 +386,8 @@ func getOutboundInterface() *net.Interface {
 	return interfaceOfIP(&ipnet)
 }
 
+// hasRoutableIP returns if the received interface has a routable IP
+// address attached on it.
 func hasRoutableIP(network string, ifi *net.Interface) (net.IP, bool) {
 	ifat, err := ifi.Addrs()
 	if err != nil {
@@ -404,6 +408,7 @@ func hasRoutableIP(network string, ifi *net.Interface) (net.IP, bool) {
 	return nil, false
 }
 
+// vpnInterface returns the interface which belongs to the VPN server.
 func vpnInterface() *net.Interface {
 	server, err := GetServerInstance()
 	if err != nil {
@@ -420,6 +425,7 @@ func vpnInterface() *net.Interface {
 	return interfaceOfIP(&ipnet)
 }
 
+// routableIP returns if the received IP is routable.
 func routableIP(network string, ip net.IP) net.IP {
 	if !ip.IsLoopback() && !ip.IsLinkLocalUnicast() && !ip.IsGlobalUnicast() {
 		return nil
@@ -462,7 +468,6 @@ func ensureNatEnabled() {
 			// instead of sleeping for the constant duration.
 			time.Sleep(1 * time.Second)
 		}
-
 	}()
 }
 
