@@ -647,12 +647,15 @@ func GetConnectedUsers() ([]User, error) {
 		panic(err)
 	}
 
-	cl, _ := parseStatusLog(f)
+	cl, _ := parseStatusLog(f) // client list from OpenVPN status log
 	for _, c := range cl {
 		var u dbUserModel
 		q := db.Where(dbUserModel{Username: c.CommonName}).First(&u)
 		if q.RecordNotFound() {
-			return nil, fmt.Errorf("common name reported by the OpenVPN is not found in the database: username='%s'", c.CommonName)
+			logrus.WithFields(
+				logrus.Fields{"CommonName": c.CommonName},
+			).Error("user not found: common name reported by the OpenVPN is not found in the database")
+			continue
 		}
 		if err := q.Error; err != nil {
 			return nil, fmt.Errorf("unknown db error: %v", err)
