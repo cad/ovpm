@@ -640,8 +640,14 @@ func GetServerInstance() (*Server, error) {
 // to the VPN service.
 func GetConnectedUsers() ([]User, error) {
 	var users []User
-	cl, _ := parseStatusLog(_DefaultStatusLogPath)
 
+	// Open the status log file.
+	f, err := os.Open(_DefaultStatusLogPath)
+	if err != nil {
+		panic(err)
+	}
+
+	cl, _ := parseStatusLog(f)
 	for _, c := range cl {
 		var u dbUserModel
 		q := db.Where(dbUserModel{Username: c.CommonName}).First(&u)

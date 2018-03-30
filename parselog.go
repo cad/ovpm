@@ -2,7 +2,7 @@ package ovpm
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +29,7 @@ type rtEntry struct {
 
 // parseStatusLog parses the received OpenVPN status log file.
 // And then returns the parsed client information.
-func parseStatusLog(fPath string) ([]clEntry, []rtEntry) {
+func parseStatusLog(f io.Reader) ([]clEntry, []rtEntry) {
 	// Parsing stages.
 	const stageCL int = 0
 	const stageRT int = 1
@@ -41,11 +41,6 @@ func parseStatusLog(fPath string) ([]clEntry, []rtEntry) {
 	var cl []clEntry
 	var rt []rtEntry
 
-	f, err := os.Open(fPath)
-	if err != nil {
-		panic(err)
-	}
-
 	// Scan and parse the file by dividing it into chunks.
 	scanner, skipFor := bufio.NewScanner(f), 3
 	for lc := 0; scanner.Scan(); lc++ {
@@ -56,30 +51,30 @@ func parseStatusLog(fPath string) ([]clEntry, []rtEntry) {
 		txt := scanner.Text()
 		switch currStage {
 		case stageCL:
-			if txt == "ROUTING TABLE" {
+			if strings.Contains(txt, "ROUTING TABLE") {
 				currStage = stageRT
 				skipFor = 1
 				continue
 			}
 			dat := strings.Split(txt, ",")
 			cl = append(cl, clEntry{
-				CommonName:     dat[0],
-				RealAddress:    dat[1],
-				BytesReceived:  stoui64(dat[2]),
-				BytesSent:      stoui64(dat[3]),
-				ConnectedSince: stodt(dat[4]),
+				CommonName:     trim(dat[0]),
+				RealAddress:    trim(dat[1]),
+				BytesReceived:  stoui64(trim(dat[2])),
+				BytesSent:      stoui64(trim(dat[3])),
+				ConnectedSince: stodt(trim(dat[4])),
 			})
 		case stageRT:
-			if txt == "GLOBAL STATS" {
+			if strings.Contains(txt, "GLOBAL STATS") {
 				currStage = stageFin
 				break
 			}
 			dat := strings.Split(txt, ",")
 			rt = append(rt, rtEntry{
-				VirtualAddress: dat[0],
-				CommonName:     dat[1],
-				RealAddress:    dat[2],
-				LastRef:        stodt(dat[3]),
+				VirtualAddress: trim(dat[0]),
+				CommonName:     trim(dat[1]),
+				RealAddress:    trim(dat[2]),
+				LastRef:        stodt(trim(dat[3])),
 			})
 		}
 	}
@@ -106,4 +101,9 @@ func stodt(s string) time.Time {
 		panic(err)
 	}
 	return t
+}
+
+// trim will trim all leading and trailing whitespace from the s.
+func trim(s string) string {
+	return strings.TrimSpace(s)
 }

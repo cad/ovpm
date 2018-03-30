@@ -3,6 +3,7 @@ package ovpm
 import (
 	"fmt"
 	"net"
+	"os"
 	"time"
 
 	passlib "gopkg.in/hlandau/passlib.v1"
@@ -433,7 +434,14 @@ func (u *User) getKey() string {
 // ConnectionStatus returns information about user's connection to the VPN server.
 func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, bytesSent uint64, bytesReceived uint64) {
 	var found *clEntry
-	cl, _ := parseStatusLog(_DefaultStatusLogPath)
+
+	// Open the status log file.
+	f, err := os.Open(_DefaultStatusLogPath)
+	if err != nil {
+		panic(err)
+	}
+
+	cl, _ := parseStatusLog(f)
 	for _, c := range cl {
 		if c.CommonName == u.Username {
 			found = &c
