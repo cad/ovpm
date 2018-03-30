@@ -1,7 +1,5 @@
 FROM fedora:latest
-MAINTAINER Mustafa Arici (mustafa@arici.io)
-
-
+LABEL maintainer="Mustafa Arici (mustafa@arici.io)"
 
 # Deps
 RUN rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
