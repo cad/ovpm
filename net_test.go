@@ -2,6 +2,8 @@ package ovpm
 
 import (
 	"fmt"
+	"net"
+	"reflect"
 	"testing"
 )
 
@@ -319,4 +321,115 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 func init() {
 	// Init
 	Testing = true
+}
+
+func TestNetworkTypeFromString(t *testing.T) {
+	type args struct {
+		typ string
+	}
+	tests := []struct {
+		name string
+		args args
+		want NetworkType
+	}{
+		{"servernet", args{"SERVERNET"}, SERVERNET},
+		{"route", args{"ROUTE"}, ROUTE},
+		{"unknown", args{"aasdfsafdASDF"}, UNDEFINEDNET},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NetworkTypeFromString(tt.args.typ); got != tt.want {
+				t.Errorf("NetworkTypeFromString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetAllNetworkTypes(t *testing.T) {
+	tests := []struct {
+		name string
+		want []NetworkType
+	}{
+		{"default", []NetworkType{UNDEFINEDNET, SERVERNET, ROUTE}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetAllNetworkTypes(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetAllNetworkTypes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsNetworkType(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"servernet", args{"SERVERNET"}, true},
+		{"route", args{"ROUTE"}, true},
+		{"invalid", args{"ADSF"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsNetworkType(tt.args.s); got != tt.want {
+				t.Errorf("IsNetworkType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIncrementIP(t *testing.T) {
+	type args struct {
+		ip   string
+		mask string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"default", args{"192.168.1.10", "255.255.255.0"}, "192.168.1.11", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IncrementIP(tt.args.ip, tt.args.mask)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("IncrementIP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("IncrementIP() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_routableIP(t *testing.T) {
+	type args struct {
+		network string
+		ip      net.IP
+	}
+	tests := []struct {
+		name string
+		args args
+		want net.IP
+	}{
+		{"default", args{"ip4", net.ParseIP("0.0.0.0").To4()}, nil},
+		{"local", args{"ip4", net.ParseIP("192.168.1.1").To4()}, net.ParseIP("192.168.1.1").To4()},
+		{"v6linklocal", args{"ip6", net.ParseIP("FE80::").To16()}, net.ParseIP("FE80::").To16()},
+		{"", args{"ip6", net.ParseIP("FE80::").To16()}, net.ParseIP("FE80::").To16()},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := routableIP(tt.args.network, tt.args.ip); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("routableIP() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
