@@ -60,19 +60,21 @@ type Server struct {
 	dbServerModel
 	webPort string
 
-	emitToFileFunc func(path, content string, mode uint) error
-	openFunc       func(path string) (io.Reader, error)
+	emitToFileFunc     func(path, content string, mode uint) error
+	openFunc           func(path string) (io.Reader, error)
+	parseStatusLogFunc func(f io.Reader) ([]clEntry, []rtEntry)
 }
 
 // TheServer returns a pointer to the server instance.
 func TheServer() *Server {
 	once.Do(func() {
-		// Initialize the server instance.
+		// Initialize the server instance by setting default mockable funcs & attributes.
 		serverInstance = &Server{
 			emitToFileFunc: emitToFile,
 			openFunc: func(path string) (io.Reader, error) {
 				return os.Open(path)
 			},
+			parseStatusLogFunc: parseStatusLog,
 		}
 	})
 	if db != nil {
@@ -668,7 +670,7 @@ func (svr *Server) GetConnectedUsers() ([]User, error) {
 		panic(err)
 	}
 
-	cl, _ := parseStatusLog(f) // client list from OpenVPN status log
+	cl, _ := svr.parseStatusLogFunc(f) // client list from OpenVPN status log
 	for _, c := range cl {
 		var u dbUserModel
 		q := db.Where(dbUserModel{Username: c.CommonName}).First(&u)
