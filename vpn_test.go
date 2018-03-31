@@ -1,12 +1,11 @@
 package ovpm
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm/supervisor"
@@ -477,31 +476,53 @@ func TestGetConnectedUsers(t *testing.T) {
 	defer db.Cease()
 	svr := TheServer()
 	svr.Init("localhost", "", UDPProto, "", "")
-	// Change openr from os.Open to our mock file injecter.
-	svr.openFunc = func(path string) (io.Reader, error) {
-		const testLog = `
-OpenVPN CLIENT LIST
-Updated,Mon Mar 26 13:26:10 2018
-Common Name,Real Address,Bytes Received,Bytes Sent,Connected Since
-google.DNS,8.8.8.8:53246,527914279,3204562859,Sat Mar 17 16:26:38 2018
-google1.DNS,8.8.4.4:33974,42727443,291595456,Mon Mar 26 08:24:08 2018
-ROUTING TABLE
-Virtual Address,Common Name,Real Address,Last Ref
-10.20.30.6,google.DNS,8.8.8.8:33974,Mon Mar 26 13:26:04 2018
-10.20.30.5,google1.DNS,8.8.4.4:53246,Mon Mar 26 13:25:57 2018
-GLOBAL STATS
-Max bcast/mcast queue length,4
-END
-`
-		return bytes.NewBufferString(testLog), nil
-	}
 
+	// Mock funcs.
+	svr.openFunc = func(path string) (io.Reader, error) {
+		return nil, nil
+	}
 	// Create the corresponding users for test.
-	if _, err := CreateNewUser("usr1", "1234", true, 0, false); err != nil {
+	usr1, err := CreateNewUser("usr1", "1234", true, 0, false)
+	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
-	if _, err := CreateNewUser("usr2", "1234", true, 0, false); err != nil {
+	usr2, err := CreateNewUser("usr2", "1234", true, 0, false)
+	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
+	}
+	now := time.Now()
+	svr.parseStatusLogFunc = func(f io.Reader) ([]clEntry, []rtEntry) {
+		clt := []clEntry{
+			clEntry{
+				CommonName:     usr1.GetUsername(),
+				RealAddress:    "1.1.1.1",
+				ConnectedSince: now,
+				BytesReceived:  1,
+				BytesSent:      5,
+			},
+			clEntry{
+				CommonName:     usr2.GetUsername(),
+				RealAddress:    "1.1.1.2",
+				ConnectedSince: now,
+				BytesReceived:  2,
+				BytesSent:      6,
+			},
+		}
+		rtt := []rtEntry{
+			rtEntry{
+				CommonName:     usr1.GetUsername(),
+				RealAddress:    "1.1.1.1",
+				LastRef:        now,
+				VirtualAddress: "10.10.10.1",
+			},
+			rtEntry{
+				CommonName:     usr2.GetUsername(),
+				RealAddress:    "1.1.1.2",
+				LastRef:        now,
+				VirtualAddress: "10.10.10.2",
+			},
+		}
+		return clt, rtt
 	}
 
 	// Test:
@@ -510,7 +531,7 @@ END
 		want    []User
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"default", []User{*usr2, *usr1}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -519,8 +540,16 @@ END
 				t.Errorf("GetConnectedUsers() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetConnectedUsers() = %v, want %v", got, tt.want)
+			for _, wu := range tt.want {
+				var found bool
+				for _, u := range got {
+					if wu.GetUsername() == u.GetUsername() {
+						found = true
+					}
+				}
+				if !found {
+					t.Errorf("wanted user (%s) is not present in the response we got %v", wu.GetUsername(), got)
+				}
 			}
 		})
 	}
