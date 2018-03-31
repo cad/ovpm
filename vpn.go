@@ -647,7 +647,7 @@ func (svr *Server) emitServerConf() error {
 func (svr *Server) Refresh() error {
 	//db = CreateDB("sqlite3", "")
 	var dbServer dbServerModel
-	fmt.Println(db)
+
 	q := db.First(&dbServer)
 	if err := q.Error; err != nil {
 		return fmt.Errorf("can't get server from db: %v", err)
