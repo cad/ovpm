@@ -299,7 +299,7 @@ func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigReques
 	}
 
 	if perms.Contains(ovpm.GenConfigAnyUserPerm) {
-		configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
+		configBlob, err := ovpm.TheServer().DumpsClientConfig(user.GetUsername())
 		if err != nil {
 			return nil, err
 		}
@@ -310,7 +310,7 @@ func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigReques
 		if user.GetUsername() != username {
 			return nil, grpc.Errorf(codes.PermissionDenied, "Caller can only genconfig for their user.")
 		}
-		configBlob, err := ovpm.DumpsClientConfig(user.GetUsername())
+		configBlob, err := ovpm.TheServer().DumpsClientConfig(user.GetUsername())
 		if err != nil {
 			return nil, err
 		}
@@ -324,10 +324,7 @@ type VPNService struct{}
 
 func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNStatusResponse, error) {
 	logrus.Debugf("rpc call: vpn status")
-	server, err := ovpm.GetServerInstance()
-	if err != nil {
-		return nil, err
-	}
+	server := ovpm.TheServer()
 
 	perms, err := permset.FromContext(ctx)
 	if err != nil {
@@ -375,7 +372,7 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.InitVPNPerm is required for this operation.")
 	}
 
-	if err := ovpm.Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
+	if err := ovpm.TheServer().Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil
@@ -392,7 +389,7 @@ func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.UpdateVPNPerm is required for this operation.")
 	}
 
-	if err := ovpm.Update(req.IpBlock, req.Dns); err != nil {
+	if err := ovpm.TheServer().Update(req.IpBlock, req.Dns); err != nil {
 		logrus.Errorf("server can not be updated: %v", err)
 	}
 	return &pb.VPNUpdateResponse{}, nil
@@ -409,7 +406,7 @@ func (s *VPNService) Restart(ctx context.Context, req *pb.VPNRestartRequest) (*p
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.UpdateVPNPerm is required for this operation.")
 	}
 
-	ovpm.RestartVPNProc()
+	ovpm.TheServer().RestartVPNProc()
 	return &pb.VPNRestartResponse{}, nil
 }
 

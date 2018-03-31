@@ -134,14 +134,14 @@ func (s *server) start() {
 	logrus.Infof("OVPM %s is running gRPC:%s, REST:%s ...", ovpm.Version, s.grpcPort, s.restPort)
 	go s.grpcServer.Serve(s.lis)
 	go http.ListenAndServe(":"+s.restPort, s.restServer)
-	ovpm.StartVPNProc()
+	ovpm.TheServer().StartVPNProc()
 }
 
 func (s *server) stop() {
 	logrus.Info("OVPM is shutting down ...")
 	s.grpcServer.Stop()
 	s.restCancel()
-	ovpm.StopVPNProc()
+	ovpm.TheServer().StopVPNProc()
 
 }
 

@@ -103,7 +103,7 @@ type Network struct {
 
 // GetNetwork returns a network specified by its name.
 func GetNetwork(name string) (*Network, error) {
-	if !IsInitialized() {
+	if svr := TheServer(); !svr.IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
 	// Validate user input.
@@ -134,9 +134,10 @@ func GetAllNetworks() []*Network {
 
 // CreateNewNetwork creates a new network definition in the system.
 func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Network, error) {
-	if !IsInitialized() {
+	if svr := TheServer(); !svr.IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
+
 	// Validate user input.
 	if govalidator.IsNull(name) {
 		return nil, fmt.Errorf("validation error: %s can not be null", name)
@@ -185,7 +186,7 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 	if db.NewRecord(&network) {
 		return nil, fmt.Errorf("can not create network in the db")
 	}
-	EmitWithRestart()
+	TheServer().EmitWithRestart()
 	logrus.Infof("network defined: %s (%s)", network.Name, network.CIDR)
 	return &Network{dbNetworkModel: network}, nil
 
@@ -193,19 +194,20 @@ func CreateNewNetwork(name, cidr string, nettype NetworkType, via string) (*Netw
 
 // Delete deletes a network definition in the system.
 func (n *Network) Delete() error {
-	if !IsInitialized() {
+	svr := TheServer()
+	if !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 
 	db.Unscoped().Delete(n.dbNetworkModel)
-	EmitWithRestart()
+	svr.EmitWithRestart()
 	logrus.Infof("network deleted: %s", n.Name)
 	return nil
 }
 
 // Associate allows the given user access to this network.
 func (n *Network) Associate(username string) error {
-	if !IsInitialized() {
+	if svr := TheServer(); !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 	user, err := GetUser(username)
@@ -231,14 +233,15 @@ func (n *Network) Associate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("association failed: %v", userAssoc.Error)
 	}
-	EmitWithRestart()
+	TheServer().EmitWithRestart()
 	logrus.Infof("user '%s' is associated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
 
 // Dissociate breaks up the given users association to the said network.
 func (n *Network) Dissociate(username string) error {
-	if !IsInitialized() {
+	svr := TheServer()
+	if !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 
@@ -265,7 +268,7 @@ func (n *Network) Dissociate(username string) error {
 	if userAssoc.Error != nil {
 		return fmt.Errorf("disassociation failed: %v", userAssoc.Error)
 	}
-	EmitWithRestart()
+	svr.EmitWithRestart()
 	logrus.Infof("user '%s' is dissociated with the network '%s'", user.GetUsername(), n.Name)
 	return nil
 }
@@ -410,14 +413,10 @@ func hasRoutableIP(network string, ifi *net.Interface) (net.IP, bool) {
 
 // vpnInterface returns the interface which belongs to the VPN server.
 func vpnInterface() *net.Interface {
-	server, err := GetServerInstance()
-	if err != nil {
-		logrus.Errorf("can't get server instance: %v", err)
-		return nil
-	}
+	svr := TheServer()
 
-	mask := net.IPMask(net.ParseIP(server.Mask))
-	prefix := net.ParseIP(server.Net)
+	mask := net.IPMask(net.ParseIP(svr.Mask))
+	prefix := net.ParseIP(svr.Net)
 	netw := prefix.Mask(mask).To4()
 	netw[3] = byte(1) // Server is always gets xxx.xxx.xxx.1
 	ipnet := net.IPNet{IP: netw, Mask: mask}
@@ -491,20 +490,16 @@ func enableNat() error {
 	}
 
 	// Enable ip forwarding.
-	emitToFile("/proc/sys/net/ipv4/ip_forward", "1", 0)
+	TheServer().emitToFile("/proc/sys/net/ipv4/ip_forward", "1", 0)
 	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
 		return fmt.Errorf("can not create new iptables object: %v", err)
 	}
 
-	server, err := GetServerInstance()
-	if err != nil {
-		logrus.Errorf("can't get server instance: %v", err)
-		return nil
-	}
+	svr := TheServer()
 
-	mask := net.IPMask(net.ParseIP(server.Mask))
-	prefix := net.ParseIP(server.Net)
+	mask := net.IPMask(net.ParseIP(svr.Mask))
+	prefix := net.ParseIP(svr.Net)
 	netw := prefix.Mask(mask).To4()
 	netw[3] = byte(1) // Server is always gets xxx.xxx.xxx.1
 	ipnet := net.IPNet{IP: netw, Mask: mask}

@@ -131,7 +131,8 @@ func GetAllUsers() ([]*User, error) {
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
 func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bool) (*User, error) {
-	if !IsInitialized() {
+	svr := TheServer()
+	if !svr.IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
 	}
 	// Validate user input.
@@ -145,7 +146,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		return nil, fmt.Errorf("forbidden: username root is reserved and can not be used")
 	}
 
-	ca, err := GetSystemCA()
+	ca, err := svr.GetSystemCA()
 	if err != nil {
 		return nil, err
 	}
@@ -154,10 +155,6 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	if err != nil {
 		return nil, fmt.Errorf("can not create client cert %s: %v", username, err)
 	}
-	server, err := GetServerInstance()
-	if err != nil {
-		return nil, fmt.Errorf("can not get server: %v", err)
-	}
 
 	if hostid != 0 {
 		ip := HostID2IP(hostid)
@@ -165,7 +162,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 			return nil, fmt.Errorf("host id doesn't represent an ip %d", hostid)
 		}
 
-		network := net.IPNet{IP: net.ParseIP(server.Net).To4(), Mask: net.IPMask(net.ParseIP(server.Mask).To4())}
+		network := net.IPNet{IP: net.ParseIP(svr.Net).To4(), Mask: net.IPMask(net.ParseIP(svr.Mask).To4())}
 		if !network.Contains(ip) {
 			return nil, fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
 		}
@@ -176,8 +173,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 
 		// Check if requested ip is allocated to the VPN server itself.
 		serverNet := net.IPNet{
-			IP:   net.ParseIP(server.Net).To4(),
-			Mask: net.IPMask(net.ParseIP(server.Mask).To4()),
+			IP:   net.ParseIP(svr.Net).To4(),
+			Mask: net.IPMask(net.ParseIP(svr.Mask).To4()),
 		}
 
 		ip, ipnet, err := net.ParseCIDR(serverNet.String())
@@ -192,7 +189,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		Username:           username,
 		Cert:               clientCert.Cert,
 		Key:                clientCert.Key,
-		ServerSerialNumber: server.SerialNumber,
+		ServerSerialNumber: svr.SerialNumber,
 		NoGW:               nogw,
 		HostID:             hostid,
 		Admin:              admin,
@@ -207,8 +204,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 	logrus.Infof("user created: %s", username)
 
 	// EmitWithRestart server config
-	err = EmitWithRestart()
-	if err != nil {
+	if err = svr.EmitWithRestart(); err != nil {
 		return nil, err
 	}
 	return &User{dbUserModel: user}, nil
@@ -218,7 +214,8 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 //
 // How this method works is similiar to PUT semantics of REST. It sets the user record fields to the provided function arguments.
 func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) error {
-	if !IsInitialized() {
+	svr := TheServer()
+	if !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
 
@@ -232,17 +229,12 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 	u.Admin = admin
 
 	if hostid != 0 {
-		server, err := GetServerInstance()
-		if err != nil {
-			return fmt.Errorf("can not get server: %v", err)
-		}
-
 		ip := HostID2IP(hostid)
 		if ip == nil {
 			return fmt.Errorf("host id doesn't represent an ip %d", hostid)
 		}
 
-		network := net.IPNet{IP: net.ParseIP(server.Net).To4(), Mask: net.IPMask(net.ParseIP(server.Mask).To4())}
+		network := net.IPNet{IP: net.ParseIP(svr.Net).To4(), Mask: net.IPMask(net.ParseIP(svr.Mask).To4())}
 		if !network.Contains(ip) {
 			return fmt.Errorf("ip %s, is out of vpn network %s", ip, network.String())
 		}
@@ -253,11 +245,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 	}
 	db.Save(u.dbUserModel)
 
-	err := EmitWithRestart()
-	if err != nil {
-		return err
-	}
-	return nil
+	return svr.EmitWithRestart()
 }
 
 // Delete deletes a user by the given username from the database.
@@ -275,8 +263,8 @@ func (u *User) Delete() error {
 	})
 	db.Unscoped().Delete(u.dbUserModel)
 	logrus.Infof("user deleted: %s", u.GetUsername())
-	err = EmitWithRestart()
-	if err != nil {
+
+	if err = TheServer().EmitWithRestart(); err != nil {
 		return err
 	}
 	u = nil // delete the existing user struct
@@ -291,8 +279,7 @@ func (u *User) ResetPassword(password string) error {
 		return fmt.Errorf("user password can not be updated %s: %v", u.Username, err)
 	}
 	db.Save(u.dbUserModel)
-	err = EmitWithRestart()
-	if err != nil {
+	if err = TheServer().EmitWithRestart(); err != nil {
 		return err
 	}
 
@@ -307,10 +294,11 @@ func (u *User) ResetPassword(password string) error {
 //
 // Also it can be used when a user cert is expired or user's private key stolen, missing etc.
 func (u *User) Renew() error {
-	if !IsInitialized() {
+	svr := TheServer()
+	if !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
 	}
-	ca, err := GetSystemCA()
+	ca, err := svr.GetSystemCA()
 	if err != nil {
 		return err
 	}
@@ -320,18 +308,12 @@ func (u *User) Renew() error {
 		return fmt.Errorf("can not create client cert %s: %v", u.Username, err)
 	}
 
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
-	}
-
 	u.Cert = clientCert.Cert
 	u.Key = clientCert.Key
-	u.ServerSerialNumber = server.SerialNumber
+	u.ServerSerialNumber = svr.SerialNumber
 
 	db.Save(u.dbUserModel)
-	err = EmitWithRestart()
-	if err != nil {
+	if err = svr.EmitWithRestart(); err != nil {
 		return err
 	}
 
@@ -363,12 +345,9 @@ func (u *User) GetCreatedAt() string {
 func (u *User) getIP() net.IP {
 	users := getNonStaticHostUsers()
 	staticHostIDs := getStaticHostIDs()
-	server, err := GetServerInstance()
-	if err != nil {
-		logrus.Panicf("can not get server instance: %v", err)
-	}
-	mask := net.IPMask(net.ParseIP(server.Mask).To4())
-	network := net.ParseIP(server.Net).To4().Mask(mask)
+	svr := TheServer()
+	mask := net.IPMask(net.ParseIP(svr.Mask).To4())
+	network := net.ParseIP(svr.Net).To4().Mask(mask)
 
 	// If the user has static ip address, return it immediately.
 	if u.HostID != 0 {
@@ -399,11 +378,9 @@ func (u *User) getIP() net.IP {
 
 // GetIPNet returns user's vpn ip network. (e.g. 192.168.0.1/24)
 func (u *User) GetIPNet() string {
-	server, err := GetServerInstance()
-	if err != nil {
-		logrus.Panicf("can not get user ipnet: %v", err)
-	}
-	mask := net.IPMask(net.ParseIP(server.Mask).To4())
+	svr := TheServer()
+
+	mask := net.IPMask(net.ParseIP(svr.Mask).To4())
 
 	ipn := net.IPNet{
 		IP:   u.getIP(),

@@ -13,8 +13,8 @@ func TestCreateNewUser(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
-	server, _ := ovpm.GetServerInstance()
+	svr := ovpm.TheServer()
+	svr.Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	username := "test.User"
@@ -44,7 +44,7 @@ func TestCreateNewUser(t *testing.T) {
 	}
 
 	// Is user's server serial number correct?
-	if !server.CheckSerial(user.ServerSerialNumber) {
+	if !svr.CheckSerial(user.ServerSerialNumber) {
 		t.Fatalf("user's ServerSerialNumber is expected to be 'CORRECT' but it is 'INCORRECT' instead %+v", user)
 	}
 
@@ -103,7 +103,7 @@ func TestUserUpdate(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	username := "testUser"
@@ -143,7 +143,7 @@ func TestUserPasswordCorrect(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
@@ -160,7 +160,7 @@ func TestUserPasswordReset(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
@@ -187,7 +187,7 @@ func TestUserDelete(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	username := "testUser"
@@ -225,7 +225,7 @@ func TestUserGet(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	username := "testUser"
@@ -249,7 +249,7 @@ func TestUserGetAll(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	ovpm.TheServer().Init("localhost", "", ovpm.UDPProto, "", "")
 	count := 5
 
 	// Prepare:
@@ -287,14 +287,15 @@ func TestUserRenew(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	svr := ovpm.TheServer()
+	svr.Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 	user, _ := ovpm.CreateNewUser("user", "1234", false, 0, true)
 
 	// Test:
 	// Re initialize the server.
-	ovpm.Init("example.com", "3333", ovpm.UDPProto, "", "") // This causes implicit Renew() on every user in the system.
+	svr.Init("example.com", "3333", ovpm.UDPProto, "", "") // This causes implicit Renew() on every user in the system.
 
 	// Fetch user back.
 	fetchedUser, _ := ovpm.GetUser(user.GetUsername())
@@ -309,7 +310,8 @@ func TestUserIPAllocator(t *testing.T) {
 	// Initialize:
 	db := ovpm.CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	ovpm.Init("localhost", "", ovpm.UDPProto, "", "")
+	svr := ovpm.TheServer()
+	svr.Init("localhost", "", ovpm.UDPProto, "", "")
 
 	// Prepare:
 
@@ -336,7 +338,7 @@ func TestUserIPAllocator(t *testing.T) {
 		}
 		if user != nil {
 			if user.GetIPNet() != tt.expectedIP {
-				t.Fatalf("user %s ip %s is expected to be %s", user.GetUsername(), user.GetIPNet(), tt.expectedIP)
+				t.Fatalf("user %s ip %s(%d) is expected to be %s", user.GetUsername(), user.GetIPNet(), user.GetHostID(), tt.expectedIP)
 			}
 		}
 	}

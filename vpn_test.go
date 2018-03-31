@@ -1,11 +1,14 @@
 package ovpm
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/bouk/monkey"
 	"github.com/cad/ovpm/supervisor"
 )
 
@@ -35,13 +38,13 @@ func TestVPNInit(t *testing.T) {
 	}
 
 	// Wrongfully initialize server.
-	err := Init("localhost", "asdf", UDPProto, "", "")
-	if err == nil {
+
+	if err := TheServer().Init("localhost", "asdf", UDPProto, "", ""); err == nil {
 		t.Fatalf("error is expected to be not nil but it's nil instead")
 	}
 
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "")
 
 	// Check database if the database has no server.
 	var server2 dbServerModel
@@ -61,7 +64,7 @@ func TestVPNDeinit(t *testing.T) {
 
 	// Prepare:
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "")
 	u, err := CreateNewUser("user", "p", false, 0, true)
 	if err != nil {
 		t.Fatal(err)
@@ -86,7 +89,7 @@ func TestVPNDeinit(t *testing.T) {
 	}
 
 	// Deinitialize.
-	Deinit()
+	TheServer().Deinit()
 
 	// Get server from db.
 	var server2 dbServerModel
@@ -112,7 +115,7 @@ func TestVPNUpdate(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	// Prepare:
-	Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "")
 	// Test:
 
 	var updatetests = []struct {
@@ -127,20 +130,17 @@ func TestVPNUpdate(t *testing.T) {
 		{"9.9.9.0/24", "1.1.1.1", true, true},
 	}
 	for _, tt := range updatetests {
-		server, err := GetServerInstance()
-		if err != nil {
-			t.Fatal(err)
-		}
+		svr := TheServer()
 
-		oldIP := server.Net
-		oldDNS := server.DNS
-		Update(tt.vpnnet, tt.dns)
-		server = nil
-		server, err = GetServerInstance()
-		if (server.Net != oldIP) != tt.vpnChanged {
+		oldIP := svr.Net
+		oldDNS := svr.DNS
+		svr.Update(tt.vpnnet, tt.dns)
+		svr = nil
+		svr = TheServer()
+		if (svr.Net != oldIP) != tt.vpnChanged {
 			t.Fatalf("expected vpn change: %t but opposite happened", tt.vpnChanged)
 		}
-		if (server.DNS != oldDNS) != tt.dnsChanged {
+		if (svr.DNS != oldDNS) != tt.dnsChanged {
 			t.Fatalf("expected vpn change: %t but opposite happened", tt.dnsChanged)
 		}
 	}
@@ -157,20 +157,20 @@ func TestVPNIsInitialized(t *testing.T) {
 
 	// Test:
 	// Is initialized?
-	if IsInitialized() {
+	if TheServer().IsInitialized() {
 		t.Fatalf("IsInitialized() is expected to return false but it returned true")
 	}
 
 	// Initialize the server.
-	Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "")
 
 	// Isn't initialized?
-	if !IsInitialized() {
+	if !TheServer().IsInitialized() {
 		t.Fatalf("IsInitialized() is expected to return true but it returned false")
 	}
 }
 
-func TestVPNGetServerInstance(t *testing.T) {
+func TestVPNTheServer(t *testing.T) {
 	// Init:
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
@@ -179,31 +179,21 @@ func TestVPNGetServerInstance(t *testing.T) {
 	// Prepare:
 
 	// Test:
-	server, err := GetServerInstance()
-
-	// Is it nil?
-	if err == nil {
-		t.Fatalf("GetServerInstance() is expected to give error since server is not initialized yet, but it gave no error instead")
-	}
+	svr := TheServer()
 
 	// Isn't server nil?
-	if server != nil {
-		t.Fatal("server is expected to be nil but it's not")
+	if svr.IsInitialized() {
+		t.Fatal("server is expected to be not initialized it is")
 	}
 
 	// Initialize server.
-	Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "")
 
-	server, err = GetServerInstance()
-
-	// Isn't it nil?
-	if err != nil {
-		t.Fatalf("GetServerInstance() is expected to give no error since server is initialized yet, but it gave error instead")
-	}
+	svr = TheServer()
 
 	// Is server nil?
-	if server == nil {
-		t.Fatal("server is expected to be not nil but it is")
+	if !svr.IsInitialized() {
+		t.Fatal("server is expected to be initialized but it's not")
 	}
 }
 
@@ -212,13 +202,14 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	Init("localhost", "", UDPProto, "", "")
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	user, _ := CreateNewUser("user", "password", false, 0, true)
 
 	// Test:
-	clientConfigBlob, err := DumpsClientConfig(user.GetUsername())
+	clientConfigBlob, err := svr.DumpsClientConfig(user.GetUsername())
 	if err != nil {
 		t.Fatalf("expected to dump client config but we got error instead: %v", err)
 	}
@@ -234,7 +225,8 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	Init("localhost", "", UDPProto, "", "")
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	noGW := false
@@ -244,8 +236,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	}
 
 	// Test:
-	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
-	if err != nil {
+	if err = svr.DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn"); err != nil {
 		t.Fatalf("expected to dump client config but we got error instead: %v", err)
 	}
 
@@ -271,8 +262,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 		t.Fatalf("can not create user: %v", err)
 	}
 
-	err = DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn")
-	if err != nil {
+	if err = TheServer().DumpClientConfig(user.GetUsername(), "/tmp/user.ovpn"); err != nil {
 		t.Fatalf("expected to dump client config but we got error instead: %v", err)
 	}
 
@@ -288,17 +278,18 @@ func TestVPNGetSystemCA(t *testing.T) {
 	defer db.Cease()
 
 	// Prepare:
+	svr := TheServer()
 
 	// Test:
-	ca, err := GetSystemCA()
+	ca, err := svr.GetSystemCA()
 	if err == nil {
 		t.Fatalf("GetSystemCA() is expected to give error but it didn't instead")
 	}
 
 	// Initialize system.
-	Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "")
 
-	ca, err = GetSystemCA()
+	ca, err = svr.GetSystemCA()
 	if err != nil {
 		t.Fatalf("GetSystemCA() is expected to get system ca, but it gave us an error instead: %v", err)
 	}
@@ -318,6 +309,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
+	svr := TheServer()
 
 	// Prepare:
 
@@ -328,7 +320,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 	}
 
 	// Call start without server initialization.
-	StartVPNProc()
+	svr.StartVPNProc()
 
 	// Isn't it still stopped?
 	if vpnProc.Status() != supervisor.STOPPED {
@@ -336,10 +328,10 @@ func TestVPNStartVPNProc(t *testing.T) {
 	}
 
 	// Initialize OVPM server.
-	Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Call start again..
-	StartVPNProc()
+	svr.StartVPNProc()
 
 	// Isn't it RUNNING?
 	if vpnProc.Status() != supervisor.RUNNING {
@@ -352,7 +344,8 @@ func TestVPNStopVPNProc(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	Init("localhost", "", UDPProto, "", "")
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 	vpnProc.Start()
@@ -364,7 +357,7 @@ func TestVPNStopVPNProc(t *testing.T) {
 	}
 
 	// Call stop.
-	StopVPNProc()
+	svr.StopVPNProc()
 
 	// Isn't it stopped?
 	if vpnProc.Status() != supervisor.STOPPED {
@@ -376,15 +369,15 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	// Init:
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	Init("localhost", "", UDPProto, "", "")
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 
 	// Test:
 
 	// Call restart.
-
-	RestartVPNProc()
+	svr.RestartVPNProc()
 
 	// Isn't it running?
 	if vpnProc.Status() != supervisor.RUNNING {
@@ -392,7 +385,7 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	}
 
 	// Call restart again.
-	RestartVPNProc()
+	svr.RestartVPNProc()
 
 	// Isn't it running?
 	if vpnProc.Status() != supervisor.RUNNING {
@@ -405,12 +398,13 @@ func TestVPNEmit(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	Init("localhost", "", UDPProto, "", "")
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
 
 	// Prepare:
 
 	// Test:
-	Emit()
+	svr.Emit()
 
 	var emittests = []string{
 		_DefaultVPNConfPath,
@@ -433,6 +427,7 @@ func TestVPNEmit(t *testing.T) {
 
 func TestVPNemitToFile(t *testing.T) {
 	// Initialize:
+
 	// Prepare:
 	path := "/test/file"
 	content := "blah blah blah"
@@ -444,8 +439,8 @@ func TestVPNemitToFile(t *testing.T) {
 	}
 
 	// Emit the contents.
-	err := emitToFile(path, content, 0)
-	if err != nil {
+
+	if err := TheServer().emitToFile(path, content, 0); err != nil {
 		t.Fatalf("expected  to be able to emit to the filesystem but we got this error instead: %v", err)
 	}
 
@@ -475,15 +470,75 @@ func (f *fakeProcess) Status() supervisor.State {
 	return f.state
 }
 
+func TestGetConnectedUsers(t *testing.T) {
+	// Init:
+	setupTestCase()
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
+	// Change openr from os.Open to our mock file injecter.
+	svr.openFunc = func(path string) (io.Reader, error) {
+		const testLog = `
+OpenVPN CLIENT LIST
+Updated,Mon Mar 26 13:26:10 2018
+Common Name,Real Address,Bytes Received,Bytes Sent,Connected Since
+google.DNS,8.8.8.8:53246,527914279,3204562859,Sat Mar 17 16:26:38 2018
+google1.DNS,8.8.4.4:33974,42727443,291595456,Mon Mar 26 08:24:08 2018
+ROUTING TABLE
+Virtual Address,Common Name,Real Address,Last Ref
+10.20.30.6,google.DNS,8.8.8.8:33974,Mon Mar 26 13:26:04 2018
+10.20.30.5,google1.DNS,8.8.4.4:53246,Mon Mar 26 13:25:57 2018
+GLOBAL STATS
+Max bcast/mcast queue length,4
+END
+`
+		return bytes.NewBufferString(testLog), nil
+	}
+
+	// Create the corresponding users for test.
+	if _, err := CreateNewUser("usr1", "1234", true, 0, false); err != nil {
+		t.Fatalf("user creation failed: %v", err)
+	}
+	if _, err := CreateNewUser("usr2", "1234", true, 0, false); err != nil {
+		t.Fatalf("user creation failed: %v", err)
+	}
+
+	// Test:
+	tests := []struct {
+		name    string
+		want    []User
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := TheServer().GetConnectedUsers()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetConnectedUsers() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetConnectedUsers() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func init() {
 	// Init
 	Testing = true
 	fs = make(map[string]string)
+
+	CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+
 	// Monkeypatch emitToFile()
-	monkey.Patch(emitToFile, func(path, content string, mode uint) error {
+	fmt.Println(TheServer())
+	TheServer().emitToFileFunc = func(path, content string, mode uint) error {
 		fs[path] = content
 		return nil
-	})
-
+	}
 	vpnProc = &fakeProcess{state: supervisor.STOPPED}
 }

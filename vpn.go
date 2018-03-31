@@ -3,12 +3,14 @@ package ovpm
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math/big"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"text/template"
 
 	"time"
@@ -48,98 +50,125 @@ type dbServerModel struct {
 	DNS      string // DNS servers to push to the clients.
 }
 
+var serverInstance *Server
+var once sync.Once
+
 // Server represents VPN server.
 type Server struct {
+	sync.Mutex
+
 	dbServerModel
 	webPort string
+
+	emitToFileFunc func(path, content string, mode uint) error
+	openFunc       func(path string) (io.Reader, error)
+}
+
+// TheServer returns a pointer to the server instance.
+func TheServer() *Server {
+	once.Do(func() {
+		// Initialize the server instance.
+		serverInstance = &Server{
+			emitToFileFunc: emitToFile,
+			openFunc: func(path string) (io.Reader, error) {
+				return os.Open(path)
+			},
+		}
+	})
+	if db != nil {
+		serverInstance.Refresh()
+	} else {
+		logrus.Warn("database is not connected yet. skipping server instance refresh")
+	}
+	return serverInstance
 }
 
 // CheckSerial takes a serial number and checks it against the current server's serial number.
-func (s *Server) CheckSerial(serial string) bool {
-	return serial == s.SerialNumber
+func (svr *Server) CheckSerial(serial string) bool {
+	return serial == svr.SerialNumber
 }
 
 // GetSerialNumber returns server's serial number.
-func (s *Server) GetSerialNumber() string {
-	return s.SerialNumber
+func (svr *Server) GetSerialNumber() string {
+	return svr.SerialNumber
 }
 
 // GetServerName returns server's name.
-func (s *Server) GetServerName() string {
-	if s.Name != "" {
-		return s.Name
+func (svr *Server) GetServerName() string {
+	if svr.Name != "" {
+		return svr.Name
 	}
 	return "default"
 }
 
 // GetHostname returns vpn server's hostname.
-func (s *Server) GetHostname() string {
-	return s.Hostname
+func (svr *Server) GetHostname() string {
+	return svr.Hostname
 }
 
 // GetPort returns vpn server's port.
-func (s *Server) GetPort() string {
-	if s.Port != "" {
-		return s.Port
+func (svr *Server) GetPort() string {
+	if svr.Port != "" {
+		return svr.Port
 	}
 	return DefaultVPNPort
 
 }
 
 // GetProto returns vpn server's proto.
-func (s *Server) GetProto() string {
-	if s.Proto != "" {
-		return s.Proto
+func (svr *Server) GetProto() string {
+	if svr.Proto != "" {
+		return svr.Proto
 	}
 	return DefaultVPNProto
 }
 
 // GetCert returns vpn server's cert.
-func (s *Server) GetCert() string {
-	return s.Cert
+func (svr *Server) GetCert() string {
+	return svr.Cert
 }
 
 // GetKey returns vpn server's key.
-func (s *Server) GetKey() string {
-	return s.Key
+func (svr *Server) GetKey() string {
+	return svr.Key
 }
 
 // GetCACert returns vpn server's cacert.
-func (s *Server) GetCACert() string {
-	return s.CACert
+func (svr *Server) GetCACert() string {
+	return svr.CACert
 }
 
 // GetCAKey returns vpn server's cakey.
-func (s *Server) GetCAKey() string {
-	return s.CAKey
+func (svr *Server) GetCAKey() string {
+	return svr.CAKey
 }
 
 // GetNet returns vpn server's net.
-func (s *Server) GetNet() string {
-	return s.Net
+func (svr *Server) GetNet() string {
+	return svr.Net
 }
 
 // GetMask returns vpn server's mask.
-func (s *Server) GetMask() string {
-	return s.Mask
+func (svr *Server) GetMask() string {
+	return svr.Mask
 }
 
 // GetCRL returns vpn server's crl.
-func (s *Server) GetCRL() string {
-	return s.CRL
+func (svr *Server) GetCRL() string {
+	return svr.CRL
 }
 
 // GetDNS returns vpn server's dns.
-func (s *Server) GetDNS() string {
-	if s.DNS != "" {
-		return s.DNS
+func (svr *Server) GetDNS() string {
+	if svr.DNS != "" {
+		return svr.DNS
 	}
 	return DefaultVPNDNS
 }
 
 // GetCreatedAt returns server's created at.
-func (s *Server) GetCreatedAt() string {
-	return s.CreatedAt.Format(time.UnixDate)
+func (svr *Server) GetCreatedAt() string {
+	return svr.CreatedAt.Format(time.UnixDate)
 }
 
 // Init regenerates keys and certs for a Root CA, gets initial settings for the VPN server
@@ -152,7 +181,7 @@ func (s *Server) GetCreatedAt() string {
 //
 // Please note that, Init is potentially destructive procedure, it will cause invalidation of
 // existing .ovpn profiles of the current users. So it should be used carefully.
-func Init(hostname string, port string, proto string, ipblock string, dns string) error {
+func (svr *Server) Init(hostname string, port string, proto string, ipblock string, dns string) error {
 	if port == "" {
 		port = DefaultVPNPort
 	}
@@ -204,8 +233,8 @@ func Init(hostname string, port string, proto string, ipblock string, dns string
 	}
 
 	serverName := "default"
-	if IsInitialized() {
-		if err := Deinit(); err != nil {
+	if svr := TheServer(); svr.IsInitialized() {
+		if err := svr.Deinit(); err != nil {
 			logrus.Errorf("server can not be deleted: %v", err)
 			return err
 		}
@@ -268,40 +297,35 @@ func Init(hostname string, port string, proto string, ipblock string, dns string
 		user.HostID = 0
 		db.Save(&user.dbUserModel)
 	}
-	EmitWithRestart()
+	TheServer().EmitWithRestart()
 	logrus.Infof("server initialized")
 	return nil
 }
 
 // Update updates VPN server attributes.
-func Update(ipblock string, dns string) error {
-	if !IsInitialized() {
+func (svr *Server) Update(ipblock string, dns string) error {
+	if !svr.IsInitialized() {
 		return fmt.Errorf("server is not initialized")
-	}
-
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
 	}
 
 	var changed bool
 	if ipblock != "" && govalidator.IsCIDR(ipblock) {
 		var ipnet *net.IPNet
-		_, ipnet, err = net.ParseCIDR(ipblock)
+		_, ipnet, err := net.ParseCIDR(ipblock)
 		if err != nil {
 			return fmt.Errorf("can not parse CIDR %s: %v", ipblock, err)
 		}
-		server.dbServerModel.Net = ipnet.IP.To4().String()
-		server.dbServerModel.Mask = net.IP(ipnet.Mask).To4().String()
+		svr.dbServerModel.Net = ipnet.IP.To4().String()
+		svr.dbServerModel.Mask = net.IP(ipnet.Mask).To4().String()
 		changed = true
 	}
 
 	if dns != "" && govalidator.IsIPv4(dns) {
-		server.dbServerModel.DNS = dns
+		svr.dbServerModel.DNS = dns
 		changed = true
 	}
 	if changed {
-		db.Save(server.dbServerModel)
+		db.Save(svr.dbServerModel)
 		users, err := GetAllUsers()
 		if err != nil {
 			return err
@@ -314,33 +338,28 @@ func Update(ipblock string, dns string) error {
 			db.Save(user.dbUserModel)
 		}
 
-		EmitWithRestart()
+		svr.EmitWithRestart()
 		logrus.Infof("server updated")
 	}
 	return nil
 }
 
 // Deinit deletes the VPN server from the database and frees the allocated resources.
-func Deinit() error {
-	if !IsInitialized() {
+func (svr *Server) Deinit() error {
+	if !svr.IsInitialized() {
 		return fmt.Errorf("server not found")
 	}
 
 	db.Unscoped().Delete(&dbServerModel{})
 	db.Unscoped().Delete(&dbRevokedModel{})
-	EmitWithRestart()
+	svr.EmitWithRestart()
 	return nil
 }
 
 // DumpsClientConfig generates .ovpn file for the given vpn user and returns it as a string.
-func DumpsClientConfig(username string) (string, error) {
+func (svr *Server) DumpsClientConfig(username string) (string, error) {
 	var result bytes.Buffer
 	user, err := GetUser(username)
-	if err != nil {
-		return "", err
-	}
-
-	server, err := GetServerInstance()
 	if err != nil {
 		return "", err
 	}
@@ -354,13 +373,13 @@ func DumpsClientConfig(username string) (string, error) {
 		NoGW     bool
 		Proto    string
 	}{
-		Hostname: server.GetHostname(),
-		Port:     server.GetPort(),
-		CA:       server.GetCACert(),
+		Hostname: svr.GetHostname(),
+		Port:     svr.GetPort(),
+		CA:       svr.GetCACert(),
 		Key:      user.getKey(),
 		Cert:     user.GetCert(),
 		NoGW:     user.IsNoGW(),
-		Proto:    server.GetProto(),
+		Proto:    svr.GetProto(),
 	}
 	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {
@@ -381,18 +400,18 @@ func DumpsClientConfig(username string) (string, error) {
 }
 
 // DumpClientConfig generates .ovpn file for the given vpn user and dumps it to outPath.
-func DumpClientConfig(username, path string) error {
-	result, err := DumpsClientConfig(username)
+func (svr *Server) DumpClientConfig(username, path string) error {
+	result, err := svr.DumpsClientConfig(username)
 	if err != nil {
 		return err
 	}
 	// Wite rendered content into openvpn server conf.
-	return emitToFile(path, result, 0)
+	return svr.emitToFile(path, result, 0)
 
 }
 
 // GetSystemCA returns the system CA from the database if available.
-func GetSystemCA() (*pki.CA, error) {
+func (svr *Server) GetSystemCA() (*pki.CA, error) {
 	server := dbServerModel{}
 	db.First(&server)
 	if db.NewRecord(&server) {
@@ -411,8 +430,8 @@ func GetSystemCA() (*pki.CA, error) {
 var vpnProc supervisor.Supervisable
 
 // StartVPNProc starts the OpenVPN process.
-func StartVPNProc() {
-	if !IsInitialized() {
+func (svr *Server) StartVPNProc() {
+	if !svr.IsInitialized() {
 		logrus.Error("can not launch OpenVPN because system is not initialized")
 		return
 	}
@@ -423,27 +442,27 @@ func StartVPNProc() {
 		logrus.Error("OpenVPN is already started")
 		return
 	}
-	Emit()
+	svr.Emit()
 	vpnProc.Start()
 	ensureNatEnabled()
 }
 
 // RestartVPNProc restarts the OpenVPN process.
-func RestartVPNProc() {
-	if !IsInitialized() {
+func (svr *Server) RestartVPNProc() {
+	if !svr.IsInitialized() {
 		logrus.Error("can not launch OpenVPN because system is not initialized")
 		return
 	}
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
-	Emit()
+	svr.Emit()
 	vpnProc.Restart()
 	ensureNatEnabled()
 }
 
 // StopVPNProc stops the OpenVPN process.
-func StopVPNProc() {
+func (svr *Server) StopVPNProc() {
 	if vpnProc == nil {
 		panic(fmt.Sprintf("vpnProc is not initialized!"))
 	}
@@ -455,7 +474,7 @@ func StopVPNProc() {
 }
 
 // Emit generates all needed files for the OpenVPN server and dumps them to their corresponding paths defined in the config.
-func Emit() error {
+func (svr *Server) Emit() error {
 	// Check dependencies
 	if !checkOpenVPNExecutable() {
 		return fmt.Errorf("openvpn executable can not be found! you should install OpenVPN on this machine")
@@ -470,43 +489,43 @@ func Emit() error {
 		return fmt.Errorf("iptables executable can not be found")
 	}
 
-	if !IsInitialized() {
+	if !svr.IsInitialized() {
 		return fmt.Errorf("you should create a server first. e.g. $ ovpm vpn create-server")
 	}
 
-	if err := emitServerConf(); err != nil {
+	if err := svr.emitServerConf(); err != nil {
 		return fmt.Errorf("can not emit server conf: %s", err)
 	}
 
-	if err := emitServerCert(); err != nil {
+	if err := svr.emitServerCert(); err != nil {
 		return fmt.Errorf("can not emit server cert: %s", err)
 	}
 
-	if err := emitServerKey(); err != nil {
+	if err := svr.emitServerKey(); err != nil {
 		return fmt.Errorf("can not emit server key: %s", err)
 	}
 
-	if err := emitCACert(); err != nil {
+	if err := svr.emitCACert(); err != nil {
 		return fmt.Errorf("can not emit ca cert : %s", err)
 	}
 
-	if err := emitCAKey(); err != nil {
+	if err := svr.emitCAKey(); err != nil {
 		return fmt.Errorf("can not emit ca key: %s", err)
 	}
 
-	if err := emitDHParams(); err != nil {
+	if err := svr.emitDHParams(); err != nil {
 		return fmt.Errorf("can not emit dhparams: %s", err)
 	}
 
-	if err := emitCCD(); err != nil {
+	if err := svr.emitCCD(); err != nil {
 		return fmt.Errorf("can not emit ccd: %s", err)
 	}
 
-	if err := emitIptables(); err != nil {
+	if err := svr.emitIptables(); err != nil {
 		return fmt.Errorf("can not emit iptables: %s", err)
 	}
 
-	if err := emitCRL(); err != nil {
+	if err := svr.emitCRL(); err != nil {
 		return fmt.Errorf("can not emit crl: %s", err)
 	}
 
@@ -515,16 +534,15 @@ func Emit() error {
 }
 
 // EmitWithRestart restarts vpnProc after calling EmitWithRestart().
-func EmitWithRestart() error {
-	err := Emit()
-	if err != nil {
+func (svr *Server) EmitWithRestart() error {
+	if err := svr.Emit(); err != nil {
 		return err
 	}
-	if IsInitialized() {
+	if svr.IsInitialized() {
 		for {
 			if vpnProc.Status() == supervisor.RUNNING || vpnProc.Status() == supervisor.STOPPED {
 				logrus.Info("OpenVPN process is restarting")
-				RestartVPNProc()
+				svr.RestartVPNProc()
 				break
 			}
 			time.Sleep(1 * time.Second)
@@ -535,6 +553,12 @@ func EmitWithRestart() error {
 
 }
 
+// emitToFile is a proxy that calls svr.emitToFileFunc.
+func (svr *Server) emitToFile(path, content string, mode uint) error {
+	return svr.emitToFileFunc(path, content, mode)
+}
+
+// emitToFile is an implementation for svr.emitToFileFunc.
 func emitToFile(path, content string, mode uint) error {
 	// When testing don't emit files to the filesystem. Just pretend you did.
 	if Testing {
@@ -553,16 +577,7 @@ func emitToFile(path, content string, mode uint) error {
 	return nil
 }
 
-func emitServerConf() error {
-	dbServer, err := GetServerInstance()
-	if err != nil {
-		return fmt.Errorf("can not get server instance: %v", err)
-	}
-
-	serverInstance, err := GetServerInstance()
-	if err != nil {
-		return fmt.Errorf("can not retrieve server: %v", err)
-	}
+func (svr *Server) emitServerConf() error {
 	port := DefaultVPNPort
 	if serverInstance.Port != "" {
 		port = serverInstance.Port
@@ -601,8 +616,8 @@ func emitServerConf() error {
 		CCDPath:      _DefaultVPNCCDPath,
 		CRLPath:      _DefaultCRLPath,
 		DHParamsPath: _DefaultDHParamsPath,
-		Net:          dbServer.Net,
-		Mask:         dbServer.Mask,
+		Net:          svr.Net,
+		Mask:         svr.Mask,
 		Port:         port,
 		Proto:        proto,
 		DNS:          dns,
@@ -623,26 +638,32 @@ func emitServerConf() error {
 	}
 
 	// Wite rendered content into openvpn server conf.
-	return emitToFile(_DefaultVPNConfPath, result.String(), 0)
+	return svr.emitToFile(_DefaultVPNConfPath, result.String(), 0)
 }
 
-// GetServerInstance returns the default server from the database.
-func GetServerInstance() (*Server, error) {
-	var server dbServerModel
-	db.First(&server)
-	if db.NewRecord(server) {
-		return nil, fmt.Errorf("can not retrieve server from db")
+// Refresh synchronizes the server instance from db.
+func (svr *Server) Refresh() error {
+	//db = CreateDB("sqlite3", "")
+	var dbServer dbServerModel
+	fmt.Println(db)
+	q := db.First(&dbServer)
+	if err := q.Error; err != nil {
+		return fmt.Errorf("can't get server from db: %v", err)
 	}
-	return &Server{dbServerModel: server}, nil
+	if q.RecordNotFound() {
+		return fmt.Errorf("server is not initialized")
+	}
+	svr.dbServerModel = dbServer
+	return nil
 }
 
 // GetConnectedUsers will return a list of users who are currently connected
 // to the VPN service.
-func GetConnectedUsers() ([]User, error) {
+func (svr *Server) GetConnectedUsers() ([]User, error) {
 	var users []User
 
 	// Open the status log file.
-	f, err := os.Open(_DefaultStatusLogPath)
+	f, err := svr.openFunc(_DefaultStatusLogPath)
 	if err != nil {
 		panic(err)
 	}
@@ -673,36 +694,29 @@ func GetConnectedUsers() ([]User, error) {
 }
 
 // IsInitialized checks if there is a default VPN server configured in the database or not.
-func IsInitialized() bool {
-	var server dbServerModel
-	db.First(&server)
-	if db.NewRecord(server) {
+func (svr *Server) IsInitialized() bool {
+	var serverModel dbServerModel
+	q := db.First(&serverModel)
+	if err := q.Error; err != nil {
+		logrus.Errorf("can't retrieve server from db: %v", err)
+	}
+	if q.RecordNotFound() {
 		return false
 	}
 	return true
 }
 
-func emitServerKey() error {
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
-	}
-
+func (svr *Server) emitServerKey() error {
 	// Write rendered content into key file.
-	return emitToFile(_DefaultKeyPath, server.Key, 0600)
+	return svr.emitToFile(_DefaultKeyPath, svr.Key, 0600)
 }
 
-func emitServerCert() error {
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
-	}
-
+func (svr *Server) emitServerCert() error {
 	// Write rendered content into the cert file.
-	return emitToFile(_DefaultCertPath, server.Cert, 0)
+	return svr.emitToFile(_DefaultCertPath, svr.Cert, 0)
 }
 
-func emitCRL() error {
+func (svr *Server) emitCRL() error {
 	var revokedDBItems []*dbRevokedModel
 	db.Find(&revokedDBItems)
 	var revokedCertSerials []*big.Int
@@ -711,7 +725,7 @@ func emitCRL() error {
 		bi.SetString(item.SerialNumber, 16)
 		revokedCertSerials = append(revokedCertSerials, bi)
 	}
-	systemCA, err := GetSystemCA()
+	systemCA, err := svr.GetSystemCA()
 	if err != nil {
 		return fmt.Errorf("can not emit CRL: %v", err)
 	}
@@ -720,30 +734,20 @@ func emitCRL() error {
 		return fmt.Errorf("can not emit crl: %v", err)
 	}
 
-	return emitToFile(_DefaultCRLPath, crl, 0)
+	return svr.emitToFile(_DefaultCRLPath, crl, 0)
 }
 
-func emitCACert() error {
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
-	}
-
+func (svr *Server) emitCACert() error {
 	// Write rendered content into the ca cert file.
-	return emitToFile(_DefaultCACertPath, server.CACert, 0)
+	return svr.emitToFile(_DefaultCACertPath, svr.CACert, 0)
 }
 
-func emitCAKey() error {
-	server, err := GetServerInstance()
-	if err != nil {
-		return err
-	}
-
+func (svr *Server) emitCAKey() error {
 	// Write rendered content into the ca key file.
-	return emitToFile(_DefaultCAKeyPath, server.CAKey, 0600)
+	return svr.emitToFile(_DefaultCAKeyPath, svr.CAKey, 0600)
 }
 
-func emitCCD() error {
+func (svr *Server) emitCCD() error {
 	users, err := GetAllUsers()
 	if err != nil {
 		return err
@@ -770,11 +774,6 @@ func emitCCD() error {
 			}
 		}
 	}
-	server, err := GetServerInstance()
-	if err != nil {
-		return fmt.Errorf("can not get server instance: %v", err)
-	}
-
 	// Render ccd templates for the users.
 	for _, user := range users {
 		var associatedRoutes [][3]string
@@ -814,7 +813,7 @@ func emitCCD() error {
 			Routes     [][3]string // [0] is IP, [1] is Netmask, [2] is Via
 			Servernets [][2]string // [0] is IP, [1] is Netmask
 			RedirectGW bool
-		}{IP: user.getIP().String(), NetMask: server.Mask, Routes: associatedRoutes, Servernets: serverNets, RedirectGW: !user.NoGW}
+		}{IP: user.getIP().String(), NetMask: svr.Mask, Routes: associatedRoutes, Servernets: serverNets, RedirectGW: !user.NoGW}
 
 		data, err := bindata.Asset("template/ccd.file.tmpl")
 		if err != nil {
@@ -829,16 +828,14 @@ func emitCCD() error {
 		if err != nil {
 			return fmt.Errorf("can not render ccd file %s: %s", user.Username, err)
 		}
-
-		err = emitToFile(filepath.Join(_DefaultVPNCCDPath, user.Username), result.String(), 0)
-		if err != nil {
+		if err = svr.emitToFile(filepath.Join(_DefaultVPNCCDPath, user.Username), result.String(), 0); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func emitDHParams() error {
+func (svr *Server) emitDHParams() error {
 	var result bytes.Buffer
 	data, err := bindata.Asset("template/dh4096.pem.tmpl")
 	if err != nil {
@@ -855,14 +852,10 @@ func emitDHParams() error {
 		return fmt.Errorf("can not render dh4096.pem file: %s", err)
 	}
 
-	err = emitToFile(_DefaultDHParamsPath, result.String(), 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	return svr.emitToFile(_DefaultDHParamsPath, result.String(), 0)
 }
 
-func emitIptables() error {
+func (svr *Server) emitIptables() error {
 	if Testing {
 		return nil
 	}
