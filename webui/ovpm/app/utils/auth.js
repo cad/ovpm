@@ -17,7 +17,7 @@ export function ClearAuthToken() {
 }
 
 export function IsAuthenticated() {
-    if (GetAuthToken()) {
+    if (GetAuthToken() != "") {
         return true
     }
     return false

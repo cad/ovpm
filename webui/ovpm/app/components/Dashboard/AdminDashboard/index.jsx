@@ -169,9 +169,11 @@ export default class AdminDashboard extends React.Component {
     handleAuthFailure(error) {
         console.log("auth failure", error)
         ClearAuthToken()
+        this.setState({"logout": true})
     }
 
     handleCreateNewUser(e) {
+        console.log("create new user")
         this.setState({modal: CREATINGNEWUSER})
     }
 
@@ -183,6 +185,8 @@ export default class AdminDashboard extends React.Component {
         for (let i in this.state.users) {
             if (this.state.users[i].username === username) {
                 this.setState({modal: EDITINGUSER, editedUser: this.state.users[i]})
+                console.log(i)
+                console.log("updating user:", this.state.users[i].username)
                 return
             }
         }
@@ -205,6 +209,7 @@ export default class AdminDashboard extends React.Component {
         userObj.host_id = user.ipAllocationMethod === "static" ? dot2num(user.staticIP) : 0
         userObj.static_pref = user.ipAllocationMethod === "static" ? "STATIC" : "NOSTATIC"
 
+        console.log("creating new user:", user.username)
         this.api.call("userCreate", userObj, true, this.handleCreateUserSuccess.bind(this), this.handleCreateUserFailure.bind(this))
         this.setState({modal: ""})
     }
@@ -238,6 +243,7 @@ export default class AdminDashboard extends React.Component {
         updatedUser.admin_pref = user.isAdmin ? "ADMIN" : "NOADMIN"
         updatedUser.host_id = user.ipAllocationMethod === "static" ? dot2num(user.staticIP) : 0
         updatedUser.static_pref = user.ipAllocationMethod === "static" ? "STATIC" : "NOSTATIC"
+        console.log("updating user:", updatedUser.username)
         this.api.call("userUpdate", updatedUser, true, this.handleUpdateUserSuccess.bind(this), this.handleUpdateUserFailure.bind(this))
 
         this.setState({modal: ""})

@@ -1,15 +1,13 @@
-//export const baseURL = "http://192.168.14.200:9091/v1"//ev
-//export const baseURL = "http://172.16.16.149:9091/v1" //ofislaptop
-//export const baseURL = "http://172.16.16.79:9091/v1"  //ofis desktop
 export var baseURL = window.location.protocol + "//" + window.location.host + "/api/v1"
 
 if (process.env.NODE_ENV !== 'production') {
-    baseURL = "http://172.16.16.79:9091/api/v1"
+    baseURL = "http://192.168.14.181:8080/api/v1" // local pc external ip
 }
 
 export const endpoints = {
     authenticate: {
         path: "/auth/authenticate",
+
         method: "POST",
     },
     authStatus: {
