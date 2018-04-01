@@ -1,7 +1,6 @@
 package ovpm
 
 import (
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -564,7 +563,6 @@ func init() {
 	defer db.Cease()
 
 	// Monkeypatch emitToFile()
-	fmt.Println(TheServer())
 	TheServer().emitToFileFunc = func(path, content string, mode uint) error {
 		fs[path] = content
 		return nil
