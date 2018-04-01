@@ -34,10 +34,6 @@
   version = "8.0.0"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/bouk/monkey"
-
-[[constraint]]
   name = "github.com/coreos/go-iptables"
   version = "0.2.0"
 
