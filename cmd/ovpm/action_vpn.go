@@ -169,7 +169,7 @@ func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string) err
 		"SERVER": "OpenVPN",
 		"CIDR":   targetNetCIDR,
 		"DNS":    targetDNSAddr,
-	}).Infoln("vpn initialized")
+	}).Infoln("changes applied")
 
 	return nil
 }
