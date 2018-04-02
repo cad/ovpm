@@ -3,7 +3,6 @@ package ovpm
 import (
 	"fmt"
 	"net"
-	"os"
 	"time"
 
 	passlib "gopkg.in/hlandau/passlib.v1"
@@ -412,13 +411,15 @@ func (u *User) getKey() string {
 func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, bytesSent uint64, bytesReceived uint64) {
 	var found *clEntry
 
+	svr := TheServer()
+
 	// Open the status log file.
-	f, err := os.Open(_DefaultStatusLogPath)
+	f, err := svr.openFunc(_DefaultStatusLogPath)
 	if err != nil {
 		panic(err)
 	}
 
-	cl, _ := parseStatusLog(f)
+	cl, _ := svr.parseStatusLogFunc(f) // client list from OpenVPN status log
 	for _, c := range cl {
 		if c.CommonName == u.Username {
 			found = &c
