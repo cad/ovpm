@@ -55,9 +55,8 @@ var once sync.Once
 
 // Server represents VPN server.
 type Server struct {
-	sync.Mutex
-
 	dbServerModel
+
 	webPort string
 
 	emitToFileFunc     func(path, content string, mode uint) error
@@ -66,6 +65,9 @@ type Server struct {
 }
 
 // TheServer returns a pointer to the server instance.
+//
+// Server instance is a singleton instance that is initialized
+// on the first call made to the TheServer().
 func TheServer() *Server {
 	once.Do(func() {
 		// Initialize the server instance by setting default mockable funcs & attributes.
