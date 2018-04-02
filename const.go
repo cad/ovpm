@@ -2,7 +2,7 @@ package ovpm
 
 const (
 	// Version defines the version of ovpm.
-	Version = "0.2.7-alpha"
+	Version = "0.2.7-beta"
 
 	// DefaultVPNPort is the default OpenVPN port to listen.
 	DefaultVPNPort = "1197"
