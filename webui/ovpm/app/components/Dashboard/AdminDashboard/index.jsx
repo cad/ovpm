@@ -533,7 +533,7 @@ export default class AdminDashboard extends React.Component {
                                     <table className="mui-table mui-table--bordered mui--text-justify">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
+                                                <th></th>
                                                 <th>USERNAME</th>
                                                 <th>IP</th>
                                                 <th>CREATED AT</th>

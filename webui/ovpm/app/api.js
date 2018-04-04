@@ -1,7 +1,7 @@
 export var baseURL = window.location.protocol + "//" + window.location.host + "/api/v1"
 
 if (process.env.NODE_ENV !== 'production') {
-    baseURL = "http://192.168.14.181:8080/api/v1" // local pc external ip
+    baseURL = "http://172.16.16.53:8080/api/v1" // local pc external ip
 }
 
 export const endpoints = {
