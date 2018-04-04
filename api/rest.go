@@ -128,6 +128,7 @@ func preflightHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
 	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
+	w.Header().Set("Access-Control-Expose-Headers", "Access-Control-Allow-Origin")
 	logrus.Debugf("rest: preflight request for %s", r.URL.Path)
 	return
 }
