@@ -207,6 +207,9 @@
         "bytes_received": {
           "type": "string",
           "format": "uint64"
+        },
+        "expires_at": {
+          "type": "string"
         }
       }
     },

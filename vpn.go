@@ -127,9 +127,28 @@ func (svr *Server) GetProto() string {
 	return DefaultVPNProto
 }
 
-// GetCert returns vpn server's cert.
-func (svr *Server) GetCert() string {
-	return svr.Cert
+// CAExpiresAt returns the expiry date time of the CA.
+func (svr *Server) CAExpiresAt() time.Time {
+	if !svr.IsInitialized() {
+		return time.Time{}
+	}
+	crt, err := pki.ReadCertFromPEM(svr.CACert)
+	if err != nil {
+		logrus.Fatalf("can't parse cert: %v", err)
+	}
+	return crt.NotAfter
+}
+
+// ExpiresAt returns the expiry date time of the server cert.
+func (svr *Server) ExpiresAt() time.Time {
+	if !svr.IsInitialized() {
+		return time.Time{}
+	}
+	crt, err := pki.ReadCertFromPEM(svr.Cert)
+	if err != nil {
+		logrus.Fatalf("can't parse cert: %v", err)
+	}
+	return crt.NotAfter
 }
 
 // GetKey returns vpn server's key.

@@ -458,6 +458,12 @@ export default class AdminDashboard extends React.Component {
                 isOnline = (<span className="text-success" style={{"font-size":"2em", "vertical-align": "middle"}} data-toggle="tooltip" title={onlineSince}>•</span>)
             }
 
+            let certExpiry = (<span className="glyphicon glyphicon-remove" data-toggle="tooltip" title="Expired"></span>)
+            if (moment(this.state.users[i].expires_at).isAfter(moment.now())) {
+                let expiresIn = "expires " + moment(this.state.users[i].expires_at).fromNow()
+                certExpiry = (<span data-toggle="tooltip" title={this.state.users[i].expires_at}>{expiresIn}</span>)
+            }
+
             let createdAt = (<span data-toggle="tooltip" title={this.state.users[i].created_at}>{moment(this.state.users[i].created_at).fromNow()}</span>)
 
             users.push(
@@ -466,6 +472,7 @@ export default class AdminDashboard extends React.Component {
                     <td>{isOnline} {this.state.users[i].username} {isAdmin}</td>
                     <td>{this.state.users[i].ip_net} {isStatic}</td>
                     <td>{createdAt}</td>
+                    <td>{certExpiry}</td>
                     <td className="mui--align-middle">{noGW}</td>
                     <td>
                         <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-floppy-save" data-toggle="tooltip" title="Download VPN Profile" onClick={this.handleDownloadProfileClick.bind(this, this.state.users[i].username)}></span></a>
@@ -537,6 +544,7 @@ export default class AdminDashboard extends React.Component {
                                                 <th>USERNAME</th>
                                                 <th>IP</th>
                                                 <th>CREATED AT</th>
+                                                <th>CERT</th>
                                                 <th>PUSH GATEWAY</th>
                                                 <th>ACTIONS</th>
                                             </tr>
@@ -581,6 +589,8 @@ export default class AdminDashboard extends React.Component {
                                             <tr><td>Network</td>   <td>{this.state.vpn.net} ({this.state.vpn.mask})</td></tr>
                                             <tr><td>DNS</td>       <td>{this.state.vpn.dns}</td></tr>
                                             <tr><td>Created At</td><td>{this.state.vpn.created_at}</td></tr>
+                                            <tr><td>Expires At</td><td>{this.state.vpn.expires_at}</td></tr>
+                                            <tr><td>CA Expires At</td><td>{this.state.vpn.ca_expires_at}</td></tr>
                                         </tbody>
                                     </table>
                                 </Tab>

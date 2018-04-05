@@ -110,6 +110,7 @@ message UserResponse {
     string connected_since = 10;
     uint64 bytes_sent = 11;
     uint64 bytes_received = 12;
+    string expires_at = 13;
   }
 
   repeated User users = 1;

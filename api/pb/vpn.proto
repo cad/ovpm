@@ -63,6 +63,8 @@ message VPNStatusResponse {
   string created_at = 9;
   string proto = 10;
   string dns = 11;
+  string expires_at = 12;
+  string ca_expires_at = 13;
 }
 message VPNInitResponse {}
 message VPNUpdateResponse {}

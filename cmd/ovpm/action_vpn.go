@@ -50,6 +50,8 @@ func vpnStatusAction(rpcServURLStr string) error {
 	table.Append([]string{"Netmask", vpnStatusResp.Mask})
 	table.Append([]string{"Created At", vpnStatusResp.CreatedAt})
 	table.Append([]string{"DNS", vpnStatusResp.Dns})
+	table.Append([]string{"Cert Exp", vpnStatusResp.ExpiresAt})
+	table.Append([]string{"CA Cert Exp", vpnStatusResp.CaExpiresAt})
 	table.Render()
 
 	return nil

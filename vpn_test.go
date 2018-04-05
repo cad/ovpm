@@ -2,11 +2,13 @@ package ovpm
 
 import (
 	"io"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cad/ovpm/pki"
 	"github.com/cad/ovpm/supervisor"
 )
 
@@ -551,6 +553,41 @@ func TestGetConnectedUsers(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestVPN_ExpiresAt(t *testing.T) {
+	// Initialize:
+	db := CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
+
+	// Test:
+	cert, err := pki.ReadCertFromPEM(svr.Cert)
+	if err != nil {
+		t.Fatalf("test preperation failed: %v", err)
+	}
+
+	if !reflect.DeepEqual(svr.ExpiresAt(), cert.NotAfter) {
+		t.Errorf("got (%s), want (%s)", svr.ExpiresAt(), cert.NotAfter)
+	}
+}
+
+func TestVPN_CAExpiresAt(t *testing.T) {
+	// Initialize:
+	db := CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	svr := TheServer()
+	svr.Init("localhost", "", UDPProto, "", "")
+
+	// Test:
+	cert, err := pki.ReadCertFromPEM(svr.CACert)
+	if err != nil {
+		t.Fatalf("test preperation failed: %v", err)
+	}
+	if !reflect.DeepEqual(svr.CAExpiresAt(), cert.NotAfter) {
+		t.Errorf("got (%s), want (%s)", svr.CAExpiresAt(), cert.NotAfter)
 	}
 }
 

@@ -54,12 +54,11 @@ func userListAction(rpcServURLStr string) error {
 	}
 
 	// Prepare table data.
-	header := []string{"#", "username", "ip", "created", "crt", "push gw", "admin"}
+	header := []string{"#", "username", "ip", "created", "crt exp", "push gw", "admin"}
 	rows := [][]string{}
 	for i, user := range userListResp.Users {
 		isConnected := " "
 		if user.IsConnected {
-			//isConnected = fmt.Sprintf("%s●%s", "\x1b[32m", "\x1b[0m\x1b[0m") // green ascii dot
 			isConnected = fmt.Sprintf("%s●%s", "", "") // colorless ascii dot
 		}
 		static := ""
@@ -73,7 +72,16 @@ func userListAction(rpcServURLStr string) error {
 
 		isValidCRT := "✘"
 		if user.ServerSerialNumber == vpnStatusResp.SerialNumber {
-			isValidCRT = "✔"
+			expiresAt, err := time.Parse(time.RFC3339, user.ExpiresAt)
+			if err != nil {
+				exit(1)
+				return errors.UnknownSysError(err)
+			}
+
+			// Check if the cert is expired.
+			if expiresAt.After(time.Now()) {
+				isValidCRT = fmt.Sprintf("in %s", humanize.Time(expiresAt))
+			}
 		}
 
 		isPushGW := "✘"

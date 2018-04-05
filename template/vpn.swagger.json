@@ -171,6 +171,12 @@
         },
         "dns": {
           "type": "string"
+        },
+        "expires_at": {
+          "type": "string"
+        },
+        "ca_expires_at": {
+          "type": "string"
         }
       }
     },

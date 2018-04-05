@@ -100,6 +100,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			ConnectedSince:     connectedSince.UTC().Format(time.RFC3339),
 			BytesSent:          bytesSent,
 			BytesReceived:      bytesReceived,
+			ExpiresAt:          user.ExpiresAt().UTC().Format(time.RFC3339),
 		})
 	}
 
@@ -341,12 +342,14 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		Hostname:     server.GetHostname(),
 		Port:         server.GetPort(),
 		Proto:        server.GetProto(),
-		Cert:         server.GetCert(),
+		Cert:         server.Cert,
 		CaCert:       server.GetCACert(),
 		Net:          server.GetNet(),
 		Mask:         server.GetMask(),
 		CreatedAt:    server.GetCreatedAt(),
 		Dns:          server.GetDNS(),
+		ExpiresAt:    server.ExpiresAt().UTC().Format(time.RFC3339),
+		CaExpiresAt:  server.CAExpiresAt().UTC().Format(time.RFC3339),
 	}
 	return &response, nil
 }
