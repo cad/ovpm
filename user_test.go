@@ -3,7 +3,10 @@ package ovpm_test
 import (
 	"fmt"
 	"net"
+	"reflect"
 	"testing"
+
+	"github.com/cad/ovpm/pki"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
@@ -16,7 +19,7 @@ func TestCreateNewUser(t *testing.T) {
 	svr := ovpm.TheServer()
 	svr.Init("localhost", "", ovpm.UDPProto, "", "")
 
-	// Prepare:
+	// Preare:
 	username := "test.User"
 	password := "testPasswd1234"
 	noGW := false
@@ -341,6 +344,28 @@ func TestUserIPAllocator(t *testing.T) {
 				t.Fatalf("user %s ip %s(%d) is expected to be %s", user.GetUsername(), user.GetIPNet(), user.GetHostID(), tt.expectedIP)
 			}
 		}
+	}
+}
+func TestUser_ExpiresAt(t *testing.T) {
+	// Initialize:
+	db := ovpm.CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+	svr := ovpm.TheServer()
+	svr.Init("localhost", "", ovpm.UDPProto, "", "")
+
+	// Test:
+	u1, err := ovpm.CreateNewUser("test", "1234", true, 0, false)
+	if err != nil {
+		t.Fatalf("test preperation failed: %v", err)
+	}
+
+	cert, err := pki.ReadCertFromPEM(u1.Cert)
+	if err != nil {
+		t.Fatalf("test preperation failed: %v", err)
+	}
+
+	if !reflect.DeepEqual(u1.ExpiresAt(), cert.NotAfter) {
+		t.Errorf("got (%s), want (%s)", u1.ExpiresAt(), cert.NotAfter)
 	}
 }
 

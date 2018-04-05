@@ -121,7 +121,6 @@ func GetAllUsers() ([]*User, error) {
 		users = append(users, &User{dbUserModel: *u})
 	}
 	return users, nil
-
 }
 
 // CreateNewUser creates a new user with the given username and password in the database.
@@ -328,6 +327,15 @@ func (u *User) GetUsername() string {
 // GetCert returns user's public certificate.
 func (u *User) GetCert() string {
 	return u.Cert
+}
+
+// ExpiresAt returns user's certificate expiration date time.
+func (u *User) ExpiresAt() time.Time {
+	crt, err := pki.ReadCertFromPEM(u.Cert)
+	if err != nil {
+		logrus.Fatalf("can't parse cert: %v", err)
+	}
+	return crt.NotAfter
 }
 
 // GetServerSerialNumber returns user's server serial number.
