@@ -82,7 +82,7 @@ func userListAction(rpcServURLStr string) error {
 		}
 
 		createdAt := user.CreatedAt
-		if t, err := time.Parse(time.RubyDate, user.CreatedAt); err == nil {
+		if t, err := time.Parse(time.RFC3339, user.CreatedAt); err == nil {
 			createdAt = humanize.Time(t)
 		}
 

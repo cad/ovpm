@@ -345,7 +345,7 @@ func (u *User) GetServerSerialNumber() string {
 
 // GetCreatedAt returns user's creation time.
 func (u *User) GetCreatedAt() string {
-	return u.CreatedAt.Format(time.UnixDate)
+	return u.CreatedAt.Format(time.RFC3339)
 }
 
 // getIP returns user's vpn ip addr.
