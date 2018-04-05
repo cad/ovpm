@@ -5,6 +5,10 @@
 //go:generate npm run build --cwd webui/ovpm/ --prefix webui/ovpm/
 //go:generate cp webui/ovpm/public/index.html template/
 //go:generate cp webui/ovpm/public/bundle.js template/
+//go:generate cp webui/ovpm/public/css/bootstrap.min.css template/
+//go:generate cp webui/ovpm/public/css/mui.min.css template/
+//go:generate cp webui/ovpm/public/fonts/glyphicons-halflings-regular.woff template/
+//go:generate cp webui/ovpm/public/js/mui.min.js template/
 //go:generate go-bindata -pkg bindata -o bindata/bindata.go template/
 
 package ovpm

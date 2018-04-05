@@ -112,6 +112,35 @@ func webuiHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			logrus.Warn(err)
 		}
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write(userData)
+	case "/js/mui.min.js":
+		userData, err := bindata.Asset("template/mui.min.js")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write(userData)
+	case "/css/bootstrap.min.css":
+		userData, err := bindata.Asset("template/bootstrap.min.css")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Header().Set("Content-Type", "text/css")
+		w.Write(userData)
+	case "/css/mui.min.css":
+		userData, err := bindata.Asset("template/mui.min.css")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Header().Set("Content-Type", "text/css")
+		w.Write(userData)
+	case "/fonts/glyphicons-halflings-regular.woff":
+		userData, err := bindata.Asset("template/glyphicons-halflings-regular.woff")
+		if err != nil {
+			logrus.Warn(err)
+		}
+		w.Header().Set("Content-Type", "application/font-woff")
 		w.Write(userData)
 
 	default:
