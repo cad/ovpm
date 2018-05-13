@@ -202,7 +202,7 @@ func netDefAction(rpcServURLStr string, netName string, netCIDR string, netType 
 	return nil
 }
 
-func netAssocAction(rpcServURLStr string, netName string, username string) error {
+func netAssocAction(rpcServURLStr string, netName string, username string, inBulk bool) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcServURLStr)
 	if err != nil {
@@ -220,18 +220,35 @@ func netAssocAction(rpcServURLStr string, netName string, username string) error
 	// Prepare service callable.
 	var netSvc = pb.NewNetworkServiceClient(rpcConn)
 
-	// Call the service.
-	_, err = netSvc.Associate(context.Background(), &pb.NetworkAssociateRequest{Name: netName, Username: username})
-	if err != nil {
-		errors.UnknownGRPCError(err)
-		exit(1)
-		return err
+	userNames := []string{username}
+	if inBulk {
+		var userSvc = pb.NewUserServiceClient(rpcConn)
+		r, err := userSvc.List(context.Background(), &pb.UserListRequest{})
+		if err != nil {
+			errors.UnknownGRPCError(err)
+			exit(1)
+			return err
+		}
+		userNames = []string{}
+		for _, u := range r.Users {
+			userNames = append(userNames, u.Username)
+		}
 	}
-	logrus.Infof("network associated: user:%s <-> network:%s", username, netName)
+
+	// Call the service.
+	for _, userName := range userNames {
+		_, err = netSvc.Associate(context.Background(), &pb.NetworkAssociateRequest{Name: netName, Username: userName})
+		if err != nil {
+			errors.UnknownGRPCError(err)
+			//exit(1)
+			//return err
+		}
+		logrus.Infof("network associated: user:%s <-> network:%s", userName, netName)
+	}
 	return nil
 }
 
-func netDissocAction(rpcServURLStr string, netName string, username string) error {
+func netDissocAction(rpcServURLStr string, netName string, username string, inBulk bool) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcServURLStr)
 	if err != nil {
@@ -249,14 +266,31 @@ func netDissocAction(rpcServURLStr string, netName string, username string) erro
 	// Prepare service callable.
 	var netSvc = pb.NewNetworkServiceClient(rpcConn)
 
-	// Call the service.
-	_, err = netSvc.Dissociate(context.Background(), &pb.NetworkDissociateRequest{Name: netName, Username: username})
-	if err != nil {
-		errors.UnknownGRPCError(err)
-		exit(1)
-		return err
+	userNames := []string{username}
+	if inBulk {
+		var userSvc = pb.NewUserServiceClient(rpcConn)
+		r, err := userSvc.List(context.Background(), &pb.UserListRequest{})
+		if err != nil {
+			errors.UnknownGRPCError(err)
+			exit(1)
+			return err
+		}
+		userNames = []string{}
+		for _, u := range r.Users {
+			userNames = append(userNames, u.Username)
+		}
 	}
 
-	logrus.Infof("network dissociated: user:%s <-> network:%s", username, netName)
+	// Call the service.
+	for _, userName := range userNames {
+		_, err = netSvc.Dissociate(context.Background(), &pb.NetworkDissociateRequest{Name: netName, Username: userName})
+		if err != nil {
+			errors.UnknownGRPCError(err)
+			//exit(1)
+			//return err
+		}
+
+		logrus.Infof("network dissociated: user:%s <-> network:%s", userName, netName)
+	}
 	return nil
 }
