@@ -161,6 +161,10 @@ var userUpdateCmd = cli.Command{
 	Action: func(c *cli.Context) error {
 		action = "user:update"
 
+		// inBulk means opeation needs to be done on
+		// all users.
+		var inBulk bool
+
 		// Use default port if no port is specified.
 		daemonPort := ovpm.DefaultDaemonPort
 		if port := c.GlobalInt("daemon-port"); port != 0 {
@@ -169,10 +173,14 @@ var userUpdateCmd = cli.Command{
 
 		// Validate username and maybe password if set.
 		if govalidator.IsNull(c.String("username")) {
-			fmt.Printf("HERE")
 			err := errors.EmptyValue("username", c.String("username"))
 			exit(1)
 			return err
+		}
+
+		// Check if bulk update is set.
+		if c.String("username") == "*" {
+			inBulk = true
 		}
 
 		// Set password if it's provided.
@@ -184,7 +192,13 @@ var userUpdateCmd = cli.Command{
 		// Set isStatic if it's provided.
 		var isStatic *bool
 		var ipAddr *net.IP
+
 		// Check mutex options.
+		if !govalidator.IsNull(c.String("static")) == true && inBulk {
+			err := errors.ConflictingDemands("--static and --user * (bulk) options are mutually exclusive (can not be used together)")
+			exit(1)
+			return err
+		}
 		if !govalidator.IsNull(c.String("static")) == true && c.Bool("no-static") == true {
 			err := errors.ConflictingDemands("--static and --no-static options are mutually exclusive (can not be used together)")
 			exit(1)
@@ -258,6 +272,7 @@ var userUpdateCmd = cli.Command{
 			isStatic,
 			noGW,
 			isAdmin,
+			inBulk,
 		)
 	},
 }

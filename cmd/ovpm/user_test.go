@@ -120,6 +120,12 @@ func TestUserUpdateCmd(t *testing.T) {
 	if err == nil {
 		t.Fatal("error is expected about static being malformed ip, but we didn't got error")
 	}
+
+	// Bulk update mutex
+	err = app.Run([]string{"ovpm", "user", "update", "--username", "*", "--static", "12.12.12.12"})
+	if err == nil {
+		t.Fatal("error is expected about bulk and --static conflict")
+	}
 }
 
 func TestUserDeleteCmd(t *testing.T) {

@@ -171,7 +171,7 @@ func userCreateAction(rpcSrvURLStr string, username string, password string, ipA
 }
 
 // userUpdateAction creates a new VPN user from the terminal.
-func userUpdateAction(rpcSrvURLStr string, username string, password *string, ipAddr *net.IP, isStatic *bool, noGW *bool, isAdmin *bool) error {
+func userUpdateAction(rpcSrvURLStr string, username string, password *string, ipAddr *net.IP, isStatic *bool, noGW *bool, isAdmin *bool, inBulk bool) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcSrvURLStr)
 	if err != nil {
@@ -195,18 +195,20 @@ func userUpdateAction(rpcSrvURLStr string, username string, password *string, ip
 	// Set targeted static IP addr.
 	targetHostid := uint32(0)
 	targetStaticPref := pb.UserUpdateRequest_NOPREFSTATIC
-	if isStatic != nil {
-		if *isStatic {
-			targetHostid = ovpm.IP2HostID(ipAddr.To4())
-			if targetHostid == 0 {
-				// hostid being 0 means dynamic ip addr(no static ip address provided),
-				// hence ambiguous meaning here.
-				// This is perceived as an error.
-				return errors.ConflictingDemands("hostid is 0, but user is trying to allocate a static ip addr")
+	if !inBulk {
+		if isStatic != nil {
+			if *isStatic {
+				targetHostid = ovpm.IP2HostID(ipAddr.To4())
+				if targetHostid == 0 {
+					// hostid being 0 means dynamic ip addr(no static ip address provided),
+					// hence ambiguous meaning here.
+					// This is perceived as an error.
+					return errors.ConflictingDemands("hostid is 0, but user is trying to allocate a static ip addr")
+				}
+				targetStaticPref = pb.UserUpdateRequest_STATIC
+			} else {
+				targetStaticPref = pb.UserUpdateRequest_NOSTATIC
 			}
-			targetStaticPref = pb.UserUpdateRequest_STATIC
-		} else {
-			targetStaticPref = pb.UserUpdateRequest_NOSTATIC
 		}
 	}
 
@@ -233,22 +235,42 @@ func userUpdateAction(rpcSrvURLStr string, username string, password *string, ip
 	// Prepare a service caller.
 	var userSvc = pb.NewUserServiceClient(rpcConn)
 
-	// Send a user update request to the server.
-	userUpdateResp, err := userSvc.Update(context.Background(), &pb.UserUpdateRequest{
-		Username:   username,
-		Password:   targetPassword,
-		Gwpref:     targetGWPref,
-		StaticPref: targetStaticPref,
-		HostId:     targetHostid,
-		AdminPref:  targetAdminPref,
-	})
-	if err != nil {
-		err := errors.UnknownGRPCError(err)
-		exit(1)
-		return err
+	userNames := []string{username}
+
+	// Mark all users to update if working in bulk.
+	if inBulk {
+		userListResp, err := userSvc.List(context.Background(), &pb.UserListRequest{})
+		if err != nil {
+			err := errors.UnknownGRPCError(err)
+			exit(1)
+			return err
+		}
+
+		uNames := []string{}
+		for _, u := range userListResp.Users {
+			uNames = append(uNames, u.Username)
+		}
+		userNames = uNames
 	}
 
-	logrus.Infof("user updated: %s", userUpdateResp.Users[0].Username)
+	for _, userName := range userNames {
+		// Send a user update request to the server.
+		userUpdateResp, err := userSvc.Update(context.Background(), &pb.UserUpdateRequest{
+			Username:   userName,
+			Password:   targetPassword,
+			Gwpref:     targetGWPref,
+			StaticPref: targetStaticPref,
+			HostId:     targetHostid,
+			AdminPref:  targetAdminPref,
+		})
+		if err != nil {
+			err := errors.UnknownGRPCError(err)
+			exit(1)
+			return err
+		}
+		logrus.Infof("user updated: %s", userUpdateResp.Users[0].Username)
+	}
+
 	return nil
 }
 
