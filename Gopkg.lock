@@ -35,13 +35,13 @@
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
-  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+  revision = "02af3965c54e8cacf948b97fef38925c4120652c"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/analysis"
   packages = ["."]
-  revision = "f59a71f0ece6f9dfb438be7f45148f006cbad88e"
+  revision = "863ac7f90e00e88e507095639a8457bbbf3c2ec9"
 
 [[projects]]
   branch = "master"
@@ -79,31 +79,31 @@
     "middleware/untyped",
     "security"
   ]
-  revision = "62281b694b396a17fe3e4313ee8b0ca2c3cca719"
+  revision = "c0cae94704c76c8643896d8054080f91e920105b"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "9acd88844bc186c3ec7f318cd3d56f1114b4ab99"
+  revision = "bcff419492eeeb01f76e77d2ebc714dc97b607f5"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/strfmt"
   packages = ["."]
-  revision = "6ba31556a6c60db8615afb9d8eddae7aae15eb48"
+  revision = "481808443b00a14745fada967cb5eeff0f9b1df2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/swag"
   packages = ["."]
-  revision = "ceb469cb0fdf2d792f28d771bc05da6c606f55e5"
+  revision = "811b1089cde9dad18d4d0c2d09fbdbf28dbd27a5"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/validate"
   packages = ["."]
-  revision = "180bba53b98899f743a112e568bed9e2ef31aa20"
+  revision = "9286f6d0e5c1ffc7cf2bda1d59291dc3c4f2f828"
 
 [[projects]]
   branch = "master"
@@ -118,7 +118,7 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "e09c5db296004fbe3f74490e84dcd62c3c5ddb1b"
+  revision = "927b65914520a8b7d44f5c9057611cfec6b2e2d0"
 
 [[projects]]
   name = "github.com/google/uuid"
@@ -177,13 +177,13 @@
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   branch = "master"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
-  revision = "b8a9be070da40449e501c3c4730a889e42d87a9e"
+  revision = "d4647c9c7a84d847478d890b816b7d8b62b0b279"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -201,21 +201,21 @@
     "scrypt",
     "ssh/terminal"
   ]
-  revision = "12892e8c234f4fe6f6803f052061de9057903bb2"
+  revision = "94e3fad7f1b4eed4ec147751ad6b4c4d33f00611"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "lex/httplex",
     "trace"
   ]
-  revision = "b68f30494add4df6bd8ef5e82803f308e7f7c59c"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   branch = "master"
@@ -224,7 +224,7 @@
     "unix",
     "windows"
   ]
-  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
+  revision = "d0faeb539838e250bd0a9db4182d48d4a1915181"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -255,7 +255,7 @@
     "googleapis/api/annotations",
     "googleapis/rpc/status"
   ]
-  revision = "ab0870e398d5dd054b868c0db1481ab029b9a9f2"
+  revision = "86e600f69ee4704c6efbf6a2a40a5c10700e76c2"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -264,6 +264,7 @@
     "balancer",
     "balancer/base",
     "balancer/roundrobin",
+    "channelz",
     "codes",
     "connectivity",
     "credentials",
@@ -284,8 +285,8 @@
     "tap",
     "transport"
   ]
-  revision = "1e2570b1b19ade82d8dbb31bba4e65e9f9ef5b34"
-  version = "v1.11.1"
+  revision = "41344da2231b913fa3d983840a57a6b1b7b631a1"
+  version = "v1.12.0"
 
 [[projects]]
   name = "gopkg.in/hlandau/easymetric.v1"

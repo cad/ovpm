@@ -18,6 +18,12 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type VPNProto int32
 
 const (
@@ -40,28 +46,74 @@ var VPNProto_value = map[string]int32{
 func (x VPNProto) String() string {
 	return proto.EnumName(VPNProto_name, int32(x))
 }
-func (VPNProto) EnumDescriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (VPNProto) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{0}
+}
 
 type VPNStatusRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNStatusRequest) Reset()                    { *m = VPNStatusRequest{} }
-func (m *VPNStatusRequest) String() string            { return proto.CompactTextString(m) }
-func (*VPNStatusRequest) ProtoMessage()               {}
-func (*VPNStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (m *VPNStatusRequest) Reset()         { *m = VPNStatusRequest{} }
+func (m *VPNStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*VPNStatusRequest) ProtoMessage()    {}
+func (*VPNStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{0}
+}
+func (m *VPNStatusRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNStatusRequest.Unmarshal(m, b)
+}
+func (m *VPNStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNStatusRequest.Marshal(b, m, deterministic)
+}
+func (dst *VPNStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNStatusRequest.Merge(dst, src)
+}
+func (m *VPNStatusRequest) XXX_Size() int {
+	return xxx_messageInfo_VPNStatusRequest.Size(m)
+}
+func (m *VPNStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNStatusRequest proto.InternalMessageInfo
 
 type VPNInitRequest struct {
-	Hostname  string   `protobuf:"bytes,1,opt,name=hostname" json:"hostname,omitempty"`
-	Port      string   `protobuf:"bytes,2,opt,name=port" json:"port,omitempty"`
-	ProtoPref VPNProto `protobuf:"varint,3,opt,name=proto_pref,json=protoPref,enum=pb.VPNProto" json:"proto_pref,omitempty"`
-	IpBlock   string   `protobuf:"bytes,4,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
-	Dns       string   `protobuf:"bytes,5,opt,name=dns" json:"dns,omitempty"`
+	Hostname             string   `protobuf:"bytes,1,opt,name=hostname" json:"hostname,omitempty"`
+	Port                 string   `protobuf:"bytes,2,opt,name=port" json:"port,omitempty"`
+	ProtoPref            VPNProto `protobuf:"varint,3,opt,name=proto_pref,json=protoPref,enum=pb.VPNProto" json:"proto_pref,omitempty"`
+	IpBlock              string   `protobuf:"bytes,4,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
+	Dns                  string   `protobuf:"bytes,5,opt,name=dns" json:"dns,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNInitRequest) Reset()                    { *m = VPNInitRequest{} }
-func (m *VPNInitRequest) String() string            { return proto.CompactTextString(m) }
-func (*VPNInitRequest) ProtoMessage()               {}
-func (*VPNInitRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (m *VPNInitRequest) Reset()         { *m = VPNInitRequest{} }
+func (m *VPNInitRequest) String() string { return proto.CompactTextString(m) }
+func (*VPNInitRequest) ProtoMessage()    {}
+func (*VPNInitRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{1}
+}
+func (m *VPNInitRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNInitRequest.Unmarshal(m, b)
+}
+func (m *VPNInitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNInitRequest.Marshal(b, m, deterministic)
+}
+func (dst *VPNInitRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNInitRequest.Merge(dst, src)
+}
+func (m *VPNInitRequest) XXX_Size() int {
+	return xxx_messageInfo_VPNInitRequest.Size(m)
+}
+func (m *VPNInitRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNInitRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNInitRequest proto.InternalMessageInfo
 
 func (m *VPNInitRequest) GetHostname() string {
 	if m != nil {
@@ -99,14 +151,36 @@ func (m *VPNInitRequest) GetDns() string {
 }
 
 type VPNUpdateRequest struct {
-	IpBlock string `protobuf:"bytes,1,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
-	Dns     string `protobuf:"bytes,2,opt,name=dns" json:"dns,omitempty"`
+	IpBlock              string   `protobuf:"bytes,1,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
+	Dns                  string   `protobuf:"bytes,2,opt,name=dns" json:"dns,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNUpdateRequest) Reset()                    { *m = VPNUpdateRequest{} }
-func (m *VPNUpdateRequest) String() string            { return proto.CompactTextString(m) }
-func (*VPNUpdateRequest) ProtoMessage()               {}
-func (*VPNUpdateRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (m *VPNUpdateRequest) Reset()         { *m = VPNUpdateRequest{} }
+func (m *VPNUpdateRequest) String() string { return proto.CompactTextString(m) }
+func (*VPNUpdateRequest) ProtoMessage()    {}
+func (*VPNUpdateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{2}
+}
+func (m *VPNUpdateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNUpdateRequest.Unmarshal(m, b)
+}
+func (m *VPNUpdateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNUpdateRequest.Marshal(b, m, deterministic)
+}
+func (dst *VPNUpdateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNUpdateRequest.Merge(dst, src)
+}
+func (m *VPNUpdateRequest) XXX_Size() int {
+	return xxx_messageInfo_VPNUpdateRequest.Size(m)
+}
+func (m *VPNUpdateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNUpdateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNUpdateRequest proto.InternalMessageInfo
 
 func (m *VPNUpdateRequest) GetIpBlock() string {
 	if m != nil {
@@ -123,33 +197,77 @@ func (m *VPNUpdateRequest) GetDns() string {
 }
 
 type VPNRestartRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNRestartRequest) Reset()                    { *m = VPNRestartRequest{} }
-func (m *VPNRestartRequest) String() string            { return proto.CompactTextString(m) }
-func (*VPNRestartRequest) ProtoMessage()               {}
-func (*VPNRestartRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
+func (m *VPNRestartRequest) Reset()         { *m = VPNRestartRequest{} }
+func (m *VPNRestartRequest) String() string { return proto.CompactTextString(m) }
+func (*VPNRestartRequest) ProtoMessage()    {}
+func (*VPNRestartRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{3}
+}
+func (m *VPNRestartRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNRestartRequest.Unmarshal(m, b)
+}
+func (m *VPNRestartRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNRestartRequest.Marshal(b, m, deterministic)
+}
+func (dst *VPNRestartRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNRestartRequest.Merge(dst, src)
+}
+func (m *VPNRestartRequest) XXX_Size() int {
+	return xxx_messageInfo_VPNRestartRequest.Size(m)
+}
+func (m *VPNRestartRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNRestartRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNRestartRequest proto.InternalMessageInfo
 
 type VPNStatusResponse struct {
-	Name         string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	SerialNumber string `protobuf:"bytes,2,opt,name=serial_number,json=serialNumber" json:"serial_number,omitempty"`
-	Hostname     string `protobuf:"bytes,3,opt,name=hostname" json:"hostname,omitempty"`
-	Port         string `protobuf:"bytes,4,opt,name=port" json:"port,omitempty"`
-	Cert         string `protobuf:"bytes,5,opt,name=cert" json:"cert,omitempty"`
-	CaCert       string `protobuf:"bytes,6,opt,name=ca_cert,json=caCert" json:"ca_cert,omitempty"`
-	Net          string `protobuf:"bytes,7,opt,name=net" json:"net,omitempty"`
-	Mask         string `protobuf:"bytes,8,opt,name=mask" json:"mask,omitempty"`
-	CreatedAt    string `protobuf:"bytes,9,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
-	Proto        string `protobuf:"bytes,10,opt,name=proto" json:"proto,omitempty"`
-	Dns          string `protobuf:"bytes,11,opt,name=dns" json:"dns,omitempty"`
-	ExpiresAt    string `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt" json:"expires_at,omitempty"`
-	CaExpiresAt  string `protobuf:"bytes,13,opt,name=ca_expires_at,json=caExpiresAt" json:"ca_expires_at,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	SerialNumber         string   `protobuf:"bytes,2,opt,name=serial_number,json=serialNumber" json:"serial_number,omitempty"`
+	Hostname             string   `protobuf:"bytes,3,opt,name=hostname" json:"hostname,omitempty"`
+	Port                 string   `protobuf:"bytes,4,opt,name=port" json:"port,omitempty"`
+	Cert                 string   `protobuf:"bytes,5,opt,name=cert" json:"cert,omitempty"`
+	CaCert               string   `protobuf:"bytes,6,opt,name=ca_cert,json=caCert" json:"ca_cert,omitempty"`
+	Net                  string   `protobuf:"bytes,7,opt,name=net" json:"net,omitempty"`
+	Mask                 string   `protobuf:"bytes,8,opt,name=mask" json:"mask,omitempty"`
+	CreatedAt            string   `protobuf:"bytes,9,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
+	Proto                string   `protobuf:"bytes,10,opt,name=proto" json:"proto,omitempty"`
+	Dns                  string   `protobuf:"bytes,11,opt,name=dns" json:"dns,omitempty"`
+	ExpiresAt            string   `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt" json:"expires_at,omitempty"`
+	CaExpiresAt          string   `protobuf:"bytes,13,opt,name=ca_expires_at,json=caExpiresAt" json:"ca_expires_at,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNStatusResponse) Reset()                    { *m = VPNStatusResponse{} }
-func (m *VPNStatusResponse) String() string            { return proto.CompactTextString(m) }
-func (*VPNStatusResponse) ProtoMessage()               {}
-func (*VPNStatusResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{4} }
+func (m *VPNStatusResponse) Reset()         { *m = VPNStatusResponse{} }
+func (m *VPNStatusResponse) String() string { return proto.CompactTextString(m) }
+func (*VPNStatusResponse) ProtoMessage()    {}
+func (*VPNStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{4}
+}
+func (m *VPNStatusResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNStatusResponse.Unmarshal(m, b)
+}
+func (m *VPNStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNStatusResponse.Marshal(b, m, deterministic)
+}
+func (dst *VPNStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNStatusResponse.Merge(dst, src)
+}
+func (m *VPNStatusResponse) XXX_Size() int {
+	return xxx_messageInfo_VPNStatusResponse.Size(m)
+}
+func (m *VPNStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNStatusResponse proto.InternalMessageInfo
 
 func (m *VPNStatusResponse) GetName() string {
 	if m != nil {
@@ -243,28 +361,94 @@ func (m *VPNStatusResponse) GetCaExpiresAt() string {
 }
 
 type VPNInitResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNInitResponse) Reset()                    { *m = VPNInitResponse{} }
-func (m *VPNInitResponse) String() string            { return proto.CompactTextString(m) }
-func (*VPNInitResponse) ProtoMessage()               {}
-func (*VPNInitResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{5} }
+func (m *VPNInitResponse) Reset()         { *m = VPNInitResponse{} }
+func (m *VPNInitResponse) String() string { return proto.CompactTextString(m) }
+func (*VPNInitResponse) ProtoMessage()    {}
+func (*VPNInitResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{5}
+}
+func (m *VPNInitResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNInitResponse.Unmarshal(m, b)
+}
+func (m *VPNInitResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNInitResponse.Marshal(b, m, deterministic)
+}
+func (dst *VPNInitResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNInitResponse.Merge(dst, src)
+}
+func (m *VPNInitResponse) XXX_Size() int {
+	return xxx_messageInfo_VPNInitResponse.Size(m)
+}
+func (m *VPNInitResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNInitResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNInitResponse proto.InternalMessageInfo
 
 type VPNUpdateResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNUpdateResponse) Reset()                    { *m = VPNUpdateResponse{} }
-func (m *VPNUpdateResponse) String() string            { return proto.CompactTextString(m) }
-func (*VPNUpdateResponse) ProtoMessage()               {}
-func (*VPNUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{6} }
+func (m *VPNUpdateResponse) Reset()         { *m = VPNUpdateResponse{} }
+func (m *VPNUpdateResponse) String() string { return proto.CompactTextString(m) }
+func (*VPNUpdateResponse) ProtoMessage()    {}
+func (*VPNUpdateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{6}
+}
+func (m *VPNUpdateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNUpdateResponse.Unmarshal(m, b)
+}
+func (m *VPNUpdateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNUpdateResponse.Marshal(b, m, deterministic)
+}
+func (dst *VPNUpdateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNUpdateResponse.Merge(dst, src)
+}
+func (m *VPNUpdateResponse) XXX_Size() int {
+	return xxx_messageInfo_VPNUpdateResponse.Size(m)
+}
+func (m *VPNUpdateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNUpdateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNUpdateResponse proto.InternalMessageInfo
 
 type VPNRestartResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *VPNRestartResponse) Reset()                    { *m = VPNRestartResponse{} }
-func (m *VPNRestartResponse) String() string            { return proto.CompactTextString(m) }
-func (*VPNRestartResponse) ProtoMessage()               {}
-func (*VPNRestartResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{7} }
+func (m *VPNRestartResponse) Reset()         { *m = VPNRestartResponse{} }
+func (m *VPNRestartResponse) String() string { return proto.CompactTextString(m) }
+func (*VPNRestartResponse) ProtoMessage()    {}
+func (*VPNRestartResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_vpn_a36938fb10df2565, []int{7}
+}
+func (m *VPNRestartResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VPNRestartResponse.Unmarshal(m, b)
+}
+func (m *VPNRestartResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VPNRestartResponse.Marshal(b, m, deterministic)
+}
+func (dst *VPNRestartResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VPNRestartResponse.Merge(dst, src)
+}
+func (m *VPNRestartResponse) XXX_Size() int {
+	return xxx_messageInfo_VPNRestartResponse.Size(m)
+}
+func (m *VPNRestartResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_VPNRestartResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VPNRestartResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*VPNStatusRequest)(nil), "pb.VPNStatusRequest")
@@ -449,9 +633,9 @@ var _VPNService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "vpn.proto",
 }
 
-func init() { proto.RegisterFile("vpn.proto", fileDescriptor1) }
+func init() { proto.RegisterFile("vpn.proto", fileDescriptor_vpn_a36938fb10df2565) }
 
-var fileDescriptor1 = []byte{
+var fileDescriptor_vpn_a36938fb10df2565 = []byte{
 	// 568 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x93, 0xcd, 0x6e, 0xd3, 0x40,
 	0x10, 0xc7, 0xb1, 0x93, 0xe6, 0x63, 0xfa, 0x81, 0x3b, 0x4d, 0xa9, 0x09, 0x54, 0xaa, 0xcc, 0xa5,

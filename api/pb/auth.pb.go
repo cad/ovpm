@@ -18,23 +18,73 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type AuthStatusRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AuthStatusRequest) Reset()                    { *m = AuthStatusRequest{} }
-func (m *AuthStatusRequest) String() string            { return proto.CompactTextString(m) }
-func (*AuthStatusRequest) ProtoMessage()               {}
-func (*AuthStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{0} }
+func (m *AuthStatusRequest) Reset()         { *m = AuthStatusRequest{} }
+func (m *AuthStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*AuthStatusRequest) ProtoMessage()    {}
+func (*AuthStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{0}
+}
+func (m *AuthStatusRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AuthStatusRequest.Unmarshal(m, b)
+}
+func (m *AuthStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AuthStatusRequest.Marshal(b, m, deterministic)
+}
+func (dst *AuthStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthStatusRequest.Merge(dst, src)
+}
+func (m *AuthStatusRequest) XXX_Size() int {
+	return xxx_messageInfo_AuthStatusRequest.Size(m)
+}
+func (m *AuthStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuthStatusRequest proto.InternalMessageInfo
 
 type AuthAuthenticateRequest struct {
-	Username string `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	Password string `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AuthAuthenticateRequest) Reset()                    { *m = AuthAuthenticateRequest{} }
-func (m *AuthAuthenticateRequest) String() string            { return proto.CompactTextString(m) }
-func (*AuthAuthenticateRequest) ProtoMessage()               {}
-func (*AuthAuthenticateRequest) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{1} }
+func (m *AuthAuthenticateRequest) Reset()         { *m = AuthAuthenticateRequest{} }
+func (m *AuthAuthenticateRequest) String() string { return proto.CompactTextString(m) }
+func (*AuthAuthenticateRequest) ProtoMessage()    {}
+func (*AuthAuthenticateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{1}
+}
+func (m *AuthAuthenticateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AuthAuthenticateRequest.Unmarshal(m, b)
+}
+func (m *AuthAuthenticateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AuthAuthenticateRequest.Marshal(b, m, deterministic)
+}
+func (dst *AuthAuthenticateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthAuthenticateRequest.Merge(dst, src)
+}
+func (m *AuthAuthenticateRequest) XXX_Size() int {
+	return xxx_messageInfo_AuthAuthenticateRequest.Size(m)
+}
+func (m *AuthAuthenticateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthAuthenticateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuthAuthenticateRequest proto.InternalMessageInfo
 
 func (m *AuthAuthenticateRequest) GetUsername() string {
 	if m != nil {
@@ -51,14 +101,36 @@ func (m *AuthAuthenticateRequest) GetPassword() string {
 }
 
 type AuthStatusResponse struct {
-	User   *UserResponse_User `protobuf:"bytes,1,opt,name=user" json:"user,omitempty"`
-	IsRoot bool               `protobuf:"varint,2,opt,name=is_root,json=isRoot" json:"is_root,omitempty"`
+	User                 *UserResponse_User `protobuf:"bytes,1,opt,name=user" json:"user,omitempty"`
+	IsRoot               bool               `protobuf:"varint,2,opt,name=is_root,json=isRoot" json:"is_root,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
-func (m *AuthStatusResponse) Reset()                    { *m = AuthStatusResponse{} }
-func (m *AuthStatusResponse) String() string            { return proto.CompactTextString(m) }
-func (*AuthStatusResponse) ProtoMessage()               {}
-func (*AuthStatusResponse) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{2} }
+func (m *AuthStatusResponse) Reset()         { *m = AuthStatusResponse{} }
+func (m *AuthStatusResponse) String() string { return proto.CompactTextString(m) }
+func (*AuthStatusResponse) ProtoMessage()    {}
+func (*AuthStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{2}
+}
+func (m *AuthStatusResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AuthStatusResponse.Unmarshal(m, b)
+}
+func (m *AuthStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AuthStatusResponse.Marshal(b, m, deterministic)
+}
+func (dst *AuthStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthStatusResponse.Merge(dst, src)
+}
+func (m *AuthStatusResponse) XXX_Size() int {
+	return xxx_messageInfo_AuthStatusResponse.Size(m)
+}
+func (m *AuthStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuthStatusResponse proto.InternalMessageInfo
 
 func (m *AuthStatusResponse) GetUser() *UserResponse_User {
 	if m != nil {
@@ -75,13 +147,35 @@ func (m *AuthStatusResponse) GetIsRoot() bool {
 }
 
 type AuthAuthenticateResponse struct {
-	Token string `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	Token                string   `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AuthAuthenticateResponse) Reset()                    { *m = AuthAuthenticateResponse{} }
-func (m *AuthAuthenticateResponse) String() string            { return proto.CompactTextString(m) }
-func (*AuthAuthenticateResponse) ProtoMessage()               {}
-func (*AuthAuthenticateResponse) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{3} }
+func (m *AuthAuthenticateResponse) Reset()         { *m = AuthAuthenticateResponse{} }
+func (m *AuthAuthenticateResponse) String() string { return proto.CompactTextString(m) }
+func (*AuthAuthenticateResponse) ProtoMessage()    {}
+func (*AuthAuthenticateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{3}
+}
+func (m *AuthAuthenticateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AuthAuthenticateResponse.Unmarshal(m, b)
+}
+func (m *AuthAuthenticateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AuthAuthenticateResponse.Marshal(b, m, deterministic)
+}
+func (dst *AuthAuthenticateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthAuthenticateResponse.Merge(dst, src)
+}
+func (m *AuthAuthenticateResponse) XXX_Size() int {
+	return xxx_messageInfo_AuthAuthenticateResponse.Size(m)
+}
+func (m *AuthAuthenticateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthAuthenticateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuthAuthenticateResponse proto.InternalMessageInfo
 
 func (m *AuthAuthenticateResponse) GetToken() string {
 	if m != nil {
@@ -202,9 +296,9 @@ var _AuthService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "auth.proto",
 }
 
-func init() { proto.RegisterFile("auth.proto", fileDescriptor3) }
+func init() { proto.RegisterFile("auth.proto", fileDescriptor_auth_79ec97a74d2b7cf3) }
 
-var fileDescriptor3 = []byte{
+var fileDescriptor_auth_79ec97a74d2b7cf3 = []byte{
 	// 306 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x51, 0x41, 0x4e, 0x2a, 0x41,
 	0x10, 0xcd, 0x90, 0xff, 0x11, 0x0b, 0x37, 0x36, 0x22, 0x38, 0x10, 0x63, 0x26, 0x2e, 0xd4, 0x05,
