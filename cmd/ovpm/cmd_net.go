@@ -187,6 +187,8 @@ var netAssociateCommand = cli.Command{
 			daemonPort = port
 		}
 
+		var inBulk bool
+
 		// Validate username and network name.
 		if netName := c.String("net"); govalidator.IsNull(netName) {
 			err := errors.EmptyValue("network", netName)
@@ -199,12 +201,17 @@ var netAssociateCommand = cli.Command{
 			return err
 		}
 
+		// Mark inBulk if username is set to asterisk.
+		if c.String("user") == "*" {
+			inBulk = true
+		}
+
 		// If dry run, then don't call the action, just preprocess.
 		if c.GlobalBool("dry-run") {
 			return nil
 		}
 
-		return netAssocAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), c.String("net"), c.String("user"))
+		return netAssocAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), c.String("net"), c.String("user"), inBulk)
 	},
 }
 
@@ -232,6 +239,8 @@ var netDissociateCommand = cli.Command{
 			daemonPort = port
 		}
 
+		var inBulk bool
+
 		// Validate username and network name.
 		if netName := c.String("net"); govalidator.IsNull(netName) {
 			err := errors.EmptyValue("network", netName)
@@ -244,12 +253,17 @@ var netDissociateCommand = cli.Command{
 			return err
 		}
 
+		// Mark inBulk if username is set to asterisk.
+		if c.String("user") == "*" {
+			inBulk = true
+		}
+
 		// If dry run, then don't call the action, just preprocess.
 		if c.GlobalBool("dry-run") {
 			return nil
 		}
 
-		return netDissocAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), c.String("net"), c.String("user"))
+		return netDissocAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), c.String("net"), c.String("user"), inBulk)
 	},
 }
 
