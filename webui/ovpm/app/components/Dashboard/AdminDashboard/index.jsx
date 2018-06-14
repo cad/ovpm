@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {GetAuthToken, ClearAuthToken} from '../../../utils/auth.js';
-import {API} from '../../../utils/restClient.js';
-import {baseURL, endpoints} from '../../../api.js';
+import { GetAuthToken, ClearAuthToken } from '../../../utils/auth.js';
+import { API } from '../../../utils/restClient.js';
+import { baseURL, endpoints } from '../../../api.js';
 import { Redirect } from 'react-router'
 import Panel from 'muicss/lib/react/panel';
 import Button from 'muicss/lib/react/button';
@@ -18,13 +18,12 @@ import UserPicker from './UserPicker';
 import moment from 'moment';
 
 const modalStyle = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
+    content: {
+        width: '50%',
+        height: '600px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        padding: 0,
     }
 };
 const CREATINGNEWUSER = "CREATINGNEWUSER"
@@ -40,7 +39,7 @@ let saveData = (function () {
     a.style = "display: none";
     return function (data, fileName) {
         var json = data,
-            blob = new Blob([json], {type: "octet/stream"}),
+            blob = new Blob([json], { type: "octet/stream" }),
             url = window.URL.createObjectURL(blob);
         a.href = url;
         a.download = fileName;
@@ -49,20 +48,17 @@ let saveData = (function () {
     };
 }());
 
-function dot2num(dot)
-{
+function dot2num(dot) {
     var d = dot.split('.');
-    return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
+    return ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
 }
 
-function num2dot(num)
-{
-    var d = num%256;
-    for (var i = 3; i > 0; i--)
-        {
-            num = Math.floor(num/256);
-            d = num%256 + '.' + d;
-        }
+function num2dot(num) {
+    var d = num % 256;
+    for (var i = 3; i > 0; i--) {
+        num = Math.floor(num / 256);
+        d = num % 256 + '.' + d;
+    }
     return d;
 }
 
@@ -115,52 +111,52 @@ export default class AdminDashboard extends React.Component {
         this.api.call("vpnStatus", {}, true, this.handleGetVPNStatusSuccess.bind(this), this.handleGetVPNStatusFailure.bind(this))
     }
 
-    handleTabChange (i, value, tab, ev) {
+    handleTabChange(i, value, tab, ev) {
         this.refresh()
     }
 
     handleGetUsersSuccess(res) {
-        this.setState({users: res.data.users})
+        this.setState({ users: res.data.users })
     }
 
     handleGetUsersFailure(error) {
         if ('response' in error && error.response.status == 401) {
             this.handleAuthFailure(error)
         }
-        this.setState({users: []})
+        this.setState({ users: [] })
     }
 
     handleGetNetworksSuccess(res) {
-        this.setState({networks: res.data.networks})
+        this.setState({ networks: res.data.networks })
     }
 
     handleGetNetworksFailure(error) {
         console.log(error)
-        this.setState({networks: []})
+        this.setState({ networks: [] })
         if (error.response.status == 401) {
             this.handleAuthFailure(error)
         }
     }
 
     handleGetVPNStatusSuccess(res) {
-        this.setState({vpn: res.data})
+        this.setState({ vpn: res.data })
     }
 
     handleGetVPNStatusFailure(error) {
         console.log(error)
-        this.setState({vpn: {}})
+        this.setState({ vpn: {} })
         if (error.response.status == 401) {
             this.handleAuthFailure(error)
         }
     }
 
     handleGetAuthStatusSuccess(res) {
-        this.setState({self: res.data.user})
+        this.setState({ self: res.data.user })
     }
 
     handleGetAuthStatusFailure(error) {
         console.log(error)
-        this.setState({self: {}})
+        this.setState({ self: {} })
         if (error.response.status == 401) {
             this.handleAuthFailure(error)
         }
@@ -169,22 +165,22 @@ export default class AdminDashboard extends React.Component {
     handleAuthFailure(error) {
         console.log("auth failure", error)
         ClearAuthToken()
-        this.setState({"logout": true})
+        this.setState({ "logout": true })
     }
 
     handleCreateNewUser(e) {
         console.log("create new user")
-        this.setState({modal: CREATINGNEWUSER})
+        this.setState({ modal: CREATINGNEWUSER })
     }
 
     handleDefineNewNetwork(e) {
-        this.setState({modal: DEFININGNEWNETWORK})
+        this.setState({ modal: DEFININGNEWNETWORK })
     }
 
     handleUpdateUser(username, e) {
         for (let i in this.state.users) {
             if (this.state.users[i].username === username) {
-                this.setState({modal: EDITINGUSER, editedUser: this.state.users[i]})
+                this.setState({ modal: EDITINGUSER, editedUser: this.state.users[i] })
                 console.log(i)
                 console.log("updating user:", this.state.users[i].username)
                 return
@@ -193,7 +189,7 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleCloseModal() {
-        this.setState({modal: ""})
+        this.setState({ modal: "" })
     }
 
     handleNewUserSave(user) {
@@ -211,7 +207,7 @@ export default class AdminDashboard extends React.Component {
 
         console.log("creating new user:", user.username)
         this.api.call("userCreate", userObj, true, this.handleCreateUserSuccess.bind(this), this.handleCreateUserFailure.bind(this))
-        this.setState({modal: ""})
+        this.setState({ modal: "" })
     }
 
     handleCreateUserSuccess(res) {
@@ -246,7 +242,7 @@ export default class AdminDashboard extends React.Component {
         console.log("updating user:", updatedUser.username)
         this.api.call("userUpdate", updatedUser, true, this.handleUpdateUserSuccess.bind(this), this.handleUpdateUserFailure.bind(this))
 
-        this.setState({modal: ""})
+        this.setState({ modal: "" })
     }
 
     handleUpdateUserSuccess(res) {
@@ -266,7 +262,7 @@ export default class AdminDashboard extends React.Component {
             // Don't remove yourself.
             return
         }
-        this.api.call("userDelete", {username: username}, true, this.handleRemoveUserSuccess.bind(this), this.handleRemoveUserFailure.bind(this))
+        this.api.call("userDelete", { username: username }, true, this.handleRemoveUserSuccess.bind(this), this.handleRemoveUserFailure.bind(this))
     }
 
     handleRemoveUserSuccess(res) {
@@ -281,13 +277,13 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleDownloadProfileClick(username, e) {
-        this.setState({genConfigUsername: username})
-        this.api.call("genConfig", {username: username}, true, this.handleDownloadProfileSuccess.bind(this), this.handleDownloadProfileFailure.bind(this))
+        this.setState({ genConfigUsername: username })
+        this.api.call("genConfig", { username: username }, true, this.handleDownloadProfileSuccess.bind(this), this.handleDownloadProfileFailure.bind(this))
     }
 
     handleDownloadProfileSuccess(res) {
         let blob = res.data.client_config
-        saveData(blob, this.state.genConfigUsername+".ovpn")
+        saveData(blob, this.state.genConfigUsername + ".ovpn")
     }
 
     handleDownloadProfileFailure(error) {
@@ -299,7 +295,7 @@ export default class AdminDashboard extends React.Component {
 
     handleDefineNetworkSave(network) {
         this.api.call("netDefine", network, true, this.handleDefineNetworkSuccess.bind(this), this.handleDefineNetworkFailure.bind(this))
-        this.setState({modal: ""})
+        this.setState({ modal: "" })
     }
 
     handleDefineNetworkSuccess(res) {
@@ -314,7 +310,7 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleUndefineNetwork(name) {
-        this.api.call("netUndefine", {name: name}, true, this.handleUndefineNetworkSuccess.bind(this), this.handleUndefineNetworkFailure.bind(this))
+        this.api.call("netUndefine", { name: name }, true, this.handleUndefineNetworkSuccess.bind(this), this.handleUndefineNetworkFailure.bind(this))
     }
 
     handleUndefineNetworkSuccess(res) {
@@ -331,16 +327,16 @@ export default class AdminDashboard extends React.Component {
     handleAssociateUser(networkName) {
         let assocUsers = []
         let network
-        for(let i in this.state.networks) {
+        for (let i in this.state.networks) {
             if (this.state.networks[i].name === networkName) {
                 network = this.state.networks[i]
                 break
             }
         }
-        for(let i in this.state.users) {
+        for (let i in this.state.users) {
             let found = false
-            for(let j in network.associated_usernames) {
-                if(this.state.users[i].username === network.associated_usernames[j]) {
+            for (let j in network.associated_usernames) {
+                if (this.state.users[i].username === network.associated_usernames[j]) {
                     found = true
                 }
             }
@@ -348,22 +344,22 @@ export default class AdminDashboard extends React.Component {
                 assocUsers.push(this.state.users[i].username)
             }
         }
-        this.setState({modal: ASSOCIATINGUSER, assocNetworkName: networkName, possibleAssocUsers: assocUsers})
+        this.setState({ modal: ASSOCIATINGUSER, assocNetworkName: networkName, possibleAssocUsers: assocUsers })
     }
 
     handleDissociateUser(networkName) {
         let dissocUsers = []
         let network
-        for(let i in this.state.networks) {
+        for (let i in this.state.networks) {
             if (this.state.networks[i].name === networkName) {
                 network = this.state.networks[i]
                 break
             }
         }
-        for(let i in this.state.users) {
+        for (let i in this.state.users) {
             let found = false
-            for(let j in network.associated_usernames) {
-                if(this.state.users[i].username === network.associated_usernames[j]) {
+            for (let j in network.associated_usernames) {
+                if (this.state.users[i].username === network.associated_usernames[j]) {
                     found = true
                 }
             }
@@ -371,19 +367,19 @@ export default class AdminDashboard extends React.Component {
                 dissocUsers.push(this.state.users[i].username)
             }
         }
-        this.setState({modal: DISSOCIATINGUSER, dissocNetworkName: networkName, possibleDissocUsers: dissocUsers})
+        this.setState({ modal: DISSOCIATINGUSER, dissocNetworkName: networkName, possibleDissocUsers: dissocUsers })
     }
 
     handleAssociateUserSave(username) {
         //call
         //refresh
-        this.api.call("netAssociate", {name: this.state.assocNetworkName, username : username}, true, this.handleAssociateUserSuccess.bind(this), this.handleAssociateUserFailure.bind(this))
-        this.setState({modal: ""})
+        this.api.call("netAssociate", { name: this.state.assocNetworkName, username: username }, true, this.handleAssociateUserSuccess.bind(this), this.handleAssociateUserFailure.bind(this))
+        this.setState({ modal: "" })
     }
 
     handleDissociateUserSave(username) {
-        this.api.call("netDissociate", {name: this.state.dissocNetworkName, username : username}, true, this.handleDissociateUserSuccess.bind(this), this.handleDissociateUserFailure.bind(this))
-        this.setState({modal: ""})
+        this.api.call("netDissociate", { name: this.state.dissocNetworkName, username: username }, true, this.handleDissociateUserSuccess.bind(this), this.handleDissociateUserFailure.bind(this))
+        this.setState({ modal: "" })
     }
 
 
@@ -411,9 +407,9 @@ export default class AdminDashboard extends React.Component {
     }
 
     handleRestartVPNServer() {
-        this.api.call("vpnRestart", {}, true, function() {
+        this.api.call("vpnRestart", {}, true, function () {
             this.refresh()
-        }.bind(this), function() {
+        }.bind(this), function () {
             if ('response' in error && error.response.status == 401) {
                 this.handleAuthFailure(error)
             }
@@ -424,7 +420,7 @@ export default class AdminDashboard extends React.Component {
 
     handleLogout() {
         ClearAuthToken()
-        this.setState({logout: true})
+        this.setState({ logout: true })
     }
 
 
@@ -451,11 +447,11 @@ export default class AdminDashboard extends React.Component {
                 noGW = (<span className="glyphicon glyphicon-ok" data-toggle="tooltip" title="True"></span>)
             }
 
-            let isOnline = (<span className="text-muted" style={{"font-size":"2em", "vertical-align": "middle"}} data-toggle="tooltip" title="Offline">◦</span>)
+            let isOnline = (<span className="text-muted" style={{ "font-size": "2em", "vertical-align": "middle" }} data-toggle="tooltip" title="Offline">◦</span>)
             if (this.state.users[i].is_connected) {
                 let onlineSince = "Online, since " + moment(this.state.users[i].connected_since).fromNow() + "."
                 console.log(onlineSince)
-                isOnline = (<span className="text-success" style={{"font-size":"2em", "vertical-align": "middle"}} data-toggle="tooltip" title={onlineSince}>•</span>)
+                isOnline = (<span className="text-success" style={{ "font-size": "2em", "vertical-align": "middle" }} data-toggle="tooltip" title={onlineSince}>•</span>)
             }
 
             let certExpiry = (<span className="glyphicon glyphicon-remove" data-toggle="tooltip" title="Expired"></span>)
@@ -468,16 +464,16 @@ export default class AdminDashboard extends React.Component {
 
             users.push(
                 <tr key={"user" + i}>
-                    <td>{i+1}</td>
+                    <td>{i + 1}</td>
                     <td>{isOnline} {this.state.users[i].username} {isAdmin}</td>
                     <td>{this.state.users[i].ip_net} {isStatic}</td>
                     <td>{createdAt}</td>
                     <td>{certExpiry}</td>
                     <td className="mui--align-middle">{noGW}</td>
                     <td>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-floppy-save" data-toggle="tooltip" title="Download VPN Profile" onClick={this.handleDownloadProfileClick.bind(this, this.state.users[i].username)}></span></a>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-edit" data-toggle="tooltip" title="Update User" onClick={this.handleUpdateUser.bind(this, this.state.users[i].username)}></span></a>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-remove" data-toggle="tooltip" title="Delete User" onClick={this.handleRemoveUser.bind(this, this.state.users[i].username)}></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-floppy-save" data-toggle="tooltip" title="Download VPN Profile" onClick={this.handleDownloadProfileClick.bind(this, this.state.users[i].username)}></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-edit" data-toggle="tooltip" title="Update User" onClick={this.handleUpdateUser.bind(this, this.state.users[i].username)}></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-remove" data-toggle="tooltip" title="Delete User" onClick={this.handleRemoveUser.bind(this, this.state.users[i].username)}></span></a>
                     </td>
                 </tr>
             )
@@ -495,34 +491,34 @@ export default class AdminDashboard extends React.Component {
             }
             networks.push(
                 <tr key={"network" + i}>
-                    <td>{i+1}</td>
+                    <td>{i + 1}</td>
                     <td>{this.state.networks[i].name}</td>
                     <td>{this.state.networks[i].cidr} {via}</td>
                     <td>{this.state.networks[i].type}</td>
                     <td>{this.state.networks[i].created_at}</td>
                     <td>{this.state.networks[i].associated_usernames.join(', ')}</td>
                     <td>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-plus-sign" data-toggle="tooltip" onClick={this.handleAssociateUser.bind(this, this.state.networks[i].name)} title="Associate User"></span></a>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-minus-sign" data-toggle="tooltip" onClick={this.handleDissociateUser.bind(this, this.state.networks[i].name)} title="Dissociate User"></span></a>
-                        <a style={{"padding-left": "5px"}}><span className="glyphicon glyphicon-remove" data-toggle="tooltip" onClick={this.handleUndefineNetwork.bind(this, this.state.networks[i].name)} title="Undefine Network"></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-plus-sign" data-toggle="tooltip" onClick={this.handleAssociateUser.bind(this, this.state.networks[i].name)} title="Associate User"></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-minus-sign" data-toggle="tooltip" onClick={this.handleDissociateUser.bind(this, this.state.networks[i].name)} title="Dissociate User"></span></a>
+                        <a style={{ "padding-left": "5px" }}><span className="glyphicon glyphicon-remove" data-toggle="tooltip" onClick={this.handleUndefineNetwork.bind(this, this.state.networks[i].name)} title="Undefine Network"></span></a>
                     </td>
                 </tr>
             )
         }
 
         return (
-            <Container style={{"padding-top":"5%"}}>
+            <Container style={{ "padding-top": "5%" }}>
                 <Panel>
                     <Button className="mui--pull-right" color="primary" onClick={this.handleLogout.bind(this)}>Logout</Button>
                     <Container>
                         <Modal isOpen={this.state.modal === CREATINGNEWUSER} contentLabel="Modal" style={modalStyle}>
-                            <UserEdit title="Create New User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleNewUserSave.bind(this)} isUsernameDisabled={false}/>
+                            <UserEdit title="Create New User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleNewUserSave.bind(this)} isUsernameDisabled={false} />
                         </Modal>
                         <Modal isOpen={this.state.modal === EDITINGUSER} contentLabel="Modal" style={modalStyle}>
-                            <UserEdit title="Update User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleUpdateUserSave.bind(this)} isUsernameDisabled={true} username={this.state.editedUser.username} isAdmin={this.state.editedUser.is_admin} pushGW={(!this.state.editedUser.no_gw)} ipAllocationMethod={this.state.editedUser.host_id == 0 ? "dynamic": "static"} staticIP={this.state.editedUser.host_id == 0 ? "": num2dot(this.state.editedUser.host_id)}/>
+                            <UserEdit title="Update User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleUpdateUserSave.bind(this)} isUsernameDisabled={true} username={this.state.editedUser.username} isAdmin={this.state.editedUser.is_admin} pushGW={(!this.state.editedUser.no_gw)} ipAllocationMethod={this.state.editedUser.host_id == 0 ? "dynamic" : "static"} staticIP={this.state.editedUser.host_id == 0 ? "" : num2dot(this.state.editedUser.host_id)} />
                         </Modal>
                         <Modal isOpen={this.state.modal === DEFININGNEWNETWORK} contentLabel="Modal" style={modalStyle}>
-                            <NetworkEdit title="New Network" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleDefineNetworkSave.bind(this)}/>
+                            <NetworkEdit title="New Network" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleDefineNetworkSave.bind(this)} />
                         </Modal>
                         <Modal isOpen={this.state.modal === ASSOCIATINGUSER} contentLabel="Modal" style={modalStyle}>
                             <UserPicker title="Associate User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleAssociateUserSave.bind(this)} userNames={this.state.possibleAssocUsers} />
@@ -600,5 +596,5 @@ export default class AdminDashboard extends React.Component {
                 </Panel>
             </Container>
         )
-}
+    }
 }
