@@ -372,7 +372,7 @@ func TestUser_ExpiresAt(t *testing.T) {
 // areUsersEqual compares given users and returns true if they are the same.
 func areUsersEqual(user1, user2 *ovpm.User) bool {
 	if user1.GetCert() != user2.GetCert() {
-		logrus.Info("Cert %v != %v", user1.GetCert(), user2.GetCert())
+		logrus.Infof("Cert %v != %v", user1.GetCert(), user2.GetCert())
 		return false
 	}
 	if user1.GetUsername() != user2.GetUsername() {
