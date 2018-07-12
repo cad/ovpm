@@ -38,6 +38,10 @@ $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 
 # Install OVPM
 $ sudo yum install ovpm
+
+# Enable and start ovpmd service
+$ systemctl start ovpmd
+$ systemctl enable ovpmd
 ```
 
 **from DEB (Ubuntu/Debian):**
