@@ -1,0 +1,9 @@
+[main]
+plugins=1
+
+[ovpm]
+name = Official OVPM yum repository
+baseurl = https://cad.github.io/ovpm/rpm/
+gpgcheck=0
+sslverify=1
+enabled=1
