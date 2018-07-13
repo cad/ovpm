@@ -97,7 +97,7 @@ func templateAuthSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2916, mode: os.FileMode(420), modTime: time.Unix(1531470281, 0)}
+	info := bindataFileInfo{name: "template/auth.swagger.json", size: 2916, mode: os.FileMode(420), modTime: time.Unix(1531470471, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -117,7 +117,7 @@ func templateBootstrapMinCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/bootstrap.min.css", size: 113498, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/bootstrap.min.css", size: 113498, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -137,7 +137,7 @@ func templateBundleJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/bundle.js", size: 564079, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/bundle.js", size: 564079, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -217,7 +217,7 @@ func templateGlyphiconsHalflingsRegularWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/glyphicons-halflings-regular.woff", size: 23320, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/glyphicons-halflings-regular.woff", size: 23320, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -237,7 +237,7 @@ func templateIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/index.html", size: 476, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/index.html", size: 476, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -277,7 +277,7 @@ func templateMuiMinCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/mui.min.css", size: 43576, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/mui.min.css", size: 43576, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -297,7 +297,7 @@ func templateMuiMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/mui.min.js", size: 19095, mode: os.FileMode(420), modTime: time.Unix(1531470293, 0)}
+	info := bindataFileInfo{name: "template/mui.min.js", size: 19095, mode: os.FileMode(420), modTime: time.Unix(1531470483, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -317,7 +317,7 @@ func templateNetworkSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/network.swagger.json", size: 6669, mode: os.FileMode(420), modTime: time.Unix(1531470281, 0)}
+	info := bindataFileInfo{name: "template/network.swagger.json", size: 6669, mode: os.FileMode(420), modTime: time.Unix(1531470471, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -357,7 +357,7 @@ func templateUserSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/user.swagger.json", size: 6969, mode: os.FileMode(420), modTime: time.Unix(1531470281, 0)}
+	info := bindataFileInfo{name: "template/user.swagger.json", size: 6969, mode: os.FileMode(420), modTime: time.Unix(1531470471, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -377,7 +377,7 @@ func templateVpnSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3859, mode: os.FileMode(420), modTime: time.Unix(1531470281, 0)}
+	info := bindataFileInfo{name: "template/vpn.swagger.json", size: 3859, mode: os.FileMode(420), modTime: time.Unix(1531470471, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
