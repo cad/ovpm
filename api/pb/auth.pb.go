@@ -199,8 +199,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for AuthService service
-
+// AuthServiceClient is the client API for AuthService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AuthServiceClient interface {
 	Status(ctx context.Context, in *AuthStatusRequest, opts ...grpc.CallOption) (*AuthStatusResponse, error)
 	Authenticate(ctx context.Context, in *AuthAuthenticateRequest, opts ...grpc.CallOption) (*AuthAuthenticateResponse, error)
@@ -216,7 +217,7 @@ func NewAuthServiceClient(cc *grpc.ClientConn) AuthServiceClient {
 
 func (c *authServiceClient) Status(ctx context.Context, in *AuthStatusRequest, opts ...grpc.CallOption) (*AuthStatusResponse, error) {
 	out := new(AuthStatusResponse)
-	err := grpc.Invoke(ctx, "/pb.AuthService/Status", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.AuthService/Status", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -225,15 +226,14 @@ func (c *authServiceClient) Status(ctx context.Context, in *AuthStatusRequest, o
 
 func (c *authServiceClient) Authenticate(ctx context.Context, in *AuthAuthenticateRequest, opts ...grpc.CallOption) (*AuthAuthenticateResponse, error) {
 	out := new(AuthAuthenticateResponse)
-	err := grpc.Invoke(ctx, "/pb.AuthService/Authenticate", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.AuthService/Authenticate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for AuthService service
-
+// AuthServiceServer is the server API for AuthService service.
 type AuthServiceServer interface {
 	Status(context.Context, *AuthStatusRequest) (*AuthStatusResponse, error)
 	Authenticate(context.Context, *AuthAuthenticateRequest) (*AuthAuthenticateResponse, error)

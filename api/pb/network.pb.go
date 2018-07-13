@@ -715,8 +715,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for NetworkService service
-
+// NetworkServiceClient is the client API for NetworkService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NetworkServiceClient interface {
 	Create(ctx context.Context, in *NetworkCreateRequest, opts ...grpc.CallOption) (*NetworkCreateResponse, error)
 	List(ctx context.Context, in *NetworkListRequest, opts ...grpc.CallOption) (*NetworkListResponse, error)
@@ -737,7 +738,7 @@ func NewNetworkServiceClient(cc *grpc.ClientConn) NetworkServiceClient {
 
 func (c *networkServiceClient) Create(ctx context.Context, in *NetworkCreateRequest, opts ...grpc.CallOption) (*NetworkCreateResponse, error) {
 	out := new(NetworkCreateResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/Create", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -746,7 +747,7 @@ func (c *networkServiceClient) Create(ctx context.Context, in *NetworkCreateRequ
 
 func (c *networkServiceClient) List(ctx context.Context, in *NetworkListRequest, opts ...grpc.CallOption) (*NetworkListResponse, error) {
 	out := new(NetworkListResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/List", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -755,7 +756,7 @@ func (c *networkServiceClient) List(ctx context.Context, in *NetworkListRequest,
 
 func (c *networkServiceClient) Delete(ctx context.Context, in *NetworkDeleteRequest, opts ...grpc.CallOption) (*NetworkDeleteResponse, error) {
 	out := new(NetworkDeleteResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/Delete", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -764,7 +765,7 @@ func (c *networkServiceClient) Delete(ctx context.Context, in *NetworkDeleteRequ
 
 func (c *networkServiceClient) GetAllTypes(ctx context.Context, in *NetworkGetAllTypesRequest, opts ...grpc.CallOption) (*NetworkGetAllTypesResponse, error) {
 	out := new(NetworkGetAllTypesResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/GetAllTypes", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/GetAllTypes", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -773,7 +774,7 @@ func (c *networkServiceClient) GetAllTypes(ctx context.Context, in *NetworkGetAl
 
 func (c *networkServiceClient) GetAssociatedUsers(ctx context.Context, in *NetworkGetAssociatedUsersRequest, opts ...grpc.CallOption) (*NetworkGetAssociatedUsersResponse, error) {
 	out := new(NetworkGetAssociatedUsersResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/GetAssociatedUsers", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/GetAssociatedUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -782,7 +783,7 @@ func (c *networkServiceClient) GetAssociatedUsers(ctx context.Context, in *Netwo
 
 func (c *networkServiceClient) Associate(ctx context.Context, in *NetworkAssociateRequest, opts ...grpc.CallOption) (*NetworkAssociateResponse, error) {
 	out := new(NetworkAssociateResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/Associate", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/Associate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -791,15 +792,14 @@ func (c *networkServiceClient) Associate(ctx context.Context, in *NetworkAssocia
 
 func (c *networkServiceClient) Dissociate(ctx context.Context, in *NetworkDissociateRequest, opts ...grpc.CallOption) (*NetworkDissociateResponse, error) {
 	out := new(NetworkDissociateResponse)
-	err := grpc.Invoke(ctx, "/pb.NetworkService/Dissociate", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.NetworkService/Dissociate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for NetworkService service
-
+// NetworkServiceServer is the server API for NetworkService service.
 type NetworkServiceServer interface {
 	Create(context.Context, *NetworkCreateRequest) (*NetworkCreateResponse, error)
 	List(context.Context, *NetworkListRequest) (*NetworkListResponse, error)

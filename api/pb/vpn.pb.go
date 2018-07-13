@@ -470,8 +470,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for VPNService service
-
+// VPNServiceClient is the client API for VPNService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type VPNServiceClient interface {
 	Status(ctx context.Context, in *VPNStatusRequest, opts ...grpc.CallOption) (*VPNStatusResponse, error)
 	Init(ctx context.Context, in *VPNInitRequest, opts ...grpc.CallOption) (*VPNInitResponse, error)
@@ -489,7 +490,7 @@ func NewVPNServiceClient(cc *grpc.ClientConn) VPNServiceClient {
 
 func (c *vPNServiceClient) Status(ctx context.Context, in *VPNStatusRequest, opts ...grpc.CallOption) (*VPNStatusResponse, error) {
 	out := new(VPNStatusResponse)
-	err := grpc.Invoke(ctx, "/pb.VPNService/Status", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.VPNService/Status", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +499,7 @@ func (c *vPNServiceClient) Status(ctx context.Context, in *VPNStatusRequest, opt
 
 func (c *vPNServiceClient) Init(ctx context.Context, in *VPNInitRequest, opts ...grpc.CallOption) (*VPNInitResponse, error) {
 	out := new(VPNInitResponse)
-	err := grpc.Invoke(ctx, "/pb.VPNService/Init", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.VPNService/Init", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -507,7 +508,7 @@ func (c *vPNServiceClient) Init(ctx context.Context, in *VPNInitRequest, opts ..
 
 func (c *vPNServiceClient) Update(ctx context.Context, in *VPNUpdateRequest, opts ...grpc.CallOption) (*VPNUpdateResponse, error) {
 	out := new(VPNUpdateResponse)
-	err := grpc.Invoke(ctx, "/pb.VPNService/Update", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.VPNService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -516,15 +517,14 @@ func (c *vPNServiceClient) Update(ctx context.Context, in *VPNUpdateRequest, opt
 
 func (c *vPNServiceClient) Restart(ctx context.Context, in *VPNRestartRequest, opts ...grpc.CallOption) (*VPNRestartResponse, error) {
 	out := new(VPNRestartResponse)
-	err := grpc.Invoke(ctx, "/pb.VPNService/Restart", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.VPNService/Restart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for VPNService service
-
+// VPNServiceServer is the server API for VPNService service.
 type VPNServiceServer interface {
 	Status(context.Context, *VPNStatusRequest) (*VPNStatusResponse, error)
 	Init(context.Context, *VPNInitRequest) (*VPNInitResponse, error)

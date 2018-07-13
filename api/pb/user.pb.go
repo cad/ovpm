@@ -627,8 +627,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for UserService service
-
+// UserServiceClient is the client API for UserService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type UserServiceClient interface {
 	List(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	Create(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserResponse, error)
@@ -648,7 +649,7 @@ func NewUserServiceClient(cc *grpc.ClientConn) UserServiceClient {
 
 func (c *userServiceClient) List(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/List", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -657,7 +658,7 @@ func (c *userServiceClient) List(ctx context.Context, in *UserListRequest, opts 
 
 func (c *userServiceClient) Create(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/Create", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -666,7 +667,7 @@ func (c *userServiceClient) Create(ctx context.Context, in *UserCreateRequest, o
 
 func (c *userServiceClient) Update(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/Update", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -675,7 +676,7 @@ func (c *userServiceClient) Update(ctx context.Context, in *UserUpdateRequest, o
 
 func (c *userServiceClient) Delete(ctx context.Context, in *UserDeleteRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/Delete", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -684,7 +685,7 @@ func (c *userServiceClient) Delete(ctx context.Context, in *UserDeleteRequest, o
 
 func (c *userServiceClient) Renew(ctx context.Context, in *UserRenewRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	out := new(UserResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/Renew", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/Renew", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -693,15 +694,14 @@ func (c *userServiceClient) Renew(ctx context.Context, in *UserRenewRequest, opt
 
 func (c *userServiceClient) GenConfig(ctx context.Context, in *UserGenConfigRequest, opts ...grpc.CallOption) (*UserGenConfigResponse, error) {
 	out := new(UserGenConfigResponse)
-	err := grpc.Invoke(ctx, "/pb.UserService/GenConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/pb.UserService/GenConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for UserService service
-
+// UserServiceServer is the server API for UserService service.
 type UserServiceServer interface {
 	List(context.Context, *UserListRequest) (*UserResponse, error)
 	Create(context.Context, *UserCreateRequest) (*UserResponse, error)
