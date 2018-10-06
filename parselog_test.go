@@ -5,6 +5,8 @@ import (
 	"io"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_parseStatusLog(t *testing.T) {
@@ -79,4 +81,25 @@ func Test_parseStatusLog(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_parseStatusLog_CorruptStatusLog(t *testing.T) {
+	const exampleLogFile = `OpenVPN CLIENT LIST
+	Updated,Mon Mar 26 13:26:10 2018
+	Common Name,Real Address,Bytes Received,Bytes Sent,Connected Since
+	google.DNS,8.8.8.8Name,Real Addressdfs,Last Ref
+	10.20.30.6,google.DNS,8.8.8.8:33974,Mon Mar 26 13:26:04 2018
+	10.20.30.5,google1.DNS,8..4.4:53246,Mon Mar 26 13:25:57 2018
+	GLOBAL STATS
+	Max bcast/mcast queue length,4
+	END
+	`
+
+	// Mock the status log file.
+	f := bytes.NewBufferString(exampleLogFile)
+
+	cl, rt := parseStatusLog(f)
+
+	assert.Empty(t, cl)
+	assert.Empty(t, rt)
 }

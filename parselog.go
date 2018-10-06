@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // clEntry reprsents a parsed entry that is present on OpenVPN
@@ -30,6 +32,13 @@ type rtEntry struct {
 // parseStatusLog parses the received OpenVPN status log file.
 // And then returns the parsed client information.
 func parseStatusLog(f io.Reader) ([]clEntry, []rtEntry) {
+	// Recover any panics
+	defer func() {
+		if r := recover(); r != nil {
+			logrus.WithField("panic", r).Error("OpenVPN log file is corrupt")
+		}
+	}()
+
 	// Parsing stages.
 	const stageCL int = 0
 	const stageRT int = 1

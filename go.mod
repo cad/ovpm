@@ -5,6 +5,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/coreos/go-iptables v0.2.0
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v0.0.0-20180421182945-02af3965c54e
 	github.com/go-openapi/analysis v0.0.0-20180418034448-863ac7f90e00 // indirect
 	github.com/go-openapi/errors v0.0.0-20171226161601-7bcb96a367ba // indirect
@@ -26,7 +27,9 @@ require (
 	github.com/mattn/go-sqlite3 v1.6.0 // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180511142126-bb74f1db0675 // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.0.5
+	github.com/stretchr/testify v1.2.2
 	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20180513064651-94e3fad7f1b4 // indirect
 	golang.org/x/net v0.0.0-20180511174649-2491c5de3490
