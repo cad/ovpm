@@ -7,7 +7,7 @@ import (
 
 	passlib "gopkg.in/hlandau/passlib.v1"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/pki"
 	"github.com/google/uuid"

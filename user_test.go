@@ -8,7 +8,7 @@ import (
 
 	"github.com/cad/ovpm/pki"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 )
 

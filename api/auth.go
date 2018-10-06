@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/permset"
 	gcontext "golang.org/x/net/context"

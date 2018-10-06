@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/permset"

@@ -1,7 +1,7 @@
 package ovpm
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 
 	// We blank import sqlite here because gorm needs it.

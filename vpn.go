@@ -15,7 +15,7 @@ import (
 
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"

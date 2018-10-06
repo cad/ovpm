@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // ApplicationError error group indicates application related errors.

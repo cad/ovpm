@@ -3,7 +3,7 @@ package errors
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // SystemError error group indicates system related errors.
