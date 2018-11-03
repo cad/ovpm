@@ -47,7 +47,7 @@ func (x VPNProto) String() string {
 	return proto.EnumName(VPNProto_name, int32(x))
 }
 func (VPNProto) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{0}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{0}
 }
 
 type VPNStatusRequest struct {
@@ -60,7 +60,7 @@ func (m *VPNStatusRequest) Reset()         { *m = VPNStatusRequest{} }
 func (m *VPNStatusRequest) String() string { return proto.CompactTextString(m) }
 func (*VPNStatusRequest) ProtoMessage()    {}
 func (*VPNStatusRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{0}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{0}
 }
 func (m *VPNStatusRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNStatusRequest.Unmarshal(m, b)
@@ -81,11 +81,11 @@ func (m *VPNStatusRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_VPNStatusRequest proto.InternalMessageInfo
 
 type VPNInitRequest struct {
-	Hostname             string   `protobuf:"bytes,1,opt,name=hostname" json:"hostname,omitempty"`
-	Port                 string   `protobuf:"bytes,2,opt,name=port" json:"port,omitempty"`
-	ProtoPref            VPNProto `protobuf:"varint,3,opt,name=proto_pref,json=protoPref,enum=pb.VPNProto" json:"proto_pref,omitempty"`
-	IpBlock              string   `protobuf:"bytes,4,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
-	Dns                  string   `protobuf:"bytes,5,opt,name=dns" json:"dns,omitempty"`
+	Hostname             string   `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Port                 string   `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
+	ProtoPref            VPNProto `protobuf:"varint,3,opt,name=proto_pref,json=protoPref,proto3,enum=pb.VPNProto" json:"proto_pref,omitempty"`
+	IpBlock              string   `protobuf:"bytes,4,opt,name=ip_block,json=ipBlock,proto3" json:"ip_block,omitempty"`
+	Dns                  string   `protobuf:"bytes,5,opt,name=dns,proto3" json:"dns,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -95,7 +95,7 @@ func (m *VPNInitRequest) Reset()         { *m = VPNInitRequest{} }
 func (m *VPNInitRequest) String() string { return proto.CompactTextString(m) }
 func (*VPNInitRequest) ProtoMessage()    {}
 func (*VPNInitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{1}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{1}
 }
 func (m *VPNInitRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNInitRequest.Unmarshal(m, b)
@@ -151,8 +151,8 @@ func (m *VPNInitRequest) GetDns() string {
 }
 
 type VPNUpdateRequest struct {
-	IpBlock              string   `protobuf:"bytes,1,opt,name=ip_block,json=ipBlock" json:"ip_block,omitempty"`
-	Dns                  string   `protobuf:"bytes,2,opt,name=dns" json:"dns,omitempty"`
+	IpBlock              string   `protobuf:"bytes,1,opt,name=ip_block,json=ipBlock,proto3" json:"ip_block,omitempty"`
+	Dns                  string   `protobuf:"bytes,2,opt,name=dns,proto3" json:"dns,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -162,7 +162,7 @@ func (m *VPNUpdateRequest) Reset()         { *m = VPNUpdateRequest{} }
 func (m *VPNUpdateRequest) String() string { return proto.CompactTextString(m) }
 func (*VPNUpdateRequest) ProtoMessage()    {}
 func (*VPNUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{2}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{2}
 }
 func (m *VPNUpdateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNUpdateRequest.Unmarshal(m, b)
@@ -206,7 +206,7 @@ func (m *VPNRestartRequest) Reset()         { *m = VPNRestartRequest{} }
 func (m *VPNRestartRequest) String() string { return proto.CompactTextString(m) }
 func (*VPNRestartRequest) ProtoMessage()    {}
 func (*VPNRestartRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{3}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{3}
 }
 func (m *VPNRestartRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNRestartRequest.Unmarshal(m, b)
@@ -227,19 +227,19 @@ func (m *VPNRestartRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_VPNRestartRequest proto.InternalMessageInfo
 
 type VPNStatusResponse struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	SerialNumber         string   `protobuf:"bytes,2,opt,name=serial_number,json=serialNumber" json:"serial_number,omitempty"`
-	Hostname             string   `protobuf:"bytes,3,opt,name=hostname" json:"hostname,omitempty"`
-	Port                 string   `protobuf:"bytes,4,opt,name=port" json:"port,omitempty"`
-	Cert                 string   `protobuf:"bytes,5,opt,name=cert" json:"cert,omitempty"`
-	CaCert               string   `protobuf:"bytes,6,opt,name=ca_cert,json=caCert" json:"ca_cert,omitempty"`
-	Net                  string   `protobuf:"bytes,7,opt,name=net" json:"net,omitempty"`
-	Mask                 string   `protobuf:"bytes,8,opt,name=mask" json:"mask,omitempty"`
-	CreatedAt            string   `protobuf:"bytes,9,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
-	Proto                string   `protobuf:"bytes,10,opt,name=proto" json:"proto,omitempty"`
-	Dns                  string   `protobuf:"bytes,11,opt,name=dns" json:"dns,omitempty"`
-	ExpiresAt            string   `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt" json:"expires_at,omitempty"`
-	CaExpiresAt          string   `protobuf:"bytes,13,opt,name=ca_expires_at,json=caExpiresAt" json:"ca_expires_at,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	SerialNumber         string   `protobuf:"bytes,2,opt,name=serial_number,json=serialNumber,proto3" json:"serial_number,omitempty"`
+	Hostname             string   `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Port                 string   `protobuf:"bytes,4,opt,name=port,proto3" json:"port,omitempty"`
+	Cert                 string   `protobuf:"bytes,5,opt,name=cert,proto3" json:"cert,omitempty"`
+	CaCert               string   `protobuf:"bytes,6,opt,name=ca_cert,json=caCert,proto3" json:"ca_cert,omitempty"`
+	Net                  string   `protobuf:"bytes,7,opt,name=net,proto3" json:"net,omitempty"`
+	Mask                 string   `protobuf:"bytes,8,opt,name=mask,proto3" json:"mask,omitempty"`
+	CreatedAt            string   `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Proto                string   `protobuf:"bytes,10,opt,name=proto,proto3" json:"proto,omitempty"`
+	Dns                  string   `protobuf:"bytes,11,opt,name=dns,proto3" json:"dns,omitempty"`
+	ExpiresAt            string   `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	CaExpiresAt          string   `protobuf:"bytes,13,opt,name=ca_expires_at,json=caExpiresAt,proto3" json:"ca_expires_at,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -249,7 +249,7 @@ func (m *VPNStatusResponse) Reset()         { *m = VPNStatusResponse{} }
 func (m *VPNStatusResponse) String() string { return proto.CompactTextString(m) }
 func (*VPNStatusResponse) ProtoMessage()    {}
 func (*VPNStatusResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{4}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{4}
 }
 func (m *VPNStatusResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNStatusResponse.Unmarshal(m, b)
@@ -370,7 +370,7 @@ func (m *VPNInitResponse) Reset()         { *m = VPNInitResponse{} }
 func (m *VPNInitResponse) String() string { return proto.CompactTextString(m) }
 func (*VPNInitResponse) ProtoMessage()    {}
 func (*VPNInitResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{5}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{5}
 }
 func (m *VPNInitResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNInitResponse.Unmarshal(m, b)
@@ -400,7 +400,7 @@ func (m *VPNUpdateResponse) Reset()         { *m = VPNUpdateResponse{} }
 func (m *VPNUpdateResponse) String() string { return proto.CompactTextString(m) }
 func (*VPNUpdateResponse) ProtoMessage()    {}
 func (*VPNUpdateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{6}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{6}
 }
 func (m *VPNUpdateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNUpdateResponse.Unmarshal(m, b)
@@ -430,7 +430,7 @@ func (m *VPNRestartResponse) Reset()         { *m = VPNRestartResponse{} }
 func (m *VPNRestartResponse) String() string { return proto.CompactTextString(m) }
 func (*VPNRestartResponse) ProtoMessage()    {}
 func (*VPNRestartResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_vpn_a36938fb10df2565, []int{7}
+	return fileDescriptor_vpn_b99816ad059ec673, []int{7}
 }
 func (m *VPNRestartResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VPNRestartResponse.Unmarshal(m, b)
@@ -633,9 +633,9 @@ var _VPNService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "vpn.proto",
 }
 
-func init() { proto.RegisterFile("vpn.proto", fileDescriptor_vpn_a36938fb10df2565) }
+func init() { proto.RegisterFile("vpn.proto", fileDescriptor_vpn_b99816ad059ec673) }
 
-var fileDescriptor_vpn_a36938fb10df2565 = []byte{
+var fileDescriptor_vpn_b99816ad059ec673 = []byte{
 	// 568 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x93, 0xcd, 0x6e, 0xd3, 0x40,
 	0x10, 0xc7, 0xb1, 0x93, 0xe6, 0x63, 0xfa, 0x81, 0x3b, 0x4d, 0xa9, 0x09, 0x54, 0xaa, 0xcc, 0xa5,

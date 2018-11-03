@@ -34,7 +34,7 @@ func (m *AuthStatusRequest) Reset()         { *m = AuthStatusRequest{} }
 func (m *AuthStatusRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthStatusRequest) ProtoMessage()    {}
 func (*AuthStatusRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{0}
+	return fileDescriptor_auth_5d9157b05cb925f8, []int{0}
 }
 func (m *AuthStatusRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthStatusRequest.Unmarshal(m, b)
@@ -55,8 +55,8 @@ func (m *AuthStatusRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_AuthStatusRequest proto.InternalMessageInfo
 
 type AuthAuthenticateRequest struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	Password             string   `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -66,7 +66,7 @@ func (m *AuthAuthenticateRequest) Reset()         { *m = AuthAuthenticateRequest
 func (m *AuthAuthenticateRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthAuthenticateRequest) ProtoMessage()    {}
 func (*AuthAuthenticateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{1}
+	return fileDescriptor_auth_5d9157b05cb925f8, []int{1}
 }
 func (m *AuthAuthenticateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthAuthenticateRequest.Unmarshal(m, b)
@@ -101,8 +101,8 @@ func (m *AuthAuthenticateRequest) GetPassword() string {
 }
 
 type AuthStatusResponse struct {
-	User                 *UserResponse_User `protobuf:"bytes,1,opt,name=user" json:"user,omitempty"`
-	IsRoot               bool               `protobuf:"varint,2,opt,name=is_root,json=isRoot" json:"is_root,omitempty"`
+	User                 *UserResponse_User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	IsRoot               bool               `protobuf:"varint,2,opt,name=is_root,json=isRoot,proto3" json:"is_root,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
 	XXX_sizecache        int32              `json:"-"`
@@ -112,7 +112,7 @@ func (m *AuthStatusResponse) Reset()         { *m = AuthStatusResponse{} }
 func (m *AuthStatusResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthStatusResponse) ProtoMessage()    {}
 func (*AuthStatusResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{2}
+	return fileDescriptor_auth_5d9157b05cb925f8, []int{2}
 }
 func (m *AuthStatusResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthStatusResponse.Unmarshal(m, b)
@@ -147,7 +147,7 @@ func (m *AuthStatusResponse) GetIsRoot() bool {
 }
 
 type AuthAuthenticateResponse struct {
-	Token                string   `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -157,7 +157,7 @@ func (m *AuthAuthenticateResponse) Reset()         { *m = AuthAuthenticateRespon
 func (m *AuthAuthenticateResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthAuthenticateResponse) ProtoMessage()    {}
 func (*AuthAuthenticateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_79ec97a74d2b7cf3, []int{3}
+	return fileDescriptor_auth_5d9157b05cb925f8, []int{3}
 }
 func (m *AuthAuthenticateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthAuthenticateResponse.Unmarshal(m, b)
@@ -296,9 +296,9 @@ var _AuthService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "auth.proto",
 }
 
-func init() { proto.RegisterFile("auth.proto", fileDescriptor_auth_79ec97a74d2b7cf3) }
+func init() { proto.RegisterFile("auth.proto", fileDescriptor_auth_5d9157b05cb925f8) }
 
-var fileDescriptor_auth_79ec97a74d2b7cf3 = []byte{
+var fileDescriptor_auth_5d9157b05cb925f8 = []byte{
 	// 306 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x51, 0x41, 0x4e, 0x2a, 0x41,
 	0x10, 0xcd, 0x90, 0xff, 0x11, 0x0b, 0x37, 0x36, 0x22, 0x38, 0x10, 0x63, 0x26, 0x2e, 0xd4, 0x05,

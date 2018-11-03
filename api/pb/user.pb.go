@@ -47,7 +47,7 @@ func (x UserUpdateRequest_GWPref) String() string {
 	return proto.EnumName(UserUpdateRequest_GWPref_name, int32(x))
 }
 func (UserUpdateRequest_GWPref) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{2, 0}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{2, 0}
 }
 
 type UserUpdateRequest_StaticPref int32
@@ -73,7 +73,7 @@ func (x UserUpdateRequest_StaticPref) String() string {
 	return proto.EnumName(UserUpdateRequest_StaticPref_name, int32(x))
 }
 func (UserUpdateRequest_StaticPref) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{2, 1}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{2, 1}
 }
 
 type UserUpdateRequest_AdminPref int32
@@ -99,7 +99,7 @@ func (x UserUpdateRequest_AdminPref) String() string {
 	return proto.EnumName(UserUpdateRequest_AdminPref_name, int32(x))
 }
 func (UserUpdateRequest_AdminPref) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{2, 2}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{2, 2}
 }
 
 type UserListRequest struct {
@@ -112,7 +112,7 @@ func (m *UserListRequest) Reset()         { *m = UserListRequest{} }
 func (m *UserListRequest) String() string { return proto.CompactTextString(m) }
 func (*UserListRequest) ProtoMessage()    {}
 func (*UserListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{0}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{0}
 }
 func (m *UserListRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserListRequest.Unmarshal(m, b)
@@ -133,11 +133,11 @@ func (m *UserListRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_UserListRequest proto.InternalMessageInfo
 
 type UserCreateRequest struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	Password             string   `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
-	NoGw                 bool     `protobuf:"varint,3,opt,name=no_gw,json=noGw" json:"no_gw,omitempty"`
-	HostId               uint32   `protobuf:"varint,4,opt,name=host_id,json=hostId" json:"host_id,omitempty"`
-	IsAdmin              bool     `protobuf:"varint,5,opt,name=is_admin,json=isAdmin" json:"is_admin,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	NoGw                 bool     `protobuf:"varint,3,opt,name=no_gw,json=noGw,proto3" json:"no_gw,omitempty"`
+	HostId               uint32   `protobuf:"varint,4,opt,name=host_id,json=hostId,proto3" json:"host_id,omitempty"`
+	IsAdmin              bool     `protobuf:"varint,5,opt,name=is_admin,json=isAdmin,proto3" json:"is_admin,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -147,7 +147,7 @@ func (m *UserCreateRequest) Reset()         { *m = UserCreateRequest{} }
 func (m *UserCreateRequest) String() string { return proto.CompactTextString(m) }
 func (*UserCreateRequest) ProtoMessage()    {}
 func (*UserCreateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{1}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{1}
 }
 func (m *UserCreateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserCreateRequest.Unmarshal(m, b)
@@ -203,12 +203,12 @@ func (m *UserCreateRequest) GetIsAdmin() bool {
 }
 
 type UserUpdateRequest struct {
-	Username             string                       `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	Password             string                       `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
-	Gwpref               UserUpdateRequest_GWPref     `protobuf:"varint,3,opt,name=gwpref,enum=pb.UserUpdateRequest_GWPref" json:"gwpref,omitempty"`
-	HostId               uint32                       `protobuf:"varint,4,opt,name=host_id,json=hostId" json:"host_id,omitempty"`
-	StaticPref           UserUpdateRequest_StaticPref `protobuf:"varint,5,opt,name=static_pref,json=staticPref,enum=pb.UserUpdateRequest_StaticPref" json:"static_pref,omitempty"`
-	AdminPref            UserUpdateRequest_AdminPref  `protobuf:"varint,6,opt,name=admin_pref,json=adminPref,enum=pb.UserUpdateRequest_AdminPref" json:"admin_pref,omitempty"`
+	Username             string                       `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password             string                       `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Gwpref               UserUpdateRequest_GWPref     `protobuf:"varint,3,opt,name=gwpref,proto3,enum=pb.UserUpdateRequest_GWPref" json:"gwpref,omitempty"`
+	HostId               uint32                       `protobuf:"varint,4,opt,name=host_id,json=hostId,proto3" json:"host_id,omitempty"`
+	StaticPref           UserUpdateRequest_StaticPref `protobuf:"varint,5,opt,name=static_pref,json=staticPref,proto3,enum=pb.UserUpdateRequest_StaticPref" json:"static_pref,omitempty"`
+	AdminPref            UserUpdateRequest_AdminPref  `protobuf:"varint,6,opt,name=admin_pref,json=adminPref,proto3,enum=pb.UserUpdateRequest_AdminPref" json:"admin_pref,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
 	XXX_unrecognized     []byte                       `json:"-"`
 	XXX_sizecache        int32                        `json:"-"`
@@ -218,7 +218,7 @@ func (m *UserUpdateRequest) Reset()         { *m = UserUpdateRequest{} }
 func (m *UserUpdateRequest) String() string { return proto.CompactTextString(m) }
 func (*UserUpdateRequest) ProtoMessage()    {}
 func (*UserUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{2}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{2}
 }
 func (m *UserUpdateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserUpdateRequest.Unmarshal(m, b)
@@ -281,7 +281,7 @@ func (m *UserUpdateRequest) GetAdminPref() UserUpdateRequest_AdminPref {
 }
 
 type UserDeleteRequest struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -291,7 +291,7 @@ func (m *UserDeleteRequest) Reset()         { *m = UserDeleteRequest{} }
 func (m *UserDeleteRequest) String() string { return proto.CompactTextString(m) }
 func (*UserDeleteRequest) ProtoMessage()    {}
 func (*UserDeleteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{3}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{3}
 }
 func (m *UserDeleteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserDeleteRequest.Unmarshal(m, b)
@@ -319,7 +319,7 @@ func (m *UserDeleteRequest) GetUsername() string {
 }
 
 type UserRenewRequest struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -329,7 +329,7 @@ func (m *UserRenewRequest) Reset()         { *m = UserRenewRequest{} }
 func (m *UserRenewRequest) String() string { return proto.CompactTextString(m) }
 func (*UserRenewRequest) ProtoMessage()    {}
 func (*UserRenewRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{4}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{4}
 }
 func (m *UserRenewRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserRenewRequest.Unmarshal(m, b)
@@ -357,7 +357,7 @@ func (m *UserRenewRequest) GetUsername() string {
 }
 
 type UserGenConfigRequest struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -367,7 +367,7 @@ func (m *UserGenConfigRequest) Reset()         { *m = UserGenConfigRequest{} }
 func (m *UserGenConfigRequest) String() string { return proto.CompactTextString(m) }
 func (*UserGenConfigRequest) ProtoMessage()    {}
 func (*UserGenConfigRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{5}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{5}
 }
 func (m *UserGenConfigRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserGenConfigRequest.Unmarshal(m, b)
@@ -395,7 +395,7 @@ func (m *UserGenConfigRequest) GetUsername() string {
 }
 
 type UserResponse struct {
-	Users                []*UserResponse_User `protobuf:"bytes,1,rep,name=users" json:"users,omitempty"`
+	Users                []*UserResponse_User `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -405,7 +405,7 @@ func (m *UserResponse) Reset()         { *m = UserResponse{} }
 func (m *UserResponse) String() string { return proto.CompactTextString(m) }
 func (*UserResponse) ProtoMessage()    {}
 func (*UserResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{6}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{6}
 }
 func (m *UserResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserResponse.Unmarshal(m, b)
@@ -433,19 +433,19 @@ func (m *UserResponse) GetUsers() []*UserResponse_User {
 }
 
 type UserResponse_User struct {
-	Username             string   `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	ServerSerialNumber   string   `protobuf:"bytes,2,opt,name=server_serial_number,json=serverSerialNumber" json:"server_serial_number,omitempty"`
-	Cert                 string   `protobuf:"bytes,3,opt,name=cert" json:"cert,omitempty"`
-	CreatedAt            string   `protobuf:"bytes,4,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
-	IpNet                string   `protobuf:"bytes,5,opt,name=ip_net,json=ipNet" json:"ip_net,omitempty"`
-	NoGw                 bool     `protobuf:"varint,6,opt,name=no_gw,json=noGw" json:"no_gw,omitempty"`
-	HostId               uint32   `protobuf:"varint,7,opt,name=host_id,json=hostId" json:"host_id,omitempty"`
-	IsAdmin              bool     `protobuf:"varint,8,opt,name=is_admin,json=isAdmin" json:"is_admin,omitempty"`
-	IsConnected          bool     `protobuf:"varint,9,opt,name=is_connected,json=isConnected" json:"is_connected,omitempty"`
-	ConnectedSince       string   `protobuf:"bytes,10,opt,name=connected_since,json=connectedSince" json:"connected_since,omitempty"`
-	BytesSent            uint64   `protobuf:"varint,11,opt,name=bytes_sent,json=bytesSent" json:"bytes_sent,omitempty"`
-	BytesReceived        uint64   `protobuf:"varint,12,opt,name=bytes_received,json=bytesReceived" json:"bytes_received,omitempty"`
-	ExpiresAt            string   `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt" json:"expires_at,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	ServerSerialNumber   string   `protobuf:"bytes,2,opt,name=server_serial_number,json=serverSerialNumber,proto3" json:"server_serial_number,omitempty"`
+	Cert                 string   `protobuf:"bytes,3,opt,name=cert,proto3" json:"cert,omitempty"`
+	CreatedAt            string   `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	IpNet                string   `protobuf:"bytes,5,opt,name=ip_net,json=ipNet,proto3" json:"ip_net,omitempty"`
+	NoGw                 bool     `protobuf:"varint,6,opt,name=no_gw,json=noGw,proto3" json:"no_gw,omitempty"`
+	HostId               uint32   `protobuf:"varint,7,opt,name=host_id,json=hostId,proto3" json:"host_id,omitempty"`
+	IsAdmin              bool     `protobuf:"varint,8,opt,name=is_admin,json=isAdmin,proto3" json:"is_admin,omitempty"`
+	IsConnected          bool     `protobuf:"varint,9,opt,name=is_connected,json=isConnected,proto3" json:"is_connected,omitempty"`
+	ConnectedSince       string   `protobuf:"bytes,10,opt,name=connected_since,json=connectedSince,proto3" json:"connected_since,omitempty"`
+	BytesSent            uint64   `protobuf:"varint,11,opt,name=bytes_sent,json=bytesSent,proto3" json:"bytes_sent,omitempty"`
+	BytesReceived        uint64   `protobuf:"varint,12,opt,name=bytes_received,json=bytesReceived,proto3" json:"bytes_received,omitempty"`
+	ExpiresAt            string   `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -455,7 +455,7 @@ func (m *UserResponse_User) Reset()         { *m = UserResponse_User{} }
 func (m *UserResponse_User) String() string { return proto.CompactTextString(m) }
 func (*UserResponse_User) ProtoMessage()    {}
 func (*UserResponse_User) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{6, 0}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{6, 0}
 }
 func (m *UserResponse_User) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserResponse_User.Unmarshal(m, b)
@@ -567,7 +567,7 @@ func (m *UserResponse_User) GetExpiresAt() string {
 }
 
 type UserGenConfigResponse struct {
-	ClientConfig         string   `protobuf:"bytes,1,opt,name=client_config,json=clientConfig" json:"client_config,omitempty"`
+	ClientConfig         string   `protobuf:"bytes,1,opt,name=client_config,json=clientConfig,proto3" json:"client_config,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -577,7 +577,7 @@ func (m *UserGenConfigResponse) Reset()         { *m = UserGenConfigResponse{} }
 func (m *UserGenConfigResponse) String() string { return proto.CompactTextString(m) }
 func (*UserGenConfigResponse) ProtoMessage()    {}
 func (*UserGenConfigResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_df435338153e53fc, []int{7}
+	return fileDescriptor_user_1c80cb0f735644ea, []int{7}
 }
 func (m *UserGenConfigResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserGenConfigResponse.Unmarshal(m, b)
@@ -856,9 +856,9 @@ var _UserService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "user.proto",
 }
 
-func init() { proto.RegisterFile("user.proto", fileDescriptor_user_df435338153e53fc) }
+func init() { proto.RegisterFile("user.proto", fileDescriptor_user_1c80cb0f735644ea) }
 
-var fileDescriptor_user_df435338153e53fc = []byte{
+var fileDescriptor_user_1c80cb0f735644ea = []byte{
 	// 825 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x95, 0xdd, 0x6e, 0xe3, 0x44,
 	0x14, 0x80, 0xeb, 0xc4, 0x71, 0xe3, 0x93, 0xb4, 0x75, 0xa7, 0x2d, 0xeb, 0x86, 0x5d, 0xc8, 0x1a,

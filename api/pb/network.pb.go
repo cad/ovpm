@@ -25,10 +25,10 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type NetworkCreateRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Cidr                 string   `protobuf:"bytes,2,opt,name=cidr" json:"cidr,omitempty"`
-	Type                 string   `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
-	Via                  string   `protobuf:"bytes,4,opt,name=via" json:"via,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Cidr                 string   `protobuf:"bytes,2,opt,name=cidr,proto3" json:"cidr,omitempty"`
+	Type                 string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Via                  string   `protobuf:"bytes,4,opt,name=via,proto3" json:"via,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -38,7 +38,7 @@ func (m *NetworkCreateRequest) Reset()         { *m = NetworkCreateRequest{} }
 func (m *NetworkCreateRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkCreateRequest) ProtoMessage()    {}
 func (*NetworkCreateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{0}
+	return fileDescriptor_network_34cf09007f6526a1, []int{0}
 }
 func (m *NetworkCreateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkCreateRequest.Unmarshal(m, b)
@@ -96,7 +96,7 @@ func (m *NetworkListRequest) Reset()         { *m = NetworkListRequest{} }
 func (m *NetworkListRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkListRequest) ProtoMessage()    {}
 func (*NetworkListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{1}
+	return fileDescriptor_network_34cf09007f6526a1, []int{1}
 }
 func (m *NetworkListRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkListRequest.Unmarshal(m, b)
@@ -117,7 +117,7 @@ func (m *NetworkListRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_NetworkListRequest proto.InternalMessageInfo
 
 type NetworkDeleteRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -127,7 +127,7 @@ func (m *NetworkDeleteRequest) Reset()         { *m = NetworkDeleteRequest{} }
 func (m *NetworkDeleteRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkDeleteRequest) ProtoMessage()    {}
 func (*NetworkDeleteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{2}
+	return fileDescriptor_network_34cf09007f6526a1, []int{2}
 }
 func (m *NetworkDeleteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkDeleteRequest.Unmarshal(m, b)
@@ -164,7 +164,7 @@ func (m *NetworkGetAllTypesRequest) Reset()         { *m = NetworkGetAllTypesReq
 func (m *NetworkGetAllTypesRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkGetAllTypesRequest) ProtoMessage()    {}
 func (*NetworkGetAllTypesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{3}
+	return fileDescriptor_network_34cf09007f6526a1, []int{3}
 }
 func (m *NetworkGetAllTypesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkGetAllTypesRequest.Unmarshal(m, b)
@@ -185,8 +185,8 @@ func (m *NetworkGetAllTypesRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_NetworkGetAllTypesRequest proto.InternalMessageInfo
 
 type NetworkAssociateRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Username             string   `protobuf:"bytes,2,opt,name=username" json:"username,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Username             string   `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -196,7 +196,7 @@ func (m *NetworkAssociateRequest) Reset()         { *m = NetworkAssociateRequest
 func (m *NetworkAssociateRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkAssociateRequest) ProtoMessage()    {}
 func (*NetworkAssociateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{4}
+	return fileDescriptor_network_34cf09007f6526a1, []int{4}
 }
 func (m *NetworkAssociateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkAssociateRequest.Unmarshal(m, b)
@@ -231,8 +231,8 @@ func (m *NetworkAssociateRequest) GetUsername() string {
 }
 
 type NetworkDissociateRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Username             string   `protobuf:"bytes,2,opt,name=username" json:"username,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Username             string   `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -242,7 +242,7 @@ func (m *NetworkDissociateRequest) Reset()         { *m = NetworkDissociateReque
 func (m *NetworkDissociateRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkDissociateRequest) ProtoMessage()    {}
 func (*NetworkDissociateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{5}
+	return fileDescriptor_network_34cf09007f6526a1, []int{5}
 }
 func (m *NetworkDissociateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkDissociateRequest.Unmarshal(m, b)
@@ -277,7 +277,7 @@ func (m *NetworkDissociateRequest) GetUsername() string {
 }
 
 type NetworkGetAssociatedUsersRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -287,7 +287,7 @@ func (m *NetworkGetAssociatedUsersRequest) Reset()         { *m = NetworkGetAsso
 func (m *NetworkGetAssociatedUsersRequest) String() string { return proto.CompactTextString(m) }
 func (*NetworkGetAssociatedUsersRequest) ProtoMessage()    {}
 func (*NetworkGetAssociatedUsersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{6}
+	return fileDescriptor_network_34cf09007f6526a1, []int{6}
 }
 func (m *NetworkGetAssociatedUsersRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkGetAssociatedUsersRequest.Unmarshal(m, b)
@@ -315,12 +315,12 @@ func (m *NetworkGetAssociatedUsersRequest) GetName() string {
 }
 
 type Network struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Cidr                 string   `protobuf:"bytes,2,opt,name=cidr" json:"cidr,omitempty"`
-	Type                 string   `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
-	CreatedAt            string   `protobuf:"bytes,4,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
-	AssociatedUsernames  []string `protobuf:"bytes,5,rep,name=associated_usernames,json=associatedUsernames" json:"associated_usernames,omitempty"`
-	Via                  string   `protobuf:"bytes,6,opt,name=via" json:"via,omitempty"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Cidr                 string   `protobuf:"bytes,2,opt,name=cidr,proto3" json:"cidr,omitempty"`
+	Type                 string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	CreatedAt            string   `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	AssociatedUsernames  []string `protobuf:"bytes,5,rep,name=associated_usernames,json=associatedUsernames,proto3" json:"associated_usernames,omitempty"`
+	Via                  string   `protobuf:"bytes,6,opt,name=via,proto3" json:"via,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -330,7 +330,7 @@ func (m *Network) Reset()         { *m = Network{} }
 func (m *Network) String() string { return proto.CompactTextString(m) }
 func (*Network) ProtoMessage()    {}
 func (*Network) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{7}
+	return fileDescriptor_network_34cf09007f6526a1, []int{7}
 }
 func (m *Network) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Network.Unmarshal(m, b)
@@ -393,8 +393,8 @@ func (m *Network) GetVia() string {
 }
 
 type NetworkType struct {
-	Type                 string   `protobuf:"bytes,1,opt,name=type" json:"type,omitempty"`
-	Description          string   `protobuf:"bytes,2,opt,name=description" json:"description,omitempty"`
+	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Description          string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -404,7 +404,7 @@ func (m *NetworkType) Reset()         { *m = NetworkType{} }
 func (m *NetworkType) String() string { return proto.CompactTextString(m) }
 func (*NetworkType) ProtoMessage()    {}
 func (*NetworkType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{8}
+	return fileDescriptor_network_34cf09007f6526a1, []int{8}
 }
 func (m *NetworkType) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkType.Unmarshal(m, b)
@@ -439,7 +439,7 @@ func (m *NetworkType) GetDescription() string {
 }
 
 type NetworkCreateResponse struct {
-	Network              *Network `protobuf:"bytes,1,opt,name=network" json:"network,omitempty"`
+	Network              *Network `protobuf:"bytes,1,opt,name=network,proto3" json:"network,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -449,7 +449,7 @@ func (m *NetworkCreateResponse) Reset()         { *m = NetworkCreateResponse{} }
 func (m *NetworkCreateResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkCreateResponse) ProtoMessage()    {}
 func (*NetworkCreateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{9}
+	return fileDescriptor_network_34cf09007f6526a1, []int{9}
 }
 func (m *NetworkCreateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkCreateResponse.Unmarshal(m, b)
@@ -477,7 +477,7 @@ func (m *NetworkCreateResponse) GetNetwork() *Network {
 }
 
 type NetworkListResponse struct {
-	Networks             []*Network `protobuf:"bytes,1,rep,name=networks" json:"networks,omitempty"`
+	Networks             []*Network `protobuf:"bytes,1,rep,name=networks,proto3" json:"networks,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -487,7 +487,7 @@ func (m *NetworkListResponse) Reset()         { *m = NetworkListResponse{} }
 func (m *NetworkListResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkListResponse) ProtoMessage()    {}
 func (*NetworkListResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{10}
+	return fileDescriptor_network_34cf09007f6526a1, []int{10}
 }
 func (m *NetworkListResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkListResponse.Unmarshal(m, b)
@@ -515,7 +515,7 @@ func (m *NetworkListResponse) GetNetworks() []*Network {
 }
 
 type NetworkDeleteResponse struct {
-	Network              *Network `protobuf:"bytes,1,opt,name=network" json:"network,omitempty"`
+	Network              *Network `protobuf:"bytes,1,opt,name=network,proto3" json:"network,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -525,7 +525,7 @@ func (m *NetworkDeleteResponse) Reset()         { *m = NetworkDeleteResponse{} }
 func (m *NetworkDeleteResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkDeleteResponse) ProtoMessage()    {}
 func (*NetworkDeleteResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{11}
+	return fileDescriptor_network_34cf09007f6526a1, []int{11}
 }
 func (m *NetworkDeleteResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkDeleteResponse.Unmarshal(m, b)
@@ -553,7 +553,7 @@ func (m *NetworkDeleteResponse) GetNetwork() *Network {
 }
 
 type NetworkGetAllTypesResponse struct {
-	Types                []*NetworkType `protobuf:"bytes,1,rep,name=types" json:"types,omitempty"`
+	Types                []*NetworkType `protobuf:"bytes,1,rep,name=types,proto3" json:"types,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -563,7 +563,7 @@ func (m *NetworkGetAllTypesResponse) Reset()         { *m = NetworkGetAllTypesRe
 func (m *NetworkGetAllTypesResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkGetAllTypesResponse) ProtoMessage()    {}
 func (*NetworkGetAllTypesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{12}
+	return fileDescriptor_network_34cf09007f6526a1, []int{12}
 }
 func (m *NetworkGetAllTypesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkGetAllTypesResponse.Unmarshal(m, b)
@@ -600,7 +600,7 @@ func (m *NetworkAssociateResponse) Reset()         { *m = NetworkAssociateRespon
 func (m *NetworkAssociateResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkAssociateResponse) ProtoMessage()    {}
 func (*NetworkAssociateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{13}
+	return fileDescriptor_network_34cf09007f6526a1, []int{13}
 }
 func (m *NetworkAssociateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkAssociateResponse.Unmarshal(m, b)
@@ -630,7 +630,7 @@ func (m *NetworkDissociateResponse) Reset()         { *m = NetworkDissociateResp
 func (m *NetworkDissociateResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkDissociateResponse) ProtoMessage()    {}
 func (*NetworkDissociateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{14}
+	return fileDescriptor_network_34cf09007f6526a1, []int{14}
 }
 func (m *NetworkDissociateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkDissociateResponse.Unmarshal(m, b)
@@ -651,7 +651,7 @@ func (m *NetworkDissociateResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_NetworkDissociateResponse proto.InternalMessageInfo
 
 type NetworkGetAssociatedUsersResponse struct {
-	Usernames            []string `protobuf:"bytes,1,rep,name=usernames" json:"usernames,omitempty"`
+	Usernames            []string `protobuf:"bytes,1,rep,name=usernames,proto3" json:"usernames,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -661,7 +661,7 @@ func (m *NetworkGetAssociatedUsersResponse) Reset()         { *m = NetworkGetAss
 func (m *NetworkGetAssociatedUsersResponse) String() string { return proto.CompactTextString(m) }
 func (*NetworkGetAssociatedUsersResponse) ProtoMessage()    {}
 func (*NetworkGetAssociatedUsersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_network_8219686474e53e94, []int{15}
+	return fileDescriptor_network_34cf09007f6526a1, []int{15}
 }
 func (m *NetworkGetAssociatedUsersResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkGetAssociatedUsersResponse.Unmarshal(m, b)
@@ -977,9 +977,9 @@ var _NetworkService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "network.proto",
 }
 
-func init() { proto.RegisterFile("network.proto", fileDescriptor_network_8219686474e53e94) }
+func init() { proto.RegisterFile("network.proto", fileDescriptor_network_34cf09007f6526a1) }
 
-var fileDescriptor_network_8219686474e53e94 = []byte{
+var fileDescriptor_network_34cf09007f6526a1 = []byte{
 	// 640 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x55, 0x4d, 0x6f, 0xda, 0x40,
 	0x10, 0x95, 0x81, 0x90, 0x30, 0xa8, 0x1f, 0xda, 0x50, 0x62, 0x0c, 0xa4, 0x64, 0x0b, 0x6a, 0xc4,
