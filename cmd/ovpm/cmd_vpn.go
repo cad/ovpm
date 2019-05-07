@@ -57,6 +57,10 @@ var vpnInitCommand = cli.Command{
 			Name:  "dns, d",
 			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
 		},
+		cli.BoolFlag{
+			Name:  "noinput",
+			Usage: "don't prompt user for input. meant for running in scripts",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "vpn:init"
@@ -74,6 +78,10 @@ var vpnInitCommand = cli.Command{
 
 		// Set port number, if provided.
 		port := ovpm.DefaultVPNPort
+		if vpnPort := c.String("port"); port != "" {
+			port = vpnPort
+		}
+
 		if !govalidator.IsNumeric(port) {
 			return errors.InvalidPort(port)
 		}
@@ -96,10 +104,12 @@ var vpnInitCommand = cli.Command{
 			return errors.NotIPv4(dnsAddr)
 		}
 
-		// Ask for confirmation from the user about the destructive
-		// changes that are about to happen.
-		var uiConfirmed bool
-		{
+		if !c.Bool("noinput") {
+
+			// Ask for confirmation from the user about the destructive
+			// changes that are about to happen.
+			var uiConfirmed bool
+
 			var response string
 			for {
 				fmt.Println("This operation will cause invalidation of existing user certificates.")
@@ -123,11 +133,11 @@ var vpnInitCommand = cli.Command{
 					break
 				}
 			}
-		}
+			// Did user confirm the destructive changes?
+			if !uiConfirmed {
+				return errors.Unconfirmed("user decided to cancel")
+			}
 
-		// Did user confirm the destructive changes?
-		if !uiConfirmed {
-			return errors.Unconfirmed("user decided to cancel")
 		}
 
 		// If dry run, then don't call the action, just preprocess.
