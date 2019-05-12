@@ -52,6 +52,7 @@ var vpnInitCommand = cli.Command{
 		cli.StringFlag{
 			Name:  "net, n",
 			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+			Value: ovpm.DefaultVPNNetwork,
 		},
 		cli.StringFlag{
 			Name:  "dns, d",
@@ -73,7 +74,7 @@ var vpnInitCommand = cli.Command{
 		}
 
 		// Set port number, if provided.
-		port := ovpm.DefaultVPNPort
+		port := c.String("port")
 		if !govalidator.IsNumeric(port) {
 			return errors.InvalidPort(port)
 		}
@@ -85,7 +86,7 @@ var vpnInitCommand = cli.Command{
 		}
 
 		// Set ipblock if provided.
-		netCIDR := ovpm.DefaultVPNNetwork
+		netCIDR := c.String("net")
 		if !govalidator.IsCIDR(netCIDR) {
 			return errors.NotCIDR(netCIDR)
 		}
