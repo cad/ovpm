@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sirupsen/logrus"
 )
 
 func vpnStatusAction(rpcServURLStr string) error {
@@ -57,7 +57,7 @@ func vpnStatusAction(rpcServURLStr string) error {
 	return nil
 }
 
-func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.VPNProto, netCIDR string, dnsAddr string) error {
+func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.VPNProto, netCIDR string, dnsAddr string, keepalivePeriod string, keepaliveTimeout string, useLZO bool) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcServURLStr)
 	if err != nil {
@@ -77,11 +77,14 @@ func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.
 
 	// Request init request from vpn service.
 	_, err = vpnSvc.Init(context.Background(), &pb.VPNInitRequest{
-		Hostname:  hostname,
-		Port:      port,
-		ProtoPref: proto,
-		IpBlock:   netCIDR,
-		Dns:       dnsAddr,
+		Hostname:         hostname,
+		Port:             port,
+		ProtoPref:        proto,
+		IpBlock:          netCIDR,
+		Dns:              dnsAddr,
+		KeepalivePeriod:  keepalivePeriod,
+		KeepaliveTimeout: keepaliveTimeout,
+		UseLzo:           useLZO,
 	})
 	if err != nil {
 		err := errors.UnknownGRPCError(err)
@@ -90,11 +93,14 @@ func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"SERVER":   "OpenVPN",
-		"CIDR":     netCIDR,
-		"PROTO":    proto,
-		"HOSTNAME": hostname,
-		"PORT":     port,
+		"SERVER":            "OpenVPN",
+		"CIDR":              netCIDR,
+		"PROTO":             proto,
+		"HOSTNAME":          hostname,
+		"PORT":              port,
+		"KEEPALIVE_PERIOD":  keepalivePeriod,
+		"KEEPALIVE_TIMEOUT": keepaliveTimeout,
+		"USE_LZO":           useLZO,
 	}).Infoln("vpn initialized")
 	return nil
 }

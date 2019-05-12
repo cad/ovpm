@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -57,6 +57,20 @@ var vpnInitCommand = cli.Command{
 			Name:  "dns, d",
 			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
 		},
+		cli.StringFlag{
+			Name:  "keepalive-period",
+			Usage: "Ping period to check if the remote peer is alive.",
+			Value: ovpm.DefaultKeepalivePeriod,
+		},
+		cli.StringFlag{
+			Name:  "keepalive-timeout",
+			Usage: "Ping timeout to assume that remote peer is down.",
+			Value: ovpm.DefaultKeepaliveTimeout,
+		},
+		cli.BoolFlag{
+			Name:  "use-lzo, l",
+			Usage: "Used to determine whether to use the deprecated lzo compression algorithm to support older clients. (default: false)",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "vpn:init"
@@ -95,6 +109,20 @@ var vpnInitCommand = cli.Command{
 		if !govalidator.IsIPv4(dnsAddr) {
 			return errors.NotIPv4(dnsAddr)
 		}
+
+		// Set KeepalivePeriod if provided.
+		keepalivePeriod := c.String("keepalive-period")
+		if !govalidator.IsNumeric(keepalivePeriod) {
+			return errors.NotValidKeepalivePeriod(keepalivePeriod)
+		}
+
+		// Set KeepaliveTimeout if provided.
+		keepaliveTimeout := c.String("keepalive-timeout")
+		if !govalidator.IsNumeric(keepaliveTimeout) {
+			return errors.NotValidKeepaliveTimeout(keepaliveTimeout)
+		}
+
+		useLZO := c.Bool("use-lzo")
 
 		// Ask for confirmation from the user about the destructive
 		// changes that are about to happen.
@@ -135,7 +163,7 @@ var vpnInitCommand = cli.Command{
 			return nil
 		}
 
-		err := vpnInitAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), hostname, port, proto, netCIDR, c.String("dns"))
+		err := vpnInitAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), hostname, port, proto, netCIDR, c.String("dns"), keepalivePeriod, keepaliveTimeout, useLZO)
 		if err != nil {
 			e, ok := err.(errors.Error)
 			if ok {

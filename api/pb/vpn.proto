@@ -17,6 +17,9 @@ message VPNInitRequest {
   VPNProto proto_pref = 3;
   string ip_block = 4;
   string dns = 5;
+  string keepalive_period = 6;
+  string keepalive_timeout = 7;
+  bool use_lzo = 8;
 }
 
 message VPNUpdateRequest {
