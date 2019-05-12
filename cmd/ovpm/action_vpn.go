@@ -13,6 +13,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type vpnInitParams struct {
+	rpcServURLStr    string
+	hostname         string
+	port             string
+	proto            pb.VPNProto
+	netCIDR          string
+	dnsAddr          string
+	keepalivePeriod  string
+	keepaliveTimeout string
+	useLZO           bool
+}
+
 func vpnStatusAction(rpcServURLStr string) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcServURLStr)
@@ -57,11 +69,11 @@ func vpnStatusAction(rpcServURLStr string) error {
 	return nil
 }
 
-func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.VPNProto, netCIDR string, dnsAddr string, keepalivePeriod string, keepaliveTimeout string, useLZO bool) error {
+func vpnInitAction(params vpnInitParams) error {
 	// Parse RPC Server's URL.
-	rpcSrvURL, err := url.Parse(rpcServURLStr)
+	rpcSrvURL, err := url.Parse(params.rpcServURLStr)
 	if err != nil {
-		return errors.BadURL(rpcServURLStr, err)
+		return errors.BadURL(params.rpcServURLStr, err)
 	}
 
 	// Create a gRPC connection to the server.
@@ -77,14 +89,14 @@ func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.
 
 	// Request init request from vpn service.
 	_, err = vpnSvc.Init(context.Background(), &pb.VPNInitRequest{
-		Hostname:         hostname,
-		Port:             port,
-		ProtoPref:        proto,
-		IpBlock:          netCIDR,
-		Dns:              dnsAddr,
-		KeepalivePeriod:  keepalivePeriod,
-		KeepaliveTimeout: keepaliveTimeout,
-		UseLzo:           useLZO,
+		Hostname:         params.hostname,
+		Port:             params.port,
+		ProtoPref:        params.proto,
+		IpBlock:          params.netCIDR,
+		Dns:              params.dnsAddr,
+		KeepalivePeriod:  params.keepalivePeriod,
+		KeepaliveTimeout: params.keepaliveTimeout,
+		UseLzo:           params.useLZO,
 	})
 	if err != nil {
 		err := errors.UnknownGRPCError(err)
@@ -94,13 +106,13 @@ func vpnInitAction(rpcServURLStr string, hostname string, port string, proto pb.
 
 	logrus.WithFields(logrus.Fields{
 		"SERVER":            "OpenVPN",
-		"CIDR":              netCIDR,
-		"PROTO":             proto,
-		"HOSTNAME":          hostname,
-		"PORT":              port,
-		"KEEPALIVE_PERIOD":  keepalivePeriod,
-		"KEEPALIVE_TIMEOUT": keepaliveTimeout,
-		"USE_LZO":           useLZO,
+		"CIDR":              params.netCIDR,
+		"PROTO":             params.proto,
+		"HOSTNAME":          params.hostname,
+		"PORT":              params.port,
+		"KEEPALIVE_PERIOD":  params.keepalivePeriod,
+		"KEEPALIVE_TIMEOUT": params.keepaliveTimeout,
+		"USE_LZO":           params.useLZO,
 	}).Infoln("vpn initialized")
 	return nil
 }

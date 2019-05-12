@@ -163,7 +163,17 @@ var vpnInitCommand = cli.Command{
 			return nil
 		}
 
-		err := vpnInitAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), hostname, port, proto, netCIDR, c.String("dns"), keepalivePeriod, keepaliveTimeout, useLZO)
+		err := vpnInitAction(vpnInitParams{
+			rpcServURLStr:    fmt.Sprintf("grpc://localhost:%d", daemonPort),
+			hostname:         hostname,
+			port:             port,
+			proto:            proto,
+			netCIDR:          netCIDR,
+			dnsAddr:          c.String("dns"),
+			keepalivePeriod:  keepalivePeriod,
+			keepaliveTimeout: keepaliveTimeout,
+			useLZO:           useLZO,
+		})
 		if err != nil {
 			e, ok := err.(errors.Error)
 			if ok {
