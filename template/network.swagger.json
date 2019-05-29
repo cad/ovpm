@@ -20,7 +20,7 @@
         "operationId": "Associate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkAssociateResponse"
             }
@@ -46,7 +46,7 @@
         "operationId": "Create",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkCreateResponse"
             }
@@ -72,7 +72,7 @@
         "operationId": "Delete",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkDeleteResponse"
             }
@@ -98,7 +98,7 @@
         "operationId": "Dissociate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkDissociateResponse"
             }
@@ -124,7 +124,7 @@
         "operationId": "GetAllTypes",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkGetAllTypesResponse"
             }
@@ -140,7 +140,7 @@
         "operationId": "GetAssociatedUsers",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkGetAssociatedUsersResponse"
             }
@@ -164,7 +164,7 @@
         "operationId": "List",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbNetworkListResponse"
             }

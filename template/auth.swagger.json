@@ -20,7 +20,7 @@
         "operationId": "Authenticate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbAuthAuthenticateResponse"
             }
@@ -46,7 +46,7 @@
         "operationId": "Status",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbAuthStatusResponse"
             }

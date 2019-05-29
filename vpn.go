@@ -15,7 +15,6 @@ import (
 
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"
@@ -23,6 +22,7 @@ import (
 	"github.com/coreos/go-iptables/iptables"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 // Possible VPN protocols.
@@ -37,17 +37,20 @@ type dbServerModel struct {
 	Name         string `gorm:"unique_index"` // Server name.
 	SerialNumber string
 
-	Hostname string // Server's ip address or FQDN
-	Port     string // Server's listening port
-	Proto    string // Server's proto udp or tcp
-	Cert     string // Server RSA certificate.
-	Key      string // Server RSA private key.
-	CACert   string // Root CA RSA certificate.
-	CAKey    string // Root CA RSA key.
-	Net      string // VPN network.
-	Mask     string // VPN network mask.
-	CRL      string // Certificate Revocation List
-	DNS      string // DNS servers to push to the clients.
+	Hostname         string // Server's ip address or FQDN
+	Port             string // Server's listening port
+	Proto            string // Server's proto udp or tcp
+	Cert             string // Server RSA certificate.
+	Key              string // Server RSA private key.
+	CACert           string // Root CA RSA certificate.
+	CAKey            string // Root CA RSA key.
+	Net              string // VPN network.
+	Mask             string // VPN network mask.
+	CRL              string // Certificate Revocation List
+	DNS              string // DNS servers to push to the clients.
+	KeepalivePeriod  string // Keepalive ping period
+	KeepaliveTimeout string // Keepalive timeout
+	UseLZO           bool   // Use LZO compression
 }
 
 var serverInstance *Server
@@ -194,6 +197,24 @@ func (svr *Server) GetCreatedAt() string {
 	return svr.CreatedAt.Format(time.UnixDate)
 }
 
+func (svr *Server) GetKeepalivePeriod() string {
+	if svr.KeepalivePeriod != "" {
+		return svr.KeepalivePeriod
+	}
+	return DefaultKeepalivePeriod
+}
+
+func (svr *Server) GetKeepaliveTimeout() string {
+	if svr.KeepaliveTimeout != "" {
+		return svr.KeepaliveTimeout
+	}
+	return DefaultKeepaliveTimeout
+}
+
+func (svr *Server) IsUseLZO() bool {
+	return svr.UseLZO
+}
+
 // Init regenerates keys and certs for a Root CA, gets initial settings for the VPN server
 // and saves them in the database.
 //
@@ -202,15 +223,32 @@ func (svr *Server) GetCreatedAt() string {
 // 'ipblock' is a IP network in the CIDR form. VPN clients get their IP addresses from this network.
 // It defaults to const 'DefaultVPNNetwork'.
 //
+// 'keepalivePeriod' is the ping period to check if the remote peer is alive.
+// It defaults to const 'DefaultKeepalivePeriod'
+//
+// 'keeapliveTimeout' is the ping timeout to assume that remote peer is down.
+// It defaults to const 'DefaultKeepaliveTimeout'
+//
+// 'useLZO' is used to determine whether to use the lzo compression algorithm to support older clients.
+// It defaults to false due to security issues and deprecation
+//
 // Please note that, Init is potentially destructive procedure, it will cause invalidation of
 // existing .ovpn profiles of the current users. So it should be used carefully.
-func (svr *Server) Init(hostname string, port string, proto string, ipblock string, dns string) error {
+func (svr *Server) Init(hostname string, port string, proto string, ipblock string, dns string, keepalivePeriod string, keepaliveTimeout string, useLZO bool) error {
 	if port == "" {
 		port = DefaultVPNPort
 	}
 
 	if dns == "" {
 		dns = DefaultVPNDNS
+	}
+
+	if keepalivePeriod == "" {
+		keepalivePeriod = DefaultKeepalivePeriod
+	}
+
+	if keepaliveTimeout == "" {
+		keepaliveTimeout = DefaultKeepaliveTimeout
 	}
 
 	switch proto {
@@ -255,6 +293,14 @@ func (svr *Server) Init(hostname string, port string, proto string, ipblock stri
 		return fmt.Errorf("validation error: port:`%s` should be numeric", port)
 	}
 
+	if !govalidator.IsNumeric(keepaliveTimeout) {
+		return fmt.Errorf("validation error: keepaliveTimeout:`%s` should be numeric", keepaliveTimeout)
+	}
+
+	if !govalidator.IsNumeric(keepalivePeriod) {
+		return fmt.Errorf("validation error: keepalivePeriod:`%s` should be numeric", keepalivePeriod)
+	}
+
 	serverName := "default"
 	if svr := TheServer(); svr.IsInitialized() {
 		if err := svr.Deinit(); err != nil {
@@ -285,17 +331,20 @@ func (svr *Server) Init(hostname string, port string, proto string, ipblock stri
 	serverInstance := dbServerModel{
 		Name: serverName,
 
-		SerialNumber: serialNumber,
-		Hostname:     hostname,
-		Proto:        proto,
-		Port:         port,
-		Cert:         srv.Cert,
-		Key:          srv.Key,
-		CACert:       ca.Cert,
-		CAKey:        ca.Key,
-		Net:          ipnet.IP.To4().String(),
-		Mask:         net.IP(ipnet.Mask).To4().String(),
-		DNS:          dns,
+		SerialNumber:     serialNumber,
+		Hostname:         hostname,
+		Proto:            proto,
+		Port:             port,
+		Cert:             srv.Cert,
+		Key:              srv.Key,
+		CACert:           ca.Cert,
+		CAKey:            ca.Key,
+		Net:              ipnet.IP.To4().String(),
+		Mask:             net.IP(ipnet.Mask).To4().String(),
+		DNS:              dns,
+		KeepalivePeriod:  keepalivePeriod,
+		KeepaliveTimeout: keepaliveTimeout,
+		UseLZO:           useLZO,
 	}
 
 	db.Create(&serverInstance)
@@ -388,21 +437,27 @@ func (svr *Server) DumpsClientConfig(username string) (string, error) {
 	}
 
 	params := struct {
-		Hostname string
-		Port     string
-		CA       string
-		Key      string
-		Cert     string
-		NoGW     bool
-		Proto    string
+		Hostname         string
+		Port             string
+		CA               string
+		Key              string
+		Cert             string
+		NoGW             bool
+		Proto            string
+		KeepalivePeriod  string
+		KeepaliveTimeout string
+		UseLZO           bool
 	}{
-		Hostname: svr.GetHostname(),
-		Port:     svr.GetPort(),
-		CA:       svr.GetCACert(),
-		Key:      user.getKey(),
-		Cert:     user.GetCert(),
-		NoGW:     user.IsNoGW(),
-		Proto:    svr.GetProto(),
+		Hostname:         svr.GetHostname(),
+		Port:             svr.GetPort(),
+		CA:               svr.GetCACert(),
+		Key:              user.getKey(),
+		Cert:             user.GetCert(),
+		NoGW:             user.IsNoGW(),
+		Proto:            svr.GetProto(),
+		KeepalivePeriod:  svr.GetKeepalivePeriod(),
+		KeepaliveTimeout: svr.GetKeepaliveTimeout(),
+		UseLZO:           svr.IsUseLZO(),
 	}
 	data, err := bindata.Asset("template/client.ovpn.tmpl")
 	if err != nil {
@@ -619,31 +674,37 @@ func (svr *Server) emitServerConf() error {
 	var result bytes.Buffer
 
 	server := struct {
-		CertPath     string
-		KeyPath      string
-		CACertPath   string
-		CAKeyPath    string
-		CCDPath      string
-		CRLPath      string
-		DHParamsPath string
-		Net          string
-		Mask         string
-		Port         string
-		Proto        string
-		DNS          string
+		CertPath         string
+		KeyPath          string
+		CACertPath       string
+		CAKeyPath        string
+		CCDPath          string
+		CRLPath          string
+		DHParamsPath     string
+		Net              string
+		Mask             string
+		Port             string
+		Proto            string
+		DNS              string
+		KeepalivePeriod  string
+		KeepaliveTimeout string
+		UseLZO           bool
 	}{
-		CertPath:     _DefaultCertPath,
-		KeyPath:      _DefaultKeyPath,
-		CACertPath:   _DefaultCACertPath,
-		CAKeyPath:    _DefaultCAKeyPath,
-		CCDPath:      _DefaultVPNCCDPath,
-		CRLPath:      _DefaultCRLPath,
-		DHParamsPath: _DefaultDHParamsPath,
-		Net:          svr.Net,
-		Mask:         svr.Mask,
-		Port:         port,
-		Proto:        proto,
-		DNS:          dns,
+		CertPath:         _DefaultCertPath,
+		KeyPath:          _DefaultKeyPath,
+		CACertPath:       _DefaultCACertPath,
+		CAKeyPath:        _DefaultCAKeyPath,
+		CCDPath:          _DefaultVPNCCDPath,
+		CRLPath:          _DefaultCRLPath,
+		DHParamsPath:     _DefaultDHParamsPath,
+		Net:              svr.Net,
+		Mask:             svr.Mask,
+		Port:             port,
+		Proto:            proto,
+		DNS:              dns,
+		KeepalivePeriod:  svr.GetKeepalivePeriod(),
+		KeepaliveTimeout: svr.GetKeepaliveTimeout(),
+		UseLZO:           svr.IsUseLZO(),
 	}
 	data, err := bindata.Asset("template/server.conf.tmpl")
 	if err != nil {

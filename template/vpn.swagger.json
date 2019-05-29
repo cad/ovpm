@@ -20,7 +20,7 @@
         "operationId": "Init",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbVPNInitResponse"
             }
@@ -46,7 +46,7 @@
         "operationId": "Restart",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbVPNRestartResponse"
             }
@@ -62,7 +62,7 @@
         "operationId": "Status",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbVPNStatusResponse"
             }
@@ -78,7 +78,7 @@
         "operationId": "Update",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbVPNUpdateResponse"
             }
@@ -118,6 +118,16 @@
         },
         "dns": {
           "type": "string"
+        },
+        "keepalive_period": {
+          "type": "string"
+        },
+        "keepalive_timeout": {
+          "type": "string"
+        },
+        "use_lzo": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     },

@@ -12,7 +12,7 @@ func TestUser_ConnectionStatus(t *testing.T) {
 	db := CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	origOpenFunc := svr.openFunc
 	defer func() { svr.openFunc = origOpenFunc }()

@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/permset"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -375,7 +375,7 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.InitVPNPerm is required for this operation.")
 	}
 
-	if err := ovpm.TheServer().Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
+	if err := ovpm.TheServer().Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns, req.KeepalivePeriod, req.KeepaliveTimeout, req.UseLzo); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil

@@ -19,6 +19,12 @@ const (
 	// DefaultDaemonPort is the port OVPMD will listen by default if something else is not specified.
 	DefaultDaemonPort = 9090
 
+	// DefaultKeepalivePeriod is the default ping period to check if the remote peer is alive.
+	DefaultKeepalivePeriod = "2"
+
+	// DefaultKeepaliveTimeout is the default ping timeout to assume that remote peer is down.
+	DefaultKeepaliveTimeout = "4"
+
 	etcBasePath = "/etc/ovpm/"
 	varBasePath = "/var/db/ovpm/"
 

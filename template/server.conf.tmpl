@@ -213,7 +213,7 @@ client-to-client
 # peer is down if no ping received during
 # a 120 second time period.
 ;keepalive 10 120
-keepalive 2 4
+keepalive {{ .KeepalivePeriod }} {{ .KeepaliveTimeout }}
 
 # For extra security beyond that provided
 # by SSL/TLS, create an "HMAC firewall"
@@ -236,10 +236,11 @@ keepalive 2 4
 ;cipher DES-EDE3-CBC  # Triple-DES
 cipher AES-128-CBC
 
+{{ if .UseLZO }}
 # Enable compression on the VPN link.
 # If you enable it here, you must also
 # enable it in the client config file.
-comp-lzo
+comp-lzo{{ end }}
 
 # The maximum number of concurrently connected
 # clients we want to allow.
