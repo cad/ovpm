@@ -6,6 +6,8 @@ import Input from 'muicss/lib/react/input';
 import Option from 'muicss/lib/react/option';
 import Select from 'muicss/lib/react/select';
 import Checkbox from 'muicss/lib/react/checkbox';
+import Textarea from 'muicss/lib/react/textarea';
+
 
 
 export default class UserEdit extends React.Component {
@@ -19,6 +21,7 @@ export default class UserEdit extends React.Component {
             ipAllocationMethod: this.props.ipAllocationMethod ? this.props.ipAllocationMethod : "dynamic",
             pushGW: this.props.pushGW != undefined ? this.props.pushGW : true,
             isAdmin: this.props.isAdmin ? this.props.isAdmin : false,
+            description: this.props.description ? this.props.description : "",
         }
 
     }
@@ -32,6 +35,9 @@ export default class UserEdit extends React.Component {
 
     handlePasswordChange(e) {
         this.setState({password: e.target.value})
+    }
+    handleDescriptionChange(e) {
+        this.setState({description: e.target.value})
     }
 
     handleStaticIPChange(e) {
@@ -77,7 +83,9 @@ export default class UserEdit extends React.Component {
                 {staticIPInput}
                 <Checkbox label="Push GW" checked={this.state.pushGW} onChange={this.handlePushGWChange.bind(this)}/>
                 <Checkbox label="Make Admin" checked={this.state.isAdmin} onChange={this.handleIsAdminChange.bind(this)}/>
-                <div className="mui--pull-right">
+                <Textarea placeholder="User description" value={this.state.description} onChange={this.handleDescriptionChange.bind(this)} cols={50} rows={5} />
+
+                    <div className="mui--pull-right">
                     <Button color="primary" onClick={this.handleFormSubmit.bind(this)} required={true}>Save</Button>
                     <Button color="danger" onClick={this.handleFormCancel.bind(this)} required={true}>Cancel</Button>
                 </div>

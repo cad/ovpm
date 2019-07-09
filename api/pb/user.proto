@@ -14,6 +14,7 @@ message UserCreateRequest {
   bool no_gw = 3;
   uint32 host_id = 4;
   bool is_admin = 5;
+  string description = 6;
 }
 
 message UserUpdateRequest {
@@ -38,6 +39,7 @@ message UserUpdateRequest {
     ADMIN = 2;
   }
   AdminPref admin_pref = 6;
+  string description = 7;
 }
 
 
@@ -111,6 +113,7 @@ message UserResponse {
     uint64 bytes_sent = 11;
     uint64 bytes_received = 12;
     string expires_at = 13;
+    string description = 14;
   }
 
   repeated User users = 1;

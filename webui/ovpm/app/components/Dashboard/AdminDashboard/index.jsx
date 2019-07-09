@@ -199,6 +199,7 @@ export default class AdminDashboard extends React.Component {
             no_gw: user.pushGW,
             host_id: 0, // handle this host_id problem
             is_admin: user.isAdmin,
+            description: user.description,
         }
         userObj.no_gw = !user.pushGW
         userObj.admin_pref = user.isAdmin ? "ADMIN" : "NOADMIN"
@@ -229,6 +230,7 @@ export default class AdminDashboard extends React.Component {
             admin_pref: "NOPREFADMIN",
             static_pref: "NOPREFSTATIC",
             hostid: 0,
+            description: user.description,
         }
 
         if (user.password !== "") {
@@ -466,6 +468,7 @@ export default class AdminDashboard extends React.Component {
                 <tr key={"user" + i}>
                     <td>{i + 1}</td>
                     <td>{isOnline} {this.state.users[i].username} {isAdmin}</td>
+                    <td style={{"white-space": "pre-line"}}>{this.state.users[i].description}</td>
                     <td>{this.state.users[i].ip_net} {isStatic}</td>
                     <td>{createdAt}</td>
                     <td>{certExpiry}</td>
@@ -515,7 +518,7 @@ export default class AdminDashboard extends React.Component {
                             <UserEdit title="Create New User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleNewUserSave.bind(this)} isUsernameDisabled={false} />
                         </Modal>
                         <Modal isOpen={this.state.modal === EDITINGUSER} contentLabel="Modal" style={modalStyle}>
-                            <UserEdit title="Update User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleUpdateUserSave.bind(this)} isUsernameDisabled={true} username={this.state.editedUser.username} isAdmin={this.state.editedUser.is_admin} pushGW={(!this.state.editedUser.no_gw)} ipAllocationMethod={this.state.editedUser.host_id == 0 ? "dynamic" : "static"} staticIP={this.state.editedUser.host_id == 0 ? "" : num2dot(this.state.editedUser.host_id)} />
+                            <UserEdit title="Update User" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleUpdateUserSave.bind(this)} isUsernameDisabled={true} username={this.state.editedUser.username} isAdmin={this.state.editedUser.is_admin} pushGW={(!this.state.editedUser.no_gw)} ipAllocationMethod={this.state.editedUser.host_id == 0 ? "dynamic" : "static"} staticIP={this.state.editedUser.host_id == 0 ? "" : num2dot(this.state.editedUser.host_id)} description={this.state.editedUser.description} />
                         </Modal>
                         <Modal isOpen={this.state.modal === DEFININGNEWNETWORK} contentLabel="Modal" style={modalStyle}>
                             <NetworkEdit title="New Network" onCancel={this.handleCloseModal.bind(this)} onSave={this.handleDefineNetworkSave.bind(this)} />
@@ -538,6 +541,7 @@ export default class AdminDashboard extends React.Component {
                                             <tr>
                                                 <th></th>
                                                 <th>USERNAME</th>
+                                                <th>DESCRIPTION</th>
                                                 <th>IP</th>
                                                 <th>CREATED AT</th>
                                                 <th>CERT</th>

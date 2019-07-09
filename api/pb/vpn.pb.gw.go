@@ -202,13 +202,13 @@ func RegisterVPNServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 }
 
 var (
-	pattern_VPNService_Status_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "status"}, ""))
+	pattern_VPNService_Status_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "status"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_VPNService_Init_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "init"}, ""))
+	pattern_VPNService_Init_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "init"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_VPNService_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "update"}, ""))
+	pattern_VPNService_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "update"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_VPNService_Restart_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "restart"}, ""))
+	pattern_VPNService_Restart_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "vpn", "restart"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

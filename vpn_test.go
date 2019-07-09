@@ -65,7 +65,7 @@ func TestVPNDeinit(t *testing.T) {
 	// Prepare:
 	// Initialize the server.
 	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
-	u, err := CreateNewUser("user", "p", false, 0, true)
+	u, err := CreateNewUser("user", "p", false, 0, true, "description")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password", false, 0, true)
+	user, _ := CreateNewUser("user", "password", false, 0, true, "description")
 
 	// Test:
 	clientConfigBlob, err := svr.DumpsClientConfig(user.GetUsername())
@@ -230,7 +230,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 
 	// Prepare:
 	noGW := false
-	user, err := CreateNewUser("user", "password", noGW, 0, true)
+	user, err := CreateNewUser("user", "password", noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}
@@ -257,7 +257,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	user.Delete()
 
 	noGW = true
-	user, err = CreateNewUser("user", "password", noGW, 0, true)
+	user, err = CreateNewUser("user", "password", noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}
@@ -483,11 +483,11 @@ func TestGetConnectedUsers(t *testing.T) {
 		return nil, nil
 	}
 	// Create the corresponding users for test.
-	usr1, err := CreateNewUser("usr1", "1234", true, 0, false)
+	usr1, err := CreateNewUser("usr1", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
-	usr2, err := CreateNewUser("usr2", "1234", true, 0, false)
+	usr2, err := CreateNewUser("usr2", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
