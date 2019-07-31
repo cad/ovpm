@@ -35,6 +35,7 @@ type dbUserModel struct {
 	HostID             uint32 // not user writable
 	Admin              bool
 	AuthToken          string // auth token
+	Description        string
 }
 
 // User represents a vpn user.
@@ -128,7 +129,7 @@ func GetAllUsers() ([]*User, error) {
 //
 // It also generates the necessary client keys and signs certificates with the current
 // server's CA.
-func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bool) (*User, error) {
+func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bool, description string) (*User, error) {
 	svr := TheServer()
 	if !svr.IsInitialized() {
 		return nil, fmt.Errorf("you first need to create server")
@@ -191,6 +192,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		NoGW:               nogw,
 		HostID:             hostid,
 		Admin:              admin,
+		Description:		description,
 	}
 	user.setPassword(password)
 
@@ -211,7 +213,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 // Update updates the user's attributes and writes them to the database.
 //
 // How this method works is similiar to PUT semantics of REST. It sets the user record fields to the provided function arguments.
-func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) error {
+func (u *User) Update(password string, nogw bool, hostid uint32, admin bool, description string) error {
 	svr := TheServer()
 	if !svr.IsInitialized() {
 		return fmt.Errorf("you first need to create server")
@@ -225,6 +227,7 @@ func (u *User) Update(password string, nogw bool, hostid uint32, admin bool) err
 	u.NoGW = nogw
 	u.HostID = hostid
 	u.Admin = admin
+	u.Description = description
 
 	if hostid != 0 {
 		ip := HostID2IP(hostid)
@@ -413,6 +416,10 @@ func (u *User) IsAdmin() bool {
 
 func (u *User) getKey() string {
 	return u.Key
+}
+
+func (u *User) GetDescription() string {
+	return u.Description
 }
 
 // ConnectionStatus returns information about user's connection to the VPN server.

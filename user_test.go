@@ -25,7 +25,7 @@ func TestCreateNewUser(t *testing.T) {
 	noGW := false
 
 	// Test:
-	user, err := ovpm.CreateNewUser(username, password, noGW, 0, true)
+	user, err := ovpm.CreateNewUser(username, password, noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestCreateNewUser(t *testing.T) {
 
 	// Is NoGW attr working properly?
 	noGW = true
-	user, err = ovpm.CreateNewUser(username, password, noGW, 0, true)
+	user, err = ovpm.CreateNewUser(username, password, noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -76,7 +76,7 @@ func TestCreateNewUser(t *testing.T) {
 
 	// Try to create a user with an invalid static ip.
 	user = nil
-	_, err = ovpm.CreateNewUser("staticuser", password, noGW, ovpm.IP2HostID(net.ParseIP("8.8.8.8").To4()), true)
+	_, err = ovpm.CreateNewUser("staticuser", password, noGW, ovpm.IP2HostID(net.ParseIP("8.8.8.8").To4()), true, "description")
 	if err == nil {
 		t.Fatalf("user creation expected to err but it didn't")
 	}
@@ -95,7 +95,7 @@ func TestCreateNewUser(t *testing.T) {
 	}
 
 	for _, tt := range usernametests {
-		_, err := ovpm.CreateNewUser(tt.username, "1234", false, 0, true)
+		_, err := ovpm.CreateNewUser(tt.username, "1234", false, 0, true, "description")
 		if ok := (err == nil); ok != tt.ok {
 			t.Fatalf("expcted condition failed '%s': %v", tt.username, err)
 		}
@@ -114,7 +114,7 @@ func TestUserUpdate(t *testing.T) {
 	noGW := false
 
 	// Test:
-	user, err := ovpm.CreateNewUser(username, password, noGW, 0, true)
+	user, err := ovpm.CreateNewUser(username, password, noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("user can not be created: %v", err)
 	}
@@ -135,7 +135,7 @@ func TestUserUpdate(t *testing.T) {
 	}
 
 	for _, tt := range updatetests {
-		err := user.Update(tt.password, tt.noGW, tt.hostid, true)
+		err := user.Update(tt.password, tt.noGW, tt.hostid, true, "description")
 		if (err == nil) != tt.ok {
 			t.Errorf("user is expected to be able to update but it gave us this error instead: %v", err)
 		}
@@ -150,7 +150,7 @@ func TestUserPasswordCorrect(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0, true)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0, true, "description")
 
 	// Test:
 	// Is user created with the correct password?
@@ -167,7 +167,7 @@ func TestUserPasswordReset(t *testing.T) {
 
 	// Prepare:
 	initialPassword := "g00dp@ssW0rd9"
-	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0, true)
+	user, _ := ovpm.CreateNewUser("testUser", initialPassword, false, 0, true, "description")
 
 	// Test:
 
@@ -194,7 +194,7 @@ func TestUserDelete(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234", false, 0, true)
+	user, _ := ovpm.CreateNewUser(username, "1234", false, 0, true, "description")
 
 	// Test:
 
@@ -232,7 +232,7 @@ func TestUserGet(t *testing.T) {
 
 	// Prepare:
 	username := "testUser"
-	user, _ := ovpm.CreateNewUser(username, "1234", false, 0, true)
+	user, _ := ovpm.CreateNewUser(username, "1234", false, 0, true, "description")
 
 	// Test:
 	// Is user fetchable?
@@ -260,7 +260,7 @@ func TestUserGetAll(t *testing.T) {
 	for i := 0; i < count; i++ {
 		username := fmt.Sprintf("user%d", i)
 		password := fmt.Sprintf("password%d", i)
-		user, _ := ovpm.CreateNewUser(username, password, false, 0, true)
+		user, _ := ovpm.CreateNewUser(username, password, false, 0, true, "description")
 		users = append(users, user)
 	}
 
@@ -294,7 +294,7 @@ func TestUserRenew(t *testing.T) {
 	svr.Init("localhost", "", ovpm.UDPProto, "", "", "", "", false)
 
 	// Prepare:
-	user, _ := ovpm.CreateNewUser("user", "1234", false, 0, true)
+	user, _ := ovpm.CreateNewUser("user", "1234", false, 0, true, "description")
 
 	// Test:
 	// Re initialize the server.
@@ -335,7 +335,7 @@ func TestUserIPAllocator(t *testing.T) {
 		{"user6", true, ovpm.IP2HostID(net.ParseIP("10.9.0.1").To4()), "10.9.0.7/24", false},
 	}
 	for _, tt := range iptests {
-		user, err := ovpm.CreateNewUser(tt.username, "pass", tt.gw, tt.hostid, true)
+		user, err := ovpm.CreateNewUser(tt.username, "pass", tt.gw, tt.hostid, true, "description")
 		if (err == nil) == !tt.pass {
 			t.Fatalf("expected pass %t %s", tt.pass, err)
 		}
@@ -354,7 +354,7 @@ func TestUser_ExpiresAt(t *testing.T) {
 	svr.Init("localhost", "", ovpm.UDPProto, "", "", "", "", false)
 
 	// Test:
-	u1, err := ovpm.CreateNewUser("test", "1234", true, 0, false)
+	u1, err := ovpm.CreateNewUser("test", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("test preperation failed: %v", err)
 	}

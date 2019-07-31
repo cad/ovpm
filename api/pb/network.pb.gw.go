@@ -88,7 +88,10 @@ func request_NetworkService_GetAssociatedUsers_0(ctx context.Context, marshaler 
 	var protoReq NetworkGetAssociatedUsersRequest
 	var metadata runtime.ServerMetadata
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_NetworkService_GetAssociatedUsers_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NetworkService_GetAssociatedUsers_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -313,19 +316,19 @@ func RegisterNetworkServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_NetworkService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "create"}, ""))
+	pattern_NetworkService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "create"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "list"}, ""))
+	pattern_NetworkService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "list"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "delete"}, ""))
+	pattern_NetworkService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "delete"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_GetAllTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "getalltypes"}, ""))
+	pattern_NetworkService_GetAllTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "getalltypes"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_GetAssociatedUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "getassociatedusers"}, ""))
+	pattern_NetworkService_GetAssociatedUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "getassociatedusers"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_Associate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "associate"}, ""))
+	pattern_NetworkService_Associate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "associate"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_NetworkService_Dissociate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "dissociate"}, ""))
+	pattern_NetworkService_Dissociate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "network", "dissociate"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

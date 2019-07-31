@@ -210,6 +210,9 @@
         },
         "expires_at": {
           "type": "string"
+        },
+        "description": {
+          "type": "string"
         }
       }
     },
@@ -260,6 +263,9 @@
         "is_admin": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "description": {
+          "type": "string"
         }
       }
     },
@@ -327,6 +333,9 @@
         },
         "admin_pref": {
           "$ref": "#/definitions/UserUpdateRequestAdminPref"
+        },
+        "description": {
+          "type": "string"
         }
       }
     }

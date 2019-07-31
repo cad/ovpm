@@ -19,7 +19,7 @@ func TestUser_ConnectionStatus(t *testing.T) {
 	svr.openFunc = func(path string) (io.Reader, error) {
 		return nil, nil
 	}
-	usr1, err := CreateNewUser("usr1", "1234", true, 0, false)
+	usr1, err := CreateNewUser("usr1", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
