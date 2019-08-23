@@ -1,5 +1,28 @@
 # Change Log
 
+## [Unreleased](https://github.com/cad/ovpm/tree/HEAD)
+
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.6...HEAD)
+
+**Implemented enhancements:**
+
+- webui:  make sure webui fetches all assets from the ovpm http server [\#65](https://github.com/cad/ovpm/issues/65)
+- Information about certificates expiration.... [\#59](https://github.com/cad/ovpm/issues/59)
+- add '\*' wildcard option to cli for bulk operations [\#46](https://github.com/cad/ovpm/issues/46)
+- show connected users [\#40](https://github.com/cad/ovpm/issues/40)
+- add cli tests [\#38](https://github.com/cad/ovpm/issues/38)
+
+**Fixed bugs:**
+
+- web ui: when user list is long, some usernames are not visible in dropdown [\#64](https://github.com/cad/ovpm/issues/64)
+- on centos there is no nogroup group defined [\#62](https://github.com/cad/ovpm/issues/62)
+
+**Closed issues:**
+
+- install fresh TUNTAP error [\#61](https://github.com/cad/ovpm/issues/61)
+- Not work depot [\#60](https://github.com/cad/ovpm/issues/60)
+- All Set, but from VPN Client i can´t reach other network... [\#58](https://github.com/cad/ovpm/issues/58)
+
 ## [v0.2.6](https://github.com/cad/ovpm/tree/v0.2.6) (2017-10-16)
 [Full Changelog](https://github.com/cad/ovpm/compare/v0.2.5...v0.2.6)
 
