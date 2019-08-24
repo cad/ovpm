@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm/errors"
 	"github.com/urfave/cli"
 

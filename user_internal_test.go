@@ -12,14 +12,14 @@ func TestUser_ConnectionStatus(t *testing.T) {
 	db := CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	origOpenFunc := svr.openFunc
 	defer func() { svr.openFunc = origOpenFunc }()
 	svr.openFunc = func(path string) (io.Reader, error) {
 		return nil, nil
 	}
-	usr1, err := CreateNewUser("usr1", "1234", true, 0, false)
+	usr1, err := CreateNewUser("usr1", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}

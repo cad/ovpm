@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm/pki"
 	"github.com/cad/ovpm/supervisor"
+	"github.com/sirupsen/logrus"
 )
 
 var fs map[string]string
@@ -39,12 +39,12 @@ func TestVPNInit(t *testing.T) {
 
 	// Wrongfully initialize server.
 
-	if err := TheServer().Init("localhost", "asdf", UDPProto, "", ""); err == nil {
+	if err := TheServer().Init("localhost", "asdf", UDPProto, "", "", "", "", false); err == nil {
 		t.Fatalf("error is expected to be not nil but it's nil instead")
 	}
 
 	// Initialize the server.
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Check database if the database has no server.
 	var server2 dbServerModel
@@ -64,8 +64,8 @@ func TestVPNDeinit(t *testing.T) {
 
 	// Prepare:
 	// Initialize the server.
-	TheServer().Init("localhost", "", UDPProto, "", "")
-	u, err := CreateNewUser("user", "p", false, 0, true)
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
+	u, err := CreateNewUser("user", "p", false, 0, true, "description")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func TestVPNUpdate(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	// Prepare:
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 	// Test:
 
 	var updatetests = []struct {
@@ -162,7 +162,7 @@ func TestVPNIsInitialized(t *testing.T) {
 	}
 
 	// Initialize the server.
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Isn't initialized?
 	if !TheServer().IsInitialized() {
@@ -187,7 +187,7 @@ func TestVPNTheServer(t *testing.T) {
 	}
 
 	// Initialize server.
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	svr = TheServer()
 
@@ -203,10 +203,10 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password", false, 0, true)
+	user, _ := CreateNewUser("user", "password", false, 0, true, "description")
 
 	// Test:
 	clientConfigBlob, err := svr.DumpsClientConfig(user.GetUsername())
@@ -226,11 +226,11 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	noGW := false
-	user, err := CreateNewUser("user", "password", noGW, 0, true)
+	user, err := CreateNewUser("user", "password", noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}
@@ -257,7 +257,7 @@ func TestVPNDumpClientConfig(t *testing.T) {
 	user.Delete()
 
 	noGW = true
-	user, err = CreateNewUser("user", "password", noGW, 0, true)
+	user, err = CreateNewUser("user", "password", noGW, 0, true, "description")
 	if err != nil {
 		t.Fatalf("can not create user: %v", err)
 	}
@@ -287,7 +287,7 @@ func TestVPNGetSystemCA(t *testing.T) {
 	}
 
 	// Initialize system.
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	ca, err = svr.GetSystemCA()
 	if err != nil {
@@ -328,7 +328,7 @@ func TestVPNStartVPNProc(t *testing.T) {
 	}
 
 	// Initialize OVPM server.
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Call start again..
 	svr.StartVPNProc()
@@ -345,7 +345,7 @@ func TestVPNStopVPNProc(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	vpnProc.Start()
@@ -370,7 +370,7 @@ func TestVPNRestartVPNProc(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 
@@ -399,7 +399,7 @@ func TestVPNEmit(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 
@@ -476,18 +476,18 @@ func TestGetConnectedUsers(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Mock funcs.
 	svr.openFunc = func(path string) (io.Reader, error) {
 		return nil, nil
 	}
 	// Create the corresponding users for test.
-	usr1, err := CreateNewUser("usr1", "1234", true, 0, false)
+	usr1, err := CreateNewUser("usr1", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
-	usr2, err := CreateNewUser("usr2", "1234", true, 0, false)
+	usr2, err := CreateNewUser("usr2", "1234", true, 0, false, "description")
 	if err != nil {
 		t.Fatalf("user creation failed: %v", err)
 	}
@@ -561,7 +561,7 @@ func TestVPN_ExpiresAt(t *testing.T) {
 	db := CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test:
 	cert, err := pki.ReadCertFromPEM(svr.Cert)
@@ -579,7 +579,7 @@ func TestVPN_CAExpiresAt(t *testing.T) {
 	db := CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 	svr := TheServer()
-	svr.Init("localhost", "", UDPProto, "", "")
+	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test:
 	cert, err := pki.ReadCertFromPEM(svr.CACert)

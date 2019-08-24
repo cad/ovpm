@@ -20,7 +20,7 @@
         "operationId": "Create",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResponse"
             }
@@ -46,7 +46,7 @@
         "operationId": "Delete",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResponse"
             }
@@ -72,7 +72,7 @@
         "operationId": "GenConfig",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserGenConfigResponse"
             }
@@ -98,7 +98,7 @@
         "operationId": "List",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResponse"
             }
@@ -114,7 +114,7 @@
         "operationId": "Renew",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResponse"
             }
@@ -140,7 +140,7 @@
         "operationId": "Update",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResponse"
             }
@@ -210,6 +210,9 @@
         },
         "expires_at": {
           "type": "string"
+        },
+        "description": {
+          "type": "string"
         }
       }
     },
@@ -260,6 +263,9 @@
         "is_admin": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "description": {
+          "type": "string"
         }
       }
     },
@@ -327,6 +333,9 @@
         },
         "admin_pref": {
           "$ref": "#/definitions/UserUpdateRequestAdminPref"
+        },
+        "description": {
+          "type": "string"
         }
       }
     }

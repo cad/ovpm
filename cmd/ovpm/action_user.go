@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"

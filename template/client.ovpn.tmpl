@@ -9,10 +9,10 @@ resolv-retry infinite
 ns-cert-type server
 cipher AES-128-CBC
 nobind
-keepalive 2 4
+keepalive {{ .KeepalivePeriod }} {{ .KeepaliveTimeout }}
 persist-key
 persist-tun
-comp-lzo
+{{ if .UseLZO }}comp-lzo{{ end }}
 verb 3
 auth-nocache
 

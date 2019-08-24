@@ -12,7 +12,7 @@ func TestVPNCreateNewNetwork(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -80,7 +80,7 @@ func TestVPNDeleteNetwork(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -118,7 +118,7 @@ func TestVPNGetNetwork(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -153,7 +153,7 @@ func TestVPNGetAllNetworks(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -199,7 +199,7 @@ func TestNetAssociate(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -207,7 +207,7 @@ func TestNetAssociate(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, err := CreateNewUser(userName, "123", false, 0, true)
+	user, err := CreateNewUser(userName, "123", false, 0, true, "description")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,7 +245,7 @@ func TestNetDissociate(t *testing.T) {
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
 
-	if err := TheServer().Init("localhost", "", UDPProto, "", ""); err != nil {
+	if err := TheServer().Init("localhost", "", UDPProto, "", "", "", "", false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -255,7 +255,7 @@ func TestNetDissociate(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, err := CreateNewUser(userName, "123", false, 0, true)
+	user, err := CreateNewUser(userName, "123", false, 0, true, "description")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,7 +297,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
 	// Test:
@@ -305,7 +305,7 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, _ := CreateNewUser(userName, "123", false, 0, true)
+	user, _ := CreateNewUser(userName, "123", false, 0, true, "description")
 
 	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
 	n.Associate(user.Username)
@@ -323,7 +323,7 @@ func TestNetworkTypeFromString(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test
 	type args struct {
@@ -352,7 +352,7 @@ func TestGetAllNetworkTypes(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test
 	tests := []struct {
@@ -375,7 +375,7 @@ func TestIsNetworkType(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test
 	type args struct {
@@ -404,7 +404,7 @@ func TestIncrementIP(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test
 	type args struct {
@@ -438,7 +438,7 @@ func Test_routableIP(t *testing.T) {
 	setupTestCase()
 	CreateDB("sqlite3", ":memory:")
 	defer db.Cease()
-	TheServer().Init("localhost", "", UDPProto, "", "")
+	TheServer().Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Test
 	type args struct {

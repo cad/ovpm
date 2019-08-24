@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/permset"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -101,6 +101,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			BytesSent:          bytesSent,
 			BytesReceived:      bytesReceived,
 			ExpiresAt:          user.ExpiresAt().UTC().Format(time.RFC3339),
+			Description:        user.GetDescription(),
 		})
 	}
 
@@ -120,7 +121,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 	}
 
 	var ut []*pb.UserResponse_User
-	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGw, req.HostId, req.IsAdmin)
+	user, err := ovpm.CreateNewUser(req.Username, req.Password, req.NoGw, req.HostId, req.IsAdmin, req.Description)
 	if err != nil {
 		return nil, err
 	}
@@ -131,6 +132,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 		NoGw:               user.IsNoGW(),
 		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
+		Description:		user.GetDescription(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -180,7 +182,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 
 	// User has admin perms?
 	if perms.Contains(ovpm.UpdateAnyUserPerm) {
-		err = user.Update(req.Password, noGW, req.HostId, admin)
+		err = user.Update(req.Password, noGW, req.HostId, admin, req.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -190,6 +192,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 			NoGw:               user.IsNoGW(),
 			HostId:             user.GetHostID(),
 			IsAdmin:            user.IsAdmin(),
+			Description:        user.GetDescription(),
 		})
 		return &pb.UserResponse{Users: ut}, nil
 	}
@@ -200,7 +203,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 			return nil, grpc.Errorf(codes.PermissionDenied, "Caller can only update their user with ovpm.UpdateSelfPerm")
 		}
 
-		err = user.Update(req.Password, noGW, req.HostId, admin)
+		err = user.Update(req.Password, noGW, req.HostId, admin, req.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -210,6 +213,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.UserUpdateRequest) (*p
 			NoGw:               user.IsNoGW(),
 			HostId:             user.GetHostID(),
 			IsAdmin:            user.IsAdmin(),
+			Description:        user.GetDescription(),
 		})
 		return &pb.UserResponse{Users: ut}, nil
 	}
@@ -375,7 +379,7 @@ func (s *VPNService) Init(ctx context.Context, req *pb.VPNInitRequest) (*pb.VPNI
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.InitVPNPerm is required for this operation.")
 	}
 
-	if err := ovpm.TheServer().Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns); err != nil {
+	if err := ovpm.TheServer().Init(req.Hostname, req.Port, proto, req.IpBlock, req.Dns, req.KeepalivePeriod, req.KeepaliveTimeout, req.UseLzo); err != nil {
 		logrus.Errorf("server can not be created: %v", err)
 	}
 	return &pb.VPNInitResponse{}, nil

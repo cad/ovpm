@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // ApplicationError error group indicates application related errors.
@@ -163,6 +163,32 @@ func NotValidNetworkType(key string, value interface{}) Error {
 			"key":   key,
 			"value": value,
 		},
+	}
+	logrus.WithFields(logrus.Fields(err.Args)).Error(err)
+	return err
+}
+
+// ErrNotValidKeepalivePeriod indicates that supplied keepalive period is invalid
+const ErrNotValidKeepalivePeriod = 3012
+
+// NotValidKeepalivePeriod ...
+func NotValidKeepalivePeriod(str string) Error {
+	err := Error{
+		Message: fmt.Sprintf("'%s' is not a valid keepalive period, must be number", str),
+		Code:    ErrNotValidKeepalivePeriod,
+	}
+	logrus.WithFields(logrus.Fields(err.Args)).Error(err)
+	return err
+}
+
+// ErrNotValidKeepaliveTimeout indicates that supplied keepalive timeout is invalid
+const ErrNotValidKeepaliveTimeout = 3013
+
+// NotValidKeepaliveTimeout ...
+func NotValidKeepaliveTimeout(str string) Error {
+	err := Error{
+		Message: fmt.Sprintf("'%s' is not a valid keepalive timeout, must be number", str),
+		Code:    ErrNotValidKeepaliveTimeout,
 	}
 	logrus.WithFields(logrus.Fields(err.Args)).Error(err)
 	return err

@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -52,10 +52,25 @@ var vpnInitCommand = cli.Command{
 		cli.StringFlag{
 			Name:  "net, n",
 			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+			Value: ovpm.DefaultVPNNetwork,
 		},
 		cli.StringFlag{
 			Name:  "dns, d",
 			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
+		},
+		cli.StringFlag{
+			Name:  "keepalive-period",
+			Usage: "Ping period to check if the remote peer is alive.",
+			Value: ovpm.DefaultKeepalivePeriod,
+		},
+		cli.StringFlag{
+			Name:  "keepalive-timeout",
+			Usage: "Ping timeout to assume that remote peer is down.",
+			Value: ovpm.DefaultKeepaliveTimeout,
+		},
+		cli.BoolFlag{
+			Name:  "use-lzo, l",
+			Usage: "Used to determine whether to use the deprecated lzo compression algorithm to support older clients. (default: false)",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -73,7 +88,7 @@ var vpnInitCommand = cli.Command{
 		}
 
 		// Set port number, if provided.
-		port := ovpm.DefaultVPNPort
+		port := c.String("port")
 		if !govalidator.IsNumeric(port) {
 			return errors.InvalidPort(port)
 		}
@@ -85,7 +100,7 @@ var vpnInitCommand = cli.Command{
 		}
 
 		// Set ipblock if provided.
-		netCIDR := ovpm.DefaultVPNNetwork
+		netCIDR := c.String("net")
 		if !govalidator.IsCIDR(netCIDR) {
 			return errors.NotCIDR(netCIDR)
 		}
@@ -95,6 +110,20 @@ var vpnInitCommand = cli.Command{
 		if !govalidator.IsIPv4(dnsAddr) {
 			return errors.NotIPv4(dnsAddr)
 		}
+
+		// Set KeepalivePeriod if provided.
+		keepalivePeriod := c.String("keepalive-period")
+		if !govalidator.IsNumeric(keepalivePeriod) {
+			return errors.NotValidKeepalivePeriod(keepalivePeriod)
+		}
+
+		// Set KeepaliveTimeout if provided.
+		keepaliveTimeout := c.String("keepalive-timeout")
+		if !govalidator.IsNumeric(keepaliveTimeout) {
+			return errors.NotValidKeepaliveTimeout(keepaliveTimeout)
+		}
+
+		useLZO := c.Bool("use-lzo")
 
 		// Ask for confirmation from the user about the destructive
 		// changes that are about to happen.
@@ -135,7 +164,17 @@ var vpnInitCommand = cli.Command{
 			return nil
 		}
 
-		err := vpnInitAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), hostname, port, proto, netCIDR, c.String("dns"))
+		err := vpnInitAction(vpnInitParams{
+			rpcServURLStr:    fmt.Sprintf("grpc://localhost:%d", daemonPort),
+			hostname:         hostname,
+			port:             port,
+			proto:            proto,
+			netCIDR:          netCIDR,
+			dnsAddr:          c.String("dns"),
+			keepalivePeriod:  keepalivePeriod,
+			keepaliveTimeout: keepaliveTimeout,
+			useLZO:           useLZO,
+		})
 		if err != nil {
 			e, ok := err.(errors.Error)
 			if ok {
