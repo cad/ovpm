@@ -14,7 +14,8 @@
     "react/jsx-one-expression-per-line": "off",
     "react-hooks/rules-of-hooks": "off",
     "react-hooks/exhaustive-deps": "off",
-    "no-undef": "off"
+    "no-undef": "off",
+    "jsx-a11y/anchor-is-valid": "off"
   }
 }
 

@@ -28,7 +28,7 @@ const modalStyle = {
 const CREATINGNEWUSER = "CREATINGNEWUSER";
 const EDITINGUSER = "EDITINGUSER";
 const DEFININGNEWNETWORK = "DEFININGNEWNETWORK";
-const EDITINGNETWORK = "EDITINGNETWORK";
+// const EDITINGNETWORK = "EDITINGNETWORK";
 const ASSOCIATINGUSER = "ASSOCIATINGUSER";
 const DISSOCIATINGUSER = "DISSOCIATINGUSER";
 
@@ -54,7 +54,7 @@ function dot2num(dot) {
 
 function num2dot(num) {
   var d = num % 256;
-  for (var i = 3; i > 0; i--) {
+  for (let i = 3; i > 0; i--) {
     num = Math.floor(num / 256);
     d = (num % 256) + "." + d;
   }
@@ -143,7 +143,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleGetUsersFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     this.setState({ users: [] });
@@ -156,7 +156,7 @@ export default class AdminDashboard extends React.Component {
   handleGetNetworksFailure(error) {
     console.log(error);
     this.setState({ networks: [] });
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -168,7 +168,7 @@ export default class AdminDashboard extends React.Component {
   handleGetVPNStatusFailure(error) {
     console.log(error);
     this.setState({ vpn: {} });
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -180,7 +180,7 @@ export default class AdminDashboard extends React.Component {
   handleGetAuthStatusFailure(error) {
     console.log(error);
     this.setState({ self: {} });
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -247,7 +247,7 @@ export default class AdminDashboard extends React.Component {
 
   handleCreateUserFailure(error) {
     console.log(error);
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -290,7 +290,7 @@ export default class AdminDashboard extends React.Component {
 
   handleUpdateUserFailure(error) {
     console.log(error);
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -315,7 +315,7 @@ export default class AdminDashboard extends React.Component {
 
   handleRemoveUserFailure(error) {
     console.log(error);
-    if (error.response.status == 401) {
+    if (error.response.status === 401) {
       this.handleAuthFailure(error);
     }
   }
@@ -337,7 +337,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleDownloadProfileFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     console.log(error);
@@ -359,7 +359,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleDefineNetworkFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     console.log(error);
@@ -380,7 +380,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleUndefineNetworkFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     console.log(error);
@@ -469,7 +469,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleAssociateUserFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     console.log(error);
@@ -480,7 +480,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   handleDissociateUserFailure(error) {
-    if ("response" in error && error.response.status == 401) {
+    if ("response" in error && error.response.status === 401) {
       this.handleAuthFailure(error);
     }
     console.log(error);
@@ -495,7 +495,7 @@ export default class AdminDashboard extends React.Component {
         this.refresh();
       }.bind(this),
       function() {
-        if ("response" in error && error.response.status == 401) {
+        if ("response" in error && error.response.status === 401) {
           this.handleAuthFailure(error);
         }
         console.log(error);
@@ -514,9 +514,9 @@ export default class AdminDashboard extends React.Component {
     }
 
     let users = [];
-    for (var i = 0; i < this.state.users.length; i++) {
+    for (let i = 0; i < this.state.users.length; i++) {
       let isStatic = "";
-      if (this.state.users[i].host_id != 0) {
+      if (this.state.users[i].host_id !== 0) {
         isStatic = (
           <small>
             <span
@@ -661,12 +661,12 @@ export default class AdminDashboard extends React.Component {
     }
 
     let networks = [];
-    for (var i = 0; i < this.state.networks.length; i++) {
+    for (let i = 0; i < this.state.networks.length; i++) {
       let via;
-      if (this.state.networks[i].type == "ROUTE") {
+      if (this.state.networks[i].type === "ROUTE") {
         via = "via vpn-server";
 
-        if (this.state.networks[i].via && this.state.networks[i].via != "") {
+        if (this.state.networks[i].via && this.state.networks[i].via !== "") {
           via = "via " + this.state.networks[i].via;
         }
       }
@@ -756,10 +756,10 @@ export default class AdminDashboard extends React.Component {
                 isAdmin={this.state.editedUser.is_admin}
                 pushGW={!this.state.editedUser.no_gw}
                 ipAllocationMethod={
-                  this.state.editedUser.host_id == 0 ? "dynamic" : "static"
+                  this.state.editedUser.host_id === 0 ? "dynamic" : "static"
                 }
                 staticIP={
-                  this.state.editedUser.host_id == 0
+                  this.state.editedUser.host_id === 0
                     ? ""
                     : num2dot(this.state.editedUser.host_id)
                 }

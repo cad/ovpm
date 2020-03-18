@@ -13,19 +13,23 @@ export class API {
 
     // validate endpoints
     if (this.endpoints.constructor !== Object) {
-      throw "endpoints must be an object: " + this.baseURL;
+      throw new Error("endpoints must be an object: " + this.baseURL);
     } else {
       for (let endpointName in this.endpoints) {
         if (endpoints[endpointName].constructor !== Object) {
-          throw "items of 'endpoints' should be endpoint object: " +
-            endpoints[endpointName];
+          throw new Error(
+            "items of 'endpoints' should be endpoint object: " +
+              endpoints[endpointName]
+          );
         }
 
         let keysShouldExist = ["path", "method"];
         for (let key in keysShouldExist) {
           if (!(keysShouldExist[key] in endpoints[endpointName])) {
-            throw "endpoint object should have a key called: " +
-              keysShouldExist[key];
+            throw new Error(
+              "endpoint object should have a key called: " +
+                keysShouldExist[key]
+            );
           }
           if (
             !(
@@ -33,8 +37,10 @@ export class API {
               String
             )
           ) {
-            throw "endpoint object should have a key called: " +
-              keysShouldExist[key];
+            throw new Error(
+              "endpoint object should have a key called: " +
+                keysShouldExist[key]
+            );
           }
         }
       }
@@ -42,14 +48,14 @@ export class API {
 
     // validate authToken
     if (this.authToken && this.authToken.constructor !== String) {
-      throw "authToken should be a string: " + this.authToken;
+      throw new Error("authToken should be a string: " + this.authToken);
     }
   }
 
   // setAuthToken receives and stores an Authorization Token
   setAuthToken(authToken) {
     if (authToken.constructor !== String) {
-      throw "authToken should be a string: " + authToken;
+      throw new Error("authToken should be a string: " + authToken);
     }
     this.authToken = authToken;
   }
@@ -65,7 +71,7 @@ export class API {
   call(endpointName, data, performAuth, onSuccess, onFailure) {
     // validate endpointName
     if (!(endpointName in this.endpoints)) {
-      throw endpointName + " is not available in " + this.endpoints;
+      throw new Error(endpointName + " is not available in " + this.endpoints);
     }
 
     let endpoint = this.endpoints[endpointName];
