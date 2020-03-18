@@ -68,7 +68,7 @@ export class API {
   // @param {bool} performAuth - if set to true, send Authorization header with the authToken
   // @param {func} onSuccess - success handler to call
   // @param {func} onFailure - failure handler to call
-  call(endpointName, data, performAuth, onSuccess, onFailure) {
+  async call(endpointName, data, performAuth, onSuccess, onFailure) {
     // validate endpointName
     if (!(endpointName in this.endpoints)) {
       throw new Error(endpointName + " is not available in " + this.endpoints);
@@ -88,8 +88,15 @@ export class API {
     }
 
     // actually perform the call
-    axios(callConf)
-      .then(onSuccess)
-      .catch(onFailure);
+    // axios(callConf)
+    //   .then(onSuccess)
+    //   .catch(onFailure);
+
+    try {
+      const res = await axios(callConf);
+      onSuccess(res);
+    } catch (err) {
+      onFailure(err);
+    }
   }
 }
