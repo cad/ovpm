@@ -1,0 +1,56 @@
+{
+  "extends": "react-app",
+  "rules": {
+    "import/no-extraneous-dependencies": "off",
+    "prefer-destructuring": "off",
+    "consistent-return": "off",
+    "no-shadow": "off",
+    "react/require-default-props": "off",
+    "react/destructuring-assignment": "off",
+    "react/prop-types": "off",
+    "react/state-in-constructor": "off",
+    "react/static-property-placement": "off",
+    "react/jsx-props-no-spreadin": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "no-undef": "off",
+    "jsx-a11y/anchor-is-valid": "off"
+  }
+}
+
+// {
+//   "parser": "babel-eslint",
+//   "extends": ["react-app", "airbnb", "prettier", "plugin:jest/recommended"],
+//   "plugins": ["prettier", "jest"],
+//   "globals": {
+//     "window": true,
+//     "localStorage": true,
+//     "fetch": true,
+//     "React": true,
+//     "shallow": true,
+//     "render": true,
+//     "mount": true
+//   },
+//   "rules": {
+//     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+//     "prettier/prettier": ["error"],
+//     "react/jsx-filename-extension": [
+//       1,
+//       {
+//         "extensions": [".js", ".jsx"]
+//       }
+//     ],
+//     "react/forbid-prop-types": [
+//       1,
+//       {
+//         "forbid": ["any"]
+//       }
+//     ],
+//     "react/react/jsx-props-no-spreading": "off",
+//     "react/jsx-one-expression-per-line": "off",
+//     "react-hooks/rules-of-hooks": "error",
+//     "react-hooks/exhaustive-deps": "warn",
+//     "no-console": "off"
+//   }
+// }
