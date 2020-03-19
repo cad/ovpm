@@ -1,31 +1,24 @@
+# OVPM-WebUI
 
-## Getting started
+## Available Scripts
 
-**Clone the repo**
+In the project directory, you can run:
 
-```
-$ git clone <repo>
-$ cd react-starter
-```
+### `yarn start`
 
-**Install dependencies**
+Runs the app in the development mode.
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-```
-$ npm install
-```
+The page will reload if you make edits.
+You will also see any lint errors in the console.
 
-**Start Run**
+### `yarn test`
 
-```
-$ npm start
-```
-This will initiate the project at `http://localhost:8080`.
+Launches the test runner in the interactive watch mode.
 
-## Build Package for Production
+### `yarn build`
 
-For building once for production (via minification).
-Builds into `public/` as `bundle.js`
+Builds the app for production to the `build` folder.
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-```
-$ npm run build
-```
+The build is minified and the filenames include the hashes.
