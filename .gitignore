@@ -5,6 +5,9 @@ data_import/
 *.py[cod]
 production.conf
 credentialsrc
+coverage.txt
+bin/
+bundle/
 
 # C extensions
 .#*
