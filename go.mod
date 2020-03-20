@@ -17,6 +17,7 @@ require (
 	github.com/go-openapi/validate v0.19.7 // indirect
 	github.com/golang/protobuf v1.3.5
 	github.com/google/uuid v1.1.1
+	github.com/goreleaser/nfpm v1.2.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3
 	github.com/jinzhu/gorm v1.9.12
 	github.com/mattn/go-runewidth v0.0.9 // indirect
@@ -24,7 +25,7 @@ require (
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/sirupsen/logrus v1.4.2
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli v1.22.3
 	go.mongodb.org/mongo-driver v1.3.1 // indirect
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6 // indirect
