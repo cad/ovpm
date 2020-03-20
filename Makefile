@@ -17,7 +17,7 @@ development-deps:
 	pacman -Sy yarn
 
 test:
-	go test -race -coverprofile=coverage.txt -covermode=atomic .
+	go test -count=1 -race -coverprofile=coverage.txt -covermode=atomic .
 
 proto:
 	protoc -I api/pb/ -I$(shell go env GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --go_out=plugins=grpc:api/pb	
