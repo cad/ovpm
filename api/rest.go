@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm/api/pb"
-	"github.com/cad/ovpm/bindata"
+	"github.com/cad/ovpm/bundle"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -69,7 +70,8 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 		Path:     "auth",
 	}, mware)
 	mux.Handle("/api/", mware)
-	mux.HandleFunc("/", webuiHandler)
+	mux.Handle("/", http.FileServer(
+		&assetfs.AssetFS{Asset: bundle.Asset, AssetDir: bundle.AssetDir, Prefix: "bundle"}))
 
 	return allowCORS(mux), cancel, nil
 }
@@ -78,26 +80,26 @@ func specsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.URL.Path {
 	case "/api/specs/user.swagger.json":
-		userData, err := bindata.Asset("template/user.swagger.json")
+		userData, err := bundle.Asset("bundle/user.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(userData)
 
 	case "/api/specs/network.swagger.json":
-		networkData, err := bindata.Asset("template/network.swagger.json")
+		networkData, err := bundle.Asset("bundle/network.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(networkData)
 	case "/api/specs/vpn.swagger.json":
-		vpnData, err := bindata.Asset("template/vpn.swagger.json")
+		vpnData, err := bundle.Asset("bundle/vpn.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Write(vpnData)
 	case "/api/specs/auth.swagger.json":
-		vpnData, err := bindata.Asset("template/auth.swagger.json")
+		vpnData, err := bundle.Asset("bundle/auth.swagger.json")
 		if err != nil {
 			logrus.Warn(err)
 		}
@@ -108,35 +110,35 @@ func specsHandler(w http.ResponseWriter, r *http.Request) {
 func webuiHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/bundle.js":
-		userData, err := bindata.Asset("template/bundle.js")
+		userData, err := bundle.Asset("bundle/bundle.js")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Write(userData)
 	case "/js/mui.min.js":
-		userData, err := bindata.Asset("template/mui.min.js")
+		userData, err := bundle.Asset("bundle/js/mui.min.js")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Write(userData)
 	case "/css/bootstrap.min.css":
-		userData, err := bindata.Asset("template/bootstrap.min.css")
+		userData, err := bundle.Asset("bundle/css/bootstrap.min.css")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Header().Set("Content-Type", "text/css")
 		w.Write(userData)
 	case "/css/mui.min.css":
-		userData, err := bindata.Asset("template/mui.min.css")
+		userData, err := bundle.Asset("bundle/css/mui.min.css")
 		if err != nil {
 			logrus.Warn(err)
 		}
 		w.Header().Set("Content-Type", "text/css")
 		w.Write(userData)
 	case "/fonts/glyphicons-halflings-regular.woff":
-		userData, err := bindata.Asset("template/glyphicons-halflings-regular.woff")
+		userData, err := bundle.Asset("bundle/glyphicons-halflings-regular.woff")
 		if err != nil {
 			logrus.Warn(err)
 		}
@@ -144,7 +146,7 @@ func webuiHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(userData)
 
 	default:
-		networkData, err := bindata.Asset("template/index.html")
+		networkData, err := bundle.Asset("bundle/index.html")
 		if err != nil {
 			logrus.Warn(err)
 		}
