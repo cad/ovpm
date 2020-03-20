@@ -1,0 +1,33 @@
+name: "ovpm"
+arch: "amd64"
+platform: "linux"
+version: "${VERSION}"
+section: "default"
+priority: "extra"
+depends:
+- openvpn
+maintainer: "Mustafa ARICI <mustafa@arici.io>"
+description: |
+  OVPM makes all aspects of OpenVPN server administration a breeze.
+vendor: ""
+homepage: "https://github.com/cad/ovpm"
+license: "AGPL3"
+overrides:
+  rpm:
+    files:
+      ./bin/ovpm: "/bin/ovpm"
+      ./bin/ovpmd: "/sbin/ovpmd"
+      ./contrib/systemd/ovpmd.service: "/usr/lib/systemd/system/ovpmd.service"
+  deb:
+    files:
+      ./bin/ovpm: "/bin/ovpm"
+      ./bin/ovpmd: "/sbin/ovpmd"
+      ./contrib/systemd/ovpmd.service: "/lib/systemd/system/ovpmd.service"
+scripts:
+  preinstall: ./scripts/preinstall.sh
+  postinstall: ./scripts/postinstall.sh
+  preremove: ./scripts/preremove.sh
+  postremove: ./scripts/postremove.sh
+empty_folders: 
+  - "/var/db/ovpm"
+

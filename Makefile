@@ -13,9 +13,13 @@ development-deps:
 	# static asset bundling
 	go get github.com/kevinburke/go-bindata/...
 
+	# for creating rpm, deb packages
+	go get github.com/goreleaser/nfpm/cmd/nfpm@latest
+
 	# webui related dependencies
 	pacman -Sy yarn
 
+# Runs unit tests.
 test:
 	go test -count=1 -race -coverprofile=coverage.txt -covermode=atomic .
 
@@ -40,11 +44,22 @@ bundle-swagger: proto
 bundle: clean-bundle bundle-webui bundle-swagger
 	go-bindata -pkg bundle -o bundle/bindata.go bundle/...
 
+# Builds server and client binaries under ./bin folder. Accetps $VERSION env var.
 build: bundle
 	@echo Building
 	rm -rf bin/
 	mkdir -p bin/
 	# CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o ./bin/ovpm  ./cmd/ovpm 
 	# CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o ./bin/ovpmd ./cmd/ovpmd
-	GOOS=linux go build -o ./bin/ovpm  ./cmd/ovpm 
-	GOOS=linux go build -o ./bin/ovpmd ./cmd/ovpmd
+	GOOS=linux go build -ldflags="-X 'github.com/cad/ovpm.Version=$(VERSION)'" -o ./bin/ovpm  ./cmd/ovpm 
+	GOOS=linux go build -ldflags="-X 'github.com/cad/ovpm.Version=$(VERSION)'" -o ./bin/ovpmd ./cmd/ovpmd
+
+clean-dist:
+	rm -rf dist/
+	mkdir -p dist/
+
+# Builds rpm and dep packages under ./dist folder. Accepts $VERSION env var.
+dist: clean-dist build
+	@echo Generating VERSION=$(VERSION) rpm and deb packages under dist/
+	nfpm pkg -t ./dist/ovpm.rpm
+	nfpm pkg -t ./dist/ovpm.deb
