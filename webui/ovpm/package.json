@@ -19,8 +19,7 @@
     "react-moment": "^0.9.7",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "string-template": "^1.0.0",
-    "validator": "^12.2.0"
+    "string-template": "^1.0.0"
   },
   "resolutions": {
     "minimist": "^1.2.3"
