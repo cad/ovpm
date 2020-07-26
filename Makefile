@@ -49,8 +49,12 @@ build: bundle
 	@echo Building
 	rm -rf bin/
 	mkdir -p bin/
-	CGO_ENABLED=0  GOOS=linux go build -ldflags="-w -X 'github.com/cad/ovpm.Version=$(VERSION)' -extldflags '-static'" -o ./bin/ovpm  ./cmd/ovpm
-	CGO_ENABLED=0  GOOS=linux go build -ldflags="-w -X 'github.com/cad/ovpm.Version=$(VERSION)' -extldflags '-static'" -o ./bin/ovpmd ./cmd/ovpmd
+	#CGO_ENABLED=0  GOOS=linux go build -ldflags="-w -X 'github.com/cad/ovpm.Version=$(VERSION)' -extldflags '-static'" -o ./bin/ovpm  ./cmd/ovpm
+	#CGO_ENABLED=0  GOOS=linux go build -ldflags="-w -X 'github.com/cad/ovpm.Version=$(VERSION)' -extldflags '-static'" -o ./bin/ovpmd ./cmd/ovpmd
+
+	# Link dynamically for now
+	CGO_CFLAGS="-g -O2 -Wno-return-local-addr" go build -ldflags="-X 'github.com/cad/ovpm.Version=$(VERSION)'" -o ./bin/ovpm  ./cmd/ovpm
+	CGO_CFLAGS="-g -O2 -Wno-return-local-addr" go build -ldflags="-X 'github.com/cad/ovpm.Version=$(VERSION)'" -o ./bin/ovpmd ./cmd/ovpmd
 
 clean-dist:
 	rm -rf dist/
