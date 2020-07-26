@@ -8,7 +8,7 @@ development-deps:
 	# grpc related dependencies
 	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
-	go get -u github.com/golang/protobuf/protoc-gen-go
+	go get -u github.com/golang/protobuf/protoc-gen-go/...
 
 	# static asset bundling
 	go get github.com/kevinburke/go-bindata/...
@@ -24,8 +24,8 @@ test:
 	go test -count=1 -race -coverprofile=coverage.txt -covermode=atomic .
 
 proto:
-	protoc -I api/pb/ -I$(shell go env GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --go_out=plugins=grpc:api/pb	
-	protoc -I api/pb/ -I$(shell go env GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --grpc-gateway_out=logtostderr=true:api/pb
+	protoc -I/usr/local/include -I api/pb/ -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --grpc-gateway_out=logtostderr=true:api/pb
+	protoc -I/usr/local/include -I api/pb/ -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --go_out=plugins=grpc:api/pb
 
 clean-bundle:
 	@echo Cleaning up bundle/
@@ -39,7 +39,7 @@ bundle-webui:
 	cp -r webui/ovpm/build/* bundle
 
 bundle-swagger: proto
-	protoc -I api/pb/ -I$(shell go env GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --swagger_out=logtostderr=true:bundle
+	protoc -I/usr/local/include -I api/pb/  -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --swagger_out=logtostderr=true:bundle
 
 bundle: clean-bundle bundle-webui bundle-swagger
 	go-bindata -pkg bundle -o bundle/bindata.go bundle/...
