@@ -64,6 +64,8 @@ func vpnStatusAction(rpcServURLStr string) error {
 	table.Append([]string{"DNS", vpnStatusResp.Dns})
 	table.Append([]string{"Cert Exp", vpnStatusResp.ExpiresAt})
 	table.Append([]string{"CA Cert Exp", vpnStatusResp.CaExpiresAt})
+	table.Append([]string{"Use LZO", fmt.Sprintf("%t", vpnStatusResp.UseLzo)})
+
 	table.Render()
 
 	return nil
@@ -117,7 +119,7 @@ func vpnInitAction(params vpnInitParams) error {
 	return nil
 }
 
-func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string) error {
+func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string, useLzo *bool) error {
 	// Parse RPC Server's URL.
 	rpcSrvURL, err := url.Parse(rpcServURLStr)
 	if err != nil {
@@ -171,6 +173,19 @@ func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string) err
 		targetDNSAddr = *dnsAddr
 	}
 
+	// Set USE-LZO preference if provided.
+	var targetLZOPref pb.VPNLZOPref
+	if useLzo == nil {
+		targetLZOPref = pb.VPNLZOPref_USE_LZO_NOPREF
+	} else {
+		if *useLzo == true {
+			targetLZOPref = pb.VPNLZOPref_USE_LZO_ENABLE
+		}
+		if *useLzo == false {
+			targetLZOPref = pb.VPNLZOPref_USE_LZO_DISABLE
+		}
+	}
+
 	// Prepare service caller.
 	var vpnSvc = pb.NewVPNServiceClient(rpcConn)
 
@@ -178,6 +193,7 @@ func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string) err
 	_, err = vpnSvc.Update(context.Background(), &pb.VPNUpdateRequest{
 		IpBlock: targetNetCIDR,
 		Dns:     targetDNSAddr,
+		LzoPref: targetLZOPref,
 	})
 	if err != nil {
 		err := errors.UnknownGRPCError(err)
@@ -186,9 +202,10 @@ func vpnUpdateAction(rpcServURLStr string, netCIDR *string, dnsAddr *string) err
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"SERVER": "OpenVPN",
-		"CIDR":   targetNetCIDR,
-		"DNS":    targetDNSAddr,
+		"SERVER":  "OpenVPN",
+		"CIDR":    targetNetCIDR,
+		"DNS":     targetDNSAddr,
+		"USE_LZO": targetLZOPref.String(),
 	}).Infoln("changes applied")
 
 	return nil

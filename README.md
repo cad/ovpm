@@ -11,6 +11,8 @@ With OVPM you can create and run an OpenVPN server, add/remove VPN users, genera
 
 *This software is not stable yet. We recommend against using it for anything serious until, version 1.0 is released.*
 
+**NOTICE: Version 0.2.8 comes with `comp-lzo` option disabled by default as it is deprecated by OpenVPN.**
+
 **Roadmap**
 
 - [x] OpenVPN management functionality
@@ -108,3 +110,19 @@ another computer.
 * [User Management](https://github.com/cad/ovpm/wiki/User-Management)
 * [Network Management](https://github.com/cad/ovpm/wiki/Network-Management)
 * [Web Interface](https://github.com/cad/ovpm/wiki/Web-Interface)
+
+# Troubleshooting
+
+## Q: My clients cannot connect to VPN after updating OVPM to v0.2.8
+
+Since `comp-lzo` is disabled by default in OVPM v0.2.8, existing clients' .ovpn profiles became invalid.
+
+In order to solve this you have the options below:
+
+* Generate new .ovpn profile for existing clients
+* Or manually remove `comp-lzo` line from clients .ovpn profiles yourself.
+* Or you can upgrade to v0.2.9 and enable lzo option back by invoking the following command.
+```bash
+$ ovpm vpn update --enable-use-lzo
+``` 
+But please note that this is not recommended as lzo option is [deprecated](https://community.openvpn.net/openvpn/wiki/DeprecatedOptions?__cf_chl_jschl_tk__=0468cbb180cdf21ca5119b591d260538cf788d30-1595873970-0-AY1Yn79gf57uYv2hrAKPwvzk-xuDvhY79eHrxJqWw1hpbapF-XgOJSsglI70HxmV78LDzJSz7m_A7eDhvzo_hCM-tx4UB7PfccKTtoHATGrOBqq4mHDhggN_EwJ7yee3fIzLgc9kvhL9pOCiISlE3NpbC0SOX21tYwFs1njdpOVGG4dHLMyudNKRGexapsQxiD2i23r30i_dzqS12QobGvPe96CuWS84ARjIRAUlutT6t5SxkccyOBunduDnbgYoB7RN8x7ab8y8Paim9ypizKiEHbxwP0Z2Y3lXByKdzHUUZSJzjzolHyRyQx-nSBuZQQ#Option:--comp-lzo) in OpenVPN.

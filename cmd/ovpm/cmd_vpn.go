@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/asaskevich/govalidator"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api/pb"
 	"github.com/cad/ovpm/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"go.uber.org/thriftrw/ptr"
 )
 
 var vpnStatusCommand = cli.Command{
@@ -204,6 +204,14 @@ var vpnUpdateCommand = cli.Command{
 			Name:  "dns, d",
 			Usage: fmt.Sprintf("DNS server to push to clients (default: %s)", ovpm.DefaultVPNDNS),
 		},
+		cli.BoolFlag{
+			Name:  "enable-use-lzo",
+			Usage: fmt.Sprintf("Enable use of the deprecated lzo compression algorithm to support older clients."),
+		},
+		cli.BoolFlag{
+			Name:  "disable-use-lzo",
+			Usage: fmt.Sprintf("Disable use of the deprecated lzo compression algorithm to support older clients."),
+		},
 	},
 	Action: func(c *cli.Context) error {
 		action = "vpn:update"
@@ -223,12 +231,26 @@ var vpnUpdateCommand = cli.Command{
 			dnsAddr = &dns
 		}
 
+		var useLzo *bool
+		if c.Bool("enable-use-lzo") && c.Bool("disable-use-lzo") {
+			e := fmt.Errorf("can not use --enable-use-lzo and --disable-use-lzo together")
+			fmt.Println(e.Error())
+			exit(1)
+			return e
+		}
+		if enableLzo := c.Bool("enable-use-lzo"); enableLzo {
+			useLzo = ptr.Bool(true)
+		}
+		if disableLzo := c.Bool("disable-use-lzo"); disableLzo {
+			useLzo = ptr.Bool(false)
+		}
+
 		// If dry run, then don't call the action, just preprocess.
 		if c.GlobalBool("dry-run") {
 			return nil
 		}
 
-		return vpnUpdateAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), netCIDR, dnsAddr)
+		return vpnUpdateAction(fmt.Sprintf("grpc://localhost:%d", daemonPort), netCIDR, dnsAddr, useLzo)
 	},
 }
 
