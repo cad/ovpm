@@ -34,6 +34,8 @@ Here is a little demo of what it looks on terminal to init the server, create a 
 
 ```bash
 # Add YUM Repo
+$ sudo yum install yum-utils -y
+$ sudo yum install epel-release -y
 $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 
 # Install OVPM
