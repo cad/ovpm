@@ -1,5 +1,3 @@
-//go:generate go-bindata template/
-
 package main
 
 import (
@@ -16,9 +14,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/api"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

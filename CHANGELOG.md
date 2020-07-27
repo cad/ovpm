@@ -1,8 +1,15 @@
 # Change Log
 
-## [Unreleased](https://github.com/cad/ovpm/tree/HEAD)
+## [v0.2.8](https://github.com/cad/ovpm/tree/v0.2.8)
 
-[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.6...HEAD)
+- WebUI: dependency updates and switched to yarn (thanks to @drac) [\#92](https://github.com/cad/ovpm/pull/92)
+- CI: switched to Github Actions
+- Minor fixes.
+
+
+## [v0.2.7](https://github.com/cad/ovpm/tree/v0.2.7)
+
+[Full Changelog](https://github.com/cad/ovpm/compare/v0.2.6...v0.2.7)
 
 **Implemented enhancements:**
 

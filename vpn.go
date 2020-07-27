@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm/bindata"
 	"github.com/cad/ovpm/pki"
 	"github.com/cad/ovpm/supervisor"
 	"github.com/coreos/go-iptables/iptables"
@@ -459,12 +458,8 @@ func (svr *Server) DumpsClientConfig(username string) (string, error) {
 		KeepaliveTimeout: svr.GetKeepaliveTimeout(),
 		UseLZO:           svr.IsUseLZO(),
 	}
-	data, err := bindata.Asset("template/client.ovpn.tmpl")
-	if err != nil {
-		return "", err
-	}
 
-	t, err := template.New("client.ovpn").Parse(string(data))
+	t, err := template.New("client.ovpn").Parse(clientOvpnTemplate)
 	if err != nil {
 		return "", fmt.Errorf("can not parse client.ovpn.tmpl template: %s", err)
 	}
@@ -706,12 +701,8 @@ func (svr *Server) emitServerConf() error {
 		KeepaliveTimeout: svr.GetKeepaliveTimeout(),
 		UseLZO:           svr.IsUseLZO(),
 	}
-	data, err := bindata.Asset("template/server.conf.tmpl")
-	if err != nil {
-		return err
-	}
 
-	t, err := template.New("server.conf").Parse(string(data))
+	t, err := template.New("server.conf").Parse(serverConfTemplate)
 	if err != nil {
 		return fmt.Errorf("can not parse server.conf.tmpl template: %s", err)
 	}
@@ -899,11 +890,7 @@ func (svr *Server) emitCCD() error {
 			RedirectGW bool
 		}{IP: user.getIP().String(), NetMask: svr.Mask, Routes: associatedRoutes, Servernets: serverNets, RedirectGW: !user.NoGW}
 
-		data, err := bindata.Asset("template/ccd.file.tmpl")
-		if err != nil {
-			return err
-		}
-		t, err := template.New("ccd.file.tmpl").Parse(string(data))
+		t, err := template.New("ccd.file.tmpl").Parse(ccdFileTemplate)
 		if err != nil {
 			return fmt.Errorf("can not parse ccd.file.tmpl template: %s", err)
 		}
@@ -921,12 +908,8 @@ func (svr *Server) emitCCD() error {
 
 func (svr *Server) emitDHParams() error {
 	var result bytes.Buffer
-	data, err := bindata.Asset("template/dh4096.pem.tmpl")
-	if err != nil {
-		return err
-	}
 
-	t, err := template.New("dh4096.pem.tmpl").Parse(string(data))
+	t, err := template.New("dh4096.pem.tmpl").Parse(dh4096PemTemplate)
 	if err != nil {
 		return fmt.Errorf("can not parse dh4096.pem template: %s", err)
 	}

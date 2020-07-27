@@ -1,6 +1,6 @@
 # OVPM - OpenVPN Management Server
 
-[![Build Status](https://travis-ci.org/cad/ovpm.svg?branch=master)](https://travis-ci.org/cad/ovpm)
+![Build Status](https://github.com/cad/ovpm/workflows/Go/badge.svg)
 [![GitHub version](https://badge.fury.io/gh/cad%2Fovpm.svg)](https://badge.fury.io/gh/cad%2Fovpm)
 [![codecov](https://codecov.io/gh/cad/ovpm/branch/master/graph/badge.svg)](https://codecov.io/gh/cad/ovpm)
 [![GoDoc](https://godoc.org/github.com/cad/ovpm?status.svg)](https://godoc.org/github.com/cad/ovpm)
@@ -34,6 +34,8 @@ Here is a little demo of what it looks on terminal to init the server, create a 
 
 ```bash
 # Add YUM Repo
+$ sudo yum install yum-utils -y
+$ sudo yum install epel-release -y
 $ sudo yum-config-manager --add-repo https://cad.github.io/ovpm/rpm/ovpm.repo
 
 # Install OVPM
