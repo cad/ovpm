@@ -28,6 +28,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli v1.22.3
 	go.mongodb.org/mongo-driver v1.3.1 // indirect
+	go.uber.org/thriftrw v1.24.0
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6 // indirect
 	golang.org/x/net v0.0.0-20200319234117-63522dbf7eec
 	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect

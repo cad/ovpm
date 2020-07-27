@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go.uber.org/thriftrw/ptr"
 	"os"
 	"time"
 
@@ -132,7 +133,7 @@ func (s *UserService) Create(ctx context.Context, req *pb.UserCreateRequest) (*p
 		NoGw:               user.IsNoGW(),
 		HostId:             user.GetHostID(),
 		IsAdmin:            user.IsAdmin(),
-		Description:		user.GetDescription(),
+		Description:        user.GetDescription(),
 	}
 	ut = append(ut, &pbUser)
 
@@ -354,6 +355,7 @@ func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.
 		Dns:          server.GetDNS(),
 		ExpiresAt:    server.ExpiresAt().UTC().Format(time.RFC3339),
 		CaExpiresAt:  server.CAExpiresAt().UTC().Format(time.RFC3339),
+		UseLzo:       server.IsUseLZO(),
 	}
 	return &response, nil
 }
@@ -396,7 +398,14 @@ func (s *VPNService) Update(ctx context.Context, req *pb.VPNUpdateRequest) (*pb.
 		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.UpdateVPNPerm is required for this operation.")
 	}
 
-	if err := ovpm.TheServer().Update(req.IpBlock, req.Dns); err != nil {
+	var useLzo *bool
+	switch req.LzoPref {
+	case pb.VPNLZOPref_USE_LZO_ENABLE:
+		useLzo = ptr.Bool(true)
+	case pb.VPNLZOPref_USE_LZO_DISABLE:
+		useLzo = ptr.Bool(false)
+	}
+	if err := ovpm.TheServer().Update(req.IpBlock, req.Dns, useLzo); err != nil {
 		logrus.Errorf("server can not be updated: %v", err)
 	}
 	return &pb.VPNUpdateResponse{}, nil

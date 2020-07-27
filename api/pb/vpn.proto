@@ -10,6 +10,12 @@ enum VPNProto {
   TCP = 2;
 }
 
+enum VPNLZOPref {
+  USE_LZO_NOPREF = 0;
+  USE_LZO_ENABLE = 1;
+  USE_LZO_DISABLE= 3;
+}
+
 message VPNStatusRequest {}
 message VPNInitRequest {
   string hostname = 1;
@@ -25,6 +31,7 @@ message VPNInitRequest {
 message VPNUpdateRequest {
   string ip_block = 1;
   string dns = 2;
+  VPNLZOPref lzo_pref = 3;
 }
 message VPNRestartRequest {}
 
@@ -68,6 +75,7 @@ message VPNStatusResponse {
   string dns = 11;
   string expires_at = 12;
   string ca_expires_at = 13;
+  bool use_lzo = 14;
 }
 message VPNInitResponse {}
 message VPNUpdateResponse {}
