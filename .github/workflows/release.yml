@@ -35,7 +35,7 @@ jobs:
           go get -u github.com/golang/protobuf/protoc-gen-go
           go get github.com/kevinburke/go-bindata/...
           go get github.com/goreleaser/nfpm/cmd/nfpm@latest
-          ls `go env GOPATH`
+
       - name: Dist
         run: VERSION=${{ steps.get_version.outputs.VERSION }} make dist
 
