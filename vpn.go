@@ -374,7 +374,7 @@ func (svr *Server) Init(hostname string, port string, proto string, ipblock stri
 }
 
 // Update updates VPN server attributes.
-func (svr *Server) Update(ipblock string, dns string) error {
+func (svr *Server) Update(ipblock string, dns string, useLzo *bool) error {
 	if !svr.IsInitialized() {
 		return fmt.Errorf("server is not initialized")
 	}
@@ -393,6 +393,10 @@ func (svr *Server) Update(ipblock string, dns string) error {
 
 	if dns != "" && govalidator.IsIPv4(dns) {
 		svr.dbServerModel.DNS = dns
+		changed = true
+	}
+	if useLzo != nil {
+		svr.dbServerModel.UseLZO = *useLzo
 		changed = true
 	}
 	if changed {

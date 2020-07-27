@@ -1,6 +1,7 @@
 package ovpm
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 	"strings"
@@ -121,23 +122,27 @@ func TestVPNUpdate(t *testing.T) {
 	var updatetests = []struct {
 		vpnnet     string
 		dns        string
+		useLZO     *bool
 		vpnChanged bool
 		dnsChanged bool
 	}{
-		{"", "", false, false},
-		{"192.168.9.0/24", "", true, false},
-		{"", "2.2.2.2", false, true},
-		{"9.9.9.0/24", "1.1.1.1", true, true},
+		{"", "", nil, false, false},
+		{"192.168.9.0/24", "", nil, true, false},
+		{"", "2.2.2.2", nil, false, true},
+		{"9.9.9.0/24", "1.1.1.1", nil, true, true},
+		{"9.9.9.0/24", "1.1.1.1", nil, true, true},
 	}
-	for _, tt := range updatetests {
+	for i, tt := range updatetests {
 		svr := TheServer()
+		svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 		oldIP := svr.Net
 		oldDNS := svr.DNS
-		svr.Update(tt.vpnnet, tt.dns)
+		svr.Update(tt.vpnnet, tt.dns, tt.useLZO)
 		svr = nil
 		svr = TheServer()
 		if (svr.Net != oldIP) != tt.vpnChanged {
+			fmt.Println(i, svr.Net, oldIP, svr.Net == oldIP, tt.vpnChanged)
 			t.Fatalf("expected vpn change: %t but opposite happened", tt.vpnChanged)
 		}
 		if (svr.DNS != oldDNS) != tt.dnsChanged {
