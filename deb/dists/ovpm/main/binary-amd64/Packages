@@ -1,16 +1,16 @@
 Package: ovpm
-Version: 0.2.9
+Version: 0.2.10
 Architecture: amd64
 Maintainer: Mustafa ARICI <mustafa@arici.io>
-Installed-Size: 44659
+Installed-Size: 44658
 Depends: openvpn
 Homepage: https://github.com/cad/ovpm
 Priority: extra
 Section: default
-Filename: pool/main/o/ovpm/ovpm_0.2.9_amd64.deb
-Size: 23368946
-SHA256: 4791ac68f95ff98d68f71769405d97777b9c5be3ea2d1839910da8b7def14d28
-SHA1: 7051ca625a18e0e4d045df08b380e876ef31f59a
-MD5sum: 660987f2a0ca340288b39d64e4d296e2
+Filename: pool/main/o/ovpm/ovpm_0.2.10_amd64.deb
+Size: 23368864
+SHA256: 9412a7dabdee71cc67509c8ef92bb38ef9b83456d64bab4347f2b22d45a4269d
+SHA1: a48b6833e306fb414aaf75406023012c541ff2ad
+MD5sum: 32709031e521c11d898ef3b4fe280400
 Description: OVPM makes all aspects of OpenVPN server administration a breeze.
 
