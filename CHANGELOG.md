@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [v0.2.10](https://github.com/cad/ovpm/tree/v0.2.10)
 
 - Fix ovpmd not starting error on Ubuntu. [#99](https://github.com/cad/ovpm/issues/99)
 
