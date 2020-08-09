@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Fix ovpmd not starting error on Ubuntu. [#99](https://github.com/cad/ovpm/issues/99)
+
 ## [v0.2.9](https://github.com/cad/ovpm/tree/v0.2.9)
 
 - CLI options to enable comp-lzo back.
