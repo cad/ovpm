@@ -51,7 +51,7 @@ var vpnInitCommand = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "net, n",
-			Usage: fmt.Sprintf("VPN network to give clients IP addresses from, in the CIDR form (default: %s)", ovpm.DefaultVPNNetwork),
+			Usage: "VPN network to give clients IP addresses from, in the CIDR form",
 			Value: ovpm.DefaultVPNNetwork,
 		},
 		cli.StringFlag{

@@ -17,12 +17,12 @@ overrides:
     files:
       ./bin/ovpm: "/bin/ovpm"
       ./bin/ovpmd: "/sbin/ovpmd"
-      ./contrib/systemd/ovpmd.service: "/usr/lib/systemd/system/ovpmd.service"
+      ./contrib/systemd/ovpmd.service.rhel: "/usr/lib/systemd/system/ovpmd.service"
   deb:
     files:
       ./bin/ovpm: "/bin/ovpm"
       ./bin/ovpmd: "/sbin/ovpmd"
-      ./contrib/systemd/ovpmd.service: "/lib/systemd/system/ovpmd.service"
+      ./contrib/systemd/ovpmd.service.ubuntu: "/lib/systemd/system/ovpmd.service"
 scripts:
   preinstall: ./scripts/preinstall.sh
   postinstall: ./scripts/postinstall.sh

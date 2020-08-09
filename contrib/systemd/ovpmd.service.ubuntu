@@ -1,0 +1,18 @@
+[Unit]
+Description=OpenVPn Manager
+Before=multi-user.target
+Before=shutdown.target
+After=local-fs.target
+After=remote-fs.target
+After=network-online.target
+After=systemd-journald-dev-log.socket
+Wants=network-online.target
+Conflicts=shutdown.target
+
+[Service]
+TimeoutSec=5min
+PIDFile=/var/run/ovpmd.pid
+ExecStart=/sbin/ovpmd
+
+[Install]
+WantedBy=multi-user.target
