@@ -3,7 +3,7 @@ export var baseURL =
 
 if (process.env.NODE_ENV !== "production") {
   // baseURL = "http://172.16.16.53:8080/api/v1" // local pc external ip
-  baseURL = "http://dfd978a2.ngrok.io/api/v1";
+  baseURL = "http://127.0.0.1:8080/api/v1";
 }
 
 export const endpoints = {
