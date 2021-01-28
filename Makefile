@@ -17,7 +17,7 @@ development-deps:
 	go get github.com/goreleaser/nfpm/cmd/nfpm@latest
 
 	# webui related dependencies
-	pacman -Sy yarn
+	#pacman -Sy yarn
 
 # Runs unit tests.
 test:
