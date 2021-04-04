@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/cad/ovpm"
 	"github.com/cad/ovpm/permset"
+	"github.com/sirupsen/logrus"
 	gcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,7 +26,7 @@ func authRequired(ctx gcontext.Context, req interface{}, handler grpc.UnaryHandl
 		return nil, grpc.Errorf(codes.Unauthenticated, "access denied")
 	}
 
-	// Set user's permissions according to it's criterias.
+	// Set user's permissions according to it's criteria.
 	var permissions permset.Permset
 	if user.IsAdmin() {
 		permissions = permset.New(ovpm.AdminPerms()...)

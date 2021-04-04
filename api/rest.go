@@ -10,7 +10,7 @@ import (
 	"github.com/cad/ovpm/bundle"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -26,7 +26,7 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 	}
 	endPoint := fmt.Sprintf("localhost:%s", grpcPort)
 	ctx = NewOriginTypeContext(ctx, OriginTypeREST)
-	gmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
+	gmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterVPNServiceHandlerFromEndpoint(ctx, gmux, endPoint, opts)
 	if err != nil {
