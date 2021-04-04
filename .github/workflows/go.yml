@@ -8,12 +8,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1'
+          go-version: '^1.16'
 
       - name: Get the version
         id: get_version
@@ -22,7 +22,7 @@ jobs:
       - name: Deps
         run: |
           sudo apt-get update -y
-          sudo apt install reprepro createrepo-c rsync -y
+          sudo apt install reprepro createrepo rsync openvpn -y
           mkdir -p /tmp/protoc
           pushd /tmp/protoc
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.7/protoc-3.15.7-linux-x86_64.zip

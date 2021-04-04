@@ -5,9 +5,9 @@ test:
 	go test -count=1 -race -coverprofile=coverage.txt -covermode=atomic .
 
 proto:
-	protoc -I./api/pb/ --go_opt=paths=source_relative --go_out=./api/pb user.proto vpn.proto network.proto auth.proto
-	protoc -I./api/pb/ --go-grpc_opt=paths=source_relative --go-grpc_out=./api/pb user.proto vpn.proto network.proto auth.proto
-	protoc -I./api/pb/ --grpc-gateway_out ./api/pb \
+	protoc -I./api/pb/ -I/usr/local/include/ --go_opt=paths=source_relative --go_out=./api/pb user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb/ -I/usr/local/include/ --go-grpc_opt=paths=source_relative --go-grpc_out=./api/pb user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb/ -I/usr/local/include/ --grpc-gateway_out ./api/pb \
 			 --grpc-gateway_opt logtostderr=true \
 			 --grpc-gateway_opt paths=source_relative \
 			 --grpc-gateway_opt generate_unbound_methods=true \
@@ -25,7 +25,7 @@ bundle-webui:
 	cp -r webui/ovpm/build/* bundle
 
 bundle-swagger: proto
-	protoc -I./api/pb --openapiv2_out=./api/pb --openapiv2_opt logtostderr=true user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb -I/usr/local/include/ --openapiv2_out=./api/pb --openapiv2_opt logtostderr=true user.proto vpn.proto network.proto auth.proto
 
 bundle: clean-bundle bundle-webui bundle-swagger
 	go-bindata -pkg bundle -o bundle/bindata.go bundle/...

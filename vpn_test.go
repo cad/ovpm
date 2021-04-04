@@ -211,7 +211,10 @@ func TestVPNDumpsClientConfig(t *testing.T) {
 	svr.Init("localhost", "", UDPProto, "", "", "", "", false)
 
 	// Prepare:
-	user, _ := CreateNewUser("user", "password", false, 0, true, "description")
+	user, err := CreateNewUser("user", "password", false, 0, true, "description")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Test:
 	clientConfigBlob, err := svr.DumpsClientConfig(user.GetUsername())

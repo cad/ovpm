@@ -12,7 +12,6 @@ require (
 	github.com/go-openapi/spec v0.20.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.3.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/mattn/go-runewidth v0.0.10 // indirect
