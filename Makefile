@@ -1,31 +1,17 @@
 .PHONY: deps build test bundle-webui clean-bundle bundle-swagger proto bundle build
-docker-build:
-	docker run --rm -i -t -e TRAVIS_GO_VERSION=$(TRAVIS_GO_VERSION) -e TRAVIS_BUILD_NUMBER=$(TRAVIS_BUILD_NUMBER) -e TRAVIS_TAG=$(TRAVIS_TAG) -v `pwd`:/fs/src/github.com/cad/ovpm -w /fs/src/github.com/cad/ovpm cadthecoder/ovpm-builder:latest
-docker-build-shell:
-	docker run --rm -i -t -e TRAVIS_GO_VERSION=$(TRAVIS_GO_VERSION) -e TRAVIS_BUILD_NUMBER=$(TRAVIS_BUILD_NUMBER) -e TRAVIS_TAG=$(TRAVIS_TAG) -v `pwd`:/fs/src/github.com/cad/ovpm -w /fs/src/github.com/cad/ovpm cadthecoder/ovpm-builder:latest /bin/bash
-
-development-deps:
-	# grpc related dependencies
-	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
-	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
-	go get -u github.com/golang/protobuf/protoc-gen-go/...
-
-	# static asset bundling
-	go get github.com/kevinburke/go-bindata/...
-
-	# for creating rpm, deb packages
-	go get github.com/goreleaser/nfpm/cmd/nfpm@latest
-
-	# webui related dependencies
-	#pacman -Sy yarn
 
 # Runs unit tests.
 test:
 	go test -count=1 -race -coverprofile=coverage.txt -covermode=atomic .
 
 proto:
-	protoc -I/usr/local/include -I api/pb/ -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --grpc-gateway_out=logtostderr=true:api/pb
-	protoc -I/usr/local/include -I api/pb/ -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --go_out=plugins=grpc:api/pb
+	protoc -I./api/pb/ --go_opt=paths=source_relative --go_out=./api/pb user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb/ --go-grpc_opt=paths=source_relative --go-grpc_out=./api/pb user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb/ --grpc-gateway_out ./api/pb \
+			 --grpc-gateway_opt logtostderr=true \
+			 --grpc-gateway_opt paths=source_relative \
+			 --grpc-gateway_opt generate_unbound_methods=true \
+			 user.proto vpn.proto network.proto auth.proto
 
 clean-bundle:
 	@echo Cleaning up bundle/
@@ -39,7 +25,7 @@ bundle-webui:
 	cp -r webui/ovpm/build/* bundle
 
 bundle-swagger: proto
-	protoc -I/usr/local/include -I api/pb/  -I/usr/local/include -I$(shell go list -m -f "{{.Dir}}" github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis api/pb/user.proto api/pb/vpn.proto api/pb/network.proto api/pb/auth.proto --swagger_out=logtostderr=true:bundle
+	protoc -I./api/pb --openapiv2_out=./api/pb --openapiv2_opt logtostderr=true user.proto vpn.proto network.proto auth.proto
 
 bundle: clean-bundle bundle-webui bundle-swagger
 	go-bindata -pkg bundle -o bundle/bindata.go bundle/...
