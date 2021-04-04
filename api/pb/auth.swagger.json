@@ -1,0 +1,186 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "auth.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AuthService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/auth/authenticate": {
+      "post": {
+        "operationId": "AuthService_Authenticate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbAuthAuthenticateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbAuthAuthenticateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
+    "/api/v1/auth/status": {
+      "get": {
+        "operationId": "AuthService_Status",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbAuthStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AuthService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserResponseUser": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "serverSerialNumber": {
+          "type": "string"
+        },
+        "cert": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "ipNet": {
+          "type": "string"
+        },
+        "noGw": {
+          "type": "boolean"
+        },
+        "hostId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "isConnected": {
+          "type": "boolean"
+        },
+        "connectedSince": {
+          "type": "string"
+        },
+        "bytesSent": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "bytesReceived": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "expiresAt": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAuthAuthenticateRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAuthAuthenticateResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAuthStatusResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/UserResponseUser"
+        },
+        "isRoot": {
+          "type": "boolean"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

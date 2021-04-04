@@ -1,5 +1,9 @@
 # Change Log
 
+## [v0.2.11]
+
+- Make sure ovpmd listens on IPv4 interfaces [#108](https://github.com/cad/ovpm/issues/108)
+
 ## [v0.2.10](https://github.com/cad/ovpm/tree/v0.2.10)
 
 - Fix ovpmd not starting error on Ubuntu. [#99](https://github.com/cad/ovpm/issues/99)

@@ -2,18 +2,21 @@ FROM fedora:latest
 LABEL maintainer="Mustafa Arici (mustafa@arici.io)"
 
 # Deps
-RUN rpm --import https://mirror.go-repo.io/fedora/RPM-GPG-KEY-GO-REPO
-RUN curl -s https://mirror.go-repo.io/fedora/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
-RUN yum -y install golang ruby ruby-devel gcc make redhat-rpm-config git rpm-build rpmdevtools createrepo reprepro npm
-RUN gem install fpm
+RUN dnf install -y git make yarnpkg nodejs protobuf-compiler protobuf-static openvpn golang
+RUN go get golang.org/dl/go1.16.3
+RUN $(go env GOPATH)/bin/go1.16.3 download
 
-VOLUME /fs/src/github.com/cad/ovpm
+RUN $(go env GOPATH)/bin/go1.16.3 install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    $(go env GOPATH)/bin/go1.16.3 install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
+    $(go env GOPATH)/bin/go1.16.3 install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest && \
+    $(go env GOPATH)/bin/go1.16.3 install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest && \
+    $(go env GOPATH)/bin/go1.16.3 install github.com/kevinburke/go-bindata/go-bindata@latest && \
+    $(go env GOPATH)/bin/go1.16.3 install github.com/goreleaser/nfpm/cmd/nfpm@latest
 
-ENV DIR="/fs/src/github.com/cad/ovpm"
-ENV RELEASEDIR=$DIR/release
-ENV UNITDIR="/usr/lib/systemd/system/"
-ENV GOPATH="/fs/"
+RUN dnf install -y which iptables
+RUN echo "alias go=$(go env GOPATH)/bin/go1.16.3" >> /root/.bashrc
+RUN echo "export PATH=$PATH:$(go env GOPATH)/bin" >> /root/.bashrc
 
-WORKDIR /fs/src/github.com/cad/ovpm
+VOLUME /app
 
-CMD ["./build.sh"]
+WORKDIR /app

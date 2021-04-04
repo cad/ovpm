@@ -1,0 +1,405 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "UserService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/user/create": {
+      "post": {
+        "operationId": "UserService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/user/delete": {
+      "post": {
+        "operationId": "UserService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserDeleteRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/user/genconfig": {
+      "post": {
+        "operationId": "UserService_GenConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserGenConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserGenConfigRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/user/list": {
+      "get": {
+        "operationId": "UserService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/user/renew": {
+      "post": {
+        "operationId": "UserService_Renew",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserRenewRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/user/update": {
+      "post": {
+        "operationId": "UserService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUserUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserResponseUser": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "serverSerialNumber": {
+          "type": "string"
+        },
+        "cert": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "ipNet": {
+          "type": "string"
+        },
+        "noGw": {
+          "type": "boolean"
+        },
+        "hostId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "isConnected": {
+          "type": "boolean"
+        },
+        "connectedSince": {
+          "type": "string"
+        },
+        "bytesSent": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "bytesReceived": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "expiresAt": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "UserUpdateRequestAdminPref": {
+      "type": "string",
+      "enum": [
+        "NOPREFADMIN",
+        "NOADMIN",
+        "ADMIN"
+      ],
+      "default": "NOPREFADMIN"
+    },
+    "UserUpdateRequestGWPref": {
+      "type": "string",
+      "enum": [
+        "NOPREF",
+        "NOGW",
+        "GW"
+      ],
+      "default": "NOPREF"
+    },
+    "UserUpdateRequestStaticPref": {
+      "type": "string",
+      "enum": [
+        "NOPREFSTATIC",
+        "NOSTATIC",
+        "STATIC"
+      ],
+      "default": "NOPREFSTATIC"
+    },
+    "pbUserCreateRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "noGw": {
+          "type": "boolean"
+        },
+        "hostId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserGenConfigRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserGenConfigResponse": {
+      "type": "object",
+      "properties": {
+        "clientConfig": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserRenewRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUserResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserResponseUser"
+          }
+        }
+      }
+    },
+    "pbUserUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "gwpref": {
+          "$ref": "#/definitions/UserUpdateRequestGWPref"
+        },
+        "hostId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "staticPref": {
+          "$ref": "#/definitions/UserUpdateRequestStaticPref"
+        },
+        "adminPref": {
+          "$ref": "#/definitions/UserUpdateRequestAdminPref"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

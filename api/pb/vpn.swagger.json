@@ -1,0 +1,277 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "vpn.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "VPNService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/vpn/init": {
+      "post": {
+        "operationId": "VPNService_Init",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbVPNInitResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbVPNInitRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VPNService"
+        ]
+      }
+    },
+    "/api/v1/vpn/restart": {
+      "post": {
+        "operationId": "VPNService_Restart",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbVPNRestartResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "VPNService"
+        ]
+      }
+    },
+    "/api/v1/vpn/status": {
+      "get": {
+        "operationId": "VPNService_Status",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbVPNStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "VPNService"
+        ]
+      }
+    },
+    "/api/v1/vpn/update": {
+      "post": {
+        "operationId": "VPNService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbVPNUpdateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbVPNUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "VPNService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "pbVPNInitRequest": {
+      "type": "object",
+      "properties": {
+        "hostname": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "protoPref": {
+          "$ref": "#/definitions/pbVPNProto"
+        },
+        "ipBlock": {
+          "type": "string"
+        },
+        "dns": {
+          "type": "string"
+        },
+        "keepalivePeriod": {
+          "type": "string"
+        },
+        "keepaliveTimeout": {
+          "type": "string"
+        },
+        "useLzo": {
+          "type": "boolean"
+        }
+      }
+    },
+    "pbVPNInitResponse": {
+      "type": "object"
+    },
+    "pbVPNLZOPref": {
+      "type": "string",
+      "enum": [
+        "USE_LZO_NOPREF",
+        "USE_LZO_ENABLE",
+        "USE_LZO_DISABLE"
+      ],
+      "default": "USE_LZO_NOPREF"
+    },
+    "pbVPNProto": {
+      "type": "string",
+      "enum": [
+        "NOPREF",
+        "UDP",
+        "TCP"
+      ],
+      "default": "NOPREF"
+    },
+    "pbVPNRestartResponse": {
+      "type": "object"
+    },
+    "pbVPNStatusResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "serialNumber": {
+          "type": "string"
+        },
+        "hostname": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "cert": {
+          "type": "string"
+        },
+        "caCert": {
+          "type": "string"
+        },
+        "net": {
+          "type": "string"
+        },
+        "mask": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "proto": {
+          "type": "string"
+        },
+        "dns": {
+          "type": "string"
+        },
+        "expiresAt": {
+          "type": "string"
+        },
+        "caExpiresAt": {
+          "type": "string"
+        },
+        "useLzo": {
+          "type": "boolean"
+        }
+      }
+    },
+    "pbVPNUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "ipBlock": {
+          "type": "string"
+        },
+        "dns": {
+          "type": "string"
+        },
+        "lzoPref": {
+          "$ref": "#/definitions/pbVPNLZOPref"
+        }
+      }
+    },
+    "pbVPNUpdateResponse": {
+      "type": "object"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

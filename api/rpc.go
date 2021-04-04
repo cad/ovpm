@@ -15,7 +15,9 @@ import (
 	"golang.org/x/net/context"
 )
 
-type AuthService struct{}
+type AuthService struct {
+	pb.UnimplementedAuthServiceServer
+}
 
 func (s *AuthService) Status(ctx context.Context, req *pb.AuthStatusRequest) (*pb.AuthStatusResponse, error) {
 	logrus.Debug("rpc call: auth status")
@@ -65,7 +67,9 @@ func (s *AuthService) Authenticate(ctx context.Context, req *pb.AuthAuthenticate
 	return &pb.AuthAuthenticateResponse{Token: token}, nil
 }
 
-type UserService struct{}
+type UserService struct {
+	pb.UnimplementedUserServiceServer
+}
 
 func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.UserResponse, error) {
 	logrus.Debug("rpc call: user list")
@@ -326,7 +330,9 @@ func (s *UserService) GenConfig(ctx context.Context, req *pb.UserGenConfigReques
 	return nil, grpc.Errorf(codes.PermissionDenied, "Permissions are required for this operation.")
 }
 
-type VPNService struct{}
+type VPNService struct {
+	pb.UnimplementedVPNServiceServer
+}
 
 func (s *VPNService) Status(ctx context.Context, req *pb.VPNStatusRequest) (*pb.VPNStatusResponse, error) {
 	logrus.Debugf("rpc call: vpn status")
@@ -426,7 +432,9 @@ func (s *VPNService) Restart(ctx context.Context, req *pb.VPNRestartRequest) (*p
 	return &pb.VPNRestartResponse{}, nil
 }
 
-type NetworkService struct{}
+type NetworkService struct {
+	pb.UnimplementedNetworkServiceServer
+}
 
 func (s *NetworkService) List(ctx context.Context, req *pb.NetworkListRequest) (*pb.NetworkListResponse, error) {
 	logrus.Debug("rpc call: network list")
