@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v0.2.11]
 
 - Make sure ovpmd listens on IPv4 interfaces [#108](https://github.com/cad/ovpm/issues/108)
 
