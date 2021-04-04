@@ -305,10 +305,18 @@ func TestNetGetAssociatedUsers(t *testing.T) {
 	cidrStr := "192.168.1.0/24"
 	netType := SERVERNET
 	userName := "testUser2"
-	user, _ := CreateNewUser(userName, "123", false, 0, true, "description")
+	user, err := CreateNewUser(userName, "123", false, 0, true, "description")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	n, _ := CreateNewNetwork(netName, cidrStr, netType, "")
-	n.Associate(user.Username)
+	n, err := CreateNewNetwork(netName, cidrStr, netType, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := n.Associate(user.Username); err != nil {
+		t.Fatal(err)
+	}
 	n = nil
 	n, _ = GetNetwork(netName)
 
