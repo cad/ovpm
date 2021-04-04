@@ -77,6 +77,7 @@ func main() {
 type server struct {
 	grpcPort   string
 	lis        net.Listener
+	restLis    net.Listener
 	grpcServer *grpc.Server
 	restServer http.Handler
 	restCancel context.CancelFunc
@@ -99,12 +100,17 @@ func newServer(port, webPort string) *server {
 	}()
 	if !ovpm.Testing {
 		// NOTE(cad): gRPC endpoint listens on localhost. This is important
-		// because we don't authanticate requests coming from localhost.
+		// because we don't authenticate requests coming from localhost.
 		// So gRPC endpoint should never listen on something else then
 		// localhost.
-		lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%s", port))
+		lis, err := net.Listen("tcp4", fmt.Sprintf("127.0.0.1:%s", port))
 		if err != nil {
 			logrus.Fatalf("could not listen to port %s: %v", port, err)
+		}
+
+		restLis, err := net.Listen("tcp4", fmt.Sprintf("0.0.0.0:%s", webPort))
+		if err != nil {
+			logrus.Fatalf("could not listen to port %s: %v", webPort, err)
 		}
 
 		rpcServer := api.NewRPCServer()
@@ -115,6 +121,7 @@ func newServer(port, webPort string) *server {
 
 		return &server{
 			lis:        lis,
+			restLis:    restLis,
 			grpcServer: rpcServer,
 			restServer: restServer,
 			restCancel: context.CancelFunc(restCancel),
@@ -131,7 +138,7 @@ func newServer(port, webPort string) *server {
 func (s *server) start() {
 	logrus.Infof("OVPM %s is running gRPC:%s, REST:%s ...", ovpm.Version, s.grpcPort, s.restPort)
 	go s.grpcServer.Serve(s.lis)
-	go http.ListenAndServe(":"+s.restPort, s.restServer)
+	go http.Serve(s.restLis, s.restServer)
 	ovpm.TheServer().StartVPNProc()
 }
 
