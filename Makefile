@@ -25,7 +25,7 @@ bundle-webui:
 	cp -r webui/ovpm/build/* bundle
 
 bundle-swagger: proto
-	protoc -I./api/pb -I/usr/local/include/ --openapiv2_out=./api/pb --openapiv2_opt logtostderr=true user.proto vpn.proto network.proto auth.proto
+	protoc -I./api/pb -I/usr/local/include/ --openapiv2_out=json_names_for_fields=false:./api/pb --openapiv2_opt logtostderr=true user.proto vpn.proto network.proto auth.proto
 
 bundle: clean-bundle bundle-webui bundle-swagger
 	go-bindata -pkg bundle -o bundle/bindata.go bundle/...

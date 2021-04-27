@@ -232,10 +232,10 @@
         "type": {
           "type": "string"
         },
-        "createdAt": {
+        "created_at": {
           "type": "string"
         },
-        "associatedUsernames": {
+        "associated_usernames": {
           "type": "array",
           "items": {
             "type": "string"
@@ -362,7 +362,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "typeUrl": {
+        "type_url": {
           "type": "string"
         },
         "value": {

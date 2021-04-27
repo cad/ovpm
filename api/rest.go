@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	"strings"
 
@@ -26,7 +27,15 @@ func NewRESTServer(grpcPort string) (http.Handler, context.CancelFunc, error) {
 	}
 	endPoint := fmt.Sprintf("localhost:%s", grpcPort)
 	ctx = NewOriginTypeContext(ctx, OriginTypeREST)
-	gmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{}))
+	gmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			UseProtoNames:   true,
+			EmitUnpopulated: true,
+		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterVPNServiceHandlerFromEndpoint(ctx, gmux, endPoint, opts)
 	if err != nil {

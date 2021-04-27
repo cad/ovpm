@@ -135,22 +135,22 @@
         "port": {
           "type": "string"
         },
-        "protoPref": {
+        "proto_pref": {
           "$ref": "#/definitions/pbVPNProto"
         },
-        "ipBlock": {
+        "ip_block": {
           "type": "string"
         },
         "dns": {
           "type": "string"
         },
-        "keepalivePeriod": {
+        "keepalive_period": {
           "type": "string"
         },
-        "keepaliveTimeout": {
+        "keepalive_timeout": {
           "type": "string"
         },
-        "useLzo": {
+        "use_lzo": {
           "type": "boolean"
         }
       }
@@ -185,7 +185,7 @@
         "name": {
           "type": "string"
         },
-        "serialNumber": {
+        "serial_number": {
           "type": "string"
         },
         "hostname": {
@@ -197,7 +197,7 @@
         "cert": {
           "type": "string"
         },
-        "caCert": {
+        "ca_cert": {
           "type": "string"
         },
         "net": {
@@ -206,7 +206,7 @@
         "mask": {
           "type": "string"
         },
-        "createdAt": {
+        "created_at": {
           "type": "string"
         },
         "proto": {
@@ -215,13 +215,13 @@
         "dns": {
           "type": "string"
         },
-        "expiresAt": {
+        "expires_at": {
           "type": "string"
         },
-        "caExpiresAt": {
+        "ca_expires_at": {
           "type": "string"
         },
-        "useLzo": {
+        "use_lzo": {
           "type": "boolean"
         }
       }
@@ -229,13 +229,13 @@
     "pbVPNUpdateRequest": {
       "type": "object",
       "properties": {
-        "ipBlock": {
+        "ip_block": {
           "type": "string"
         },
         "dns": {
           "type": "string"
         },
-        "lzoPref": {
+        "lzo_pref": {
           "$ref": "#/definitions/pbVPNLZOPref"
         }
       }
@@ -246,7 +246,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "typeUrl": {
+        "type_url": {
           "type": "string"
         },
         "value": {

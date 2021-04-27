@@ -206,43 +206,43 @@
         "username": {
           "type": "string"
         },
-        "serverSerialNumber": {
+        "server_serial_number": {
           "type": "string"
         },
         "cert": {
           "type": "string"
         },
-        "createdAt": {
+        "created_at": {
           "type": "string"
         },
-        "ipNet": {
+        "ip_net": {
           "type": "string"
         },
-        "noGw": {
+        "no_gw": {
           "type": "boolean"
         },
-        "hostId": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "isAdmin": {
+        "is_admin": {
           "type": "boolean"
         },
-        "isConnected": {
+        "is_connected": {
           "type": "boolean"
         },
-        "connectedSince": {
+        "connected_since": {
           "type": "string"
         },
-        "bytesSent": {
+        "bytes_sent": {
           "type": "string",
           "format": "uint64"
         },
-        "bytesReceived": {
+        "bytes_received": {
           "type": "string",
           "format": "uint64"
         },
-        "expiresAt": {
+        "expires_at": {
           "type": "string"
         },
         "description": {
@@ -286,14 +286,14 @@
         "password": {
           "type": "string"
         },
-        "noGw": {
+        "no_gw": {
           "type": "boolean"
         },
-        "hostId": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "isAdmin": {
+        "is_admin": {
           "type": "boolean"
         },
         "description": {
@@ -320,7 +320,7 @@
     "pbUserGenConfigResponse": {
       "type": "object",
       "properties": {
-        "clientConfig": {
+        "client_config": {
           "type": "string"
         }
       }
@@ -356,14 +356,14 @@
         "gwpref": {
           "$ref": "#/definitions/UserUpdateRequestGWPref"
         },
-        "hostId": {
+        "host_id": {
           "type": "integer",
           "format": "int64"
         },
-        "staticPref": {
+        "static_pref": {
           "$ref": "#/definitions/UserUpdateRequestStaticPref"
         },
-        "adminPref": {
+        "admin_pref": {
           "$ref": "#/definitions/UserUpdateRequestAdminPref"
         },
         "description": {
@@ -374,7 +374,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "typeUrl": {
+        "type_url": {
           "type": "string"
         },
         "value": {
