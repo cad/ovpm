@@ -206,11 +206,11 @@ var vpnUpdateCommand = cli.Command{
 		},
 		cli.BoolFlag{
 			Name:  "enable-use-lzo",
-			Usage: fmt.Sprintf("Enable use of the deprecated lzo compression algorithm to support older clients."),
+			Usage: "Enable use of the deprecated lzo compression algorithm to support older clients.",
 		},
 		cli.BoolFlag{
 			Name:  "disable-use-lzo",
-			Usage: fmt.Sprintf("Disable use of the deprecated lzo compression algorithm to support older clients."),
+			Usage: "Disable use of the deprecated lzo compression algorithm to support older clients.",
 		},
 	},
 	Action: func(c *cli.Context) error {
