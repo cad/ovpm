@@ -513,7 +513,7 @@ func (svr *Server) StartVPNProc() {
 		return
 	}
 	if vpnProc == nil {
-		panic(fmt.Sprintf("vpnProc is not initialized!"))
+		panic("vpnProc is not initialized!")
 	}
 	if vpnProc.Status() == supervisor.RUNNING {
 		logrus.Error("OpenVPN is already started")
@@ -531,7 +531,7 @@ func (svr *Server) RestartVPNProc() {
 		return
 	}
 	if vpnProc == nil {
-		panic(fmt.Sprintf("vpnProc is not initialized!"))
+		panic("vpnProc is not initialized!")
 	}
 	svr.Emit()
 	vpnProc.Restart()
@@ -541,7 +541,7 @@ func (svr *Server) RestartVPNProc() {
 // StopVPNProc stops the OpenVPN process.
 func (svr *Server) StopVPNProc() {
 	if vpnProc == nil {
-		panic(fmt.Sprintf("vpnProc is not initialized!"))
+		panic("vpnProc is not initialized!")
 	}
 	if vpnProc.Status() != supervisor.RUNNING {
 		logrus.Error("OpenVPN is already not running")
