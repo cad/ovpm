@@ -70,7 +70,7 @@ $ systemctl enable ovpmd
 Only dependency for ovpm is **OpenVPN>=2.3.3**.
 
 ```bash
-$ go get -u github.com/cad/ovpm/...
+$ go get -u github.com/GoldenRUS/ovpm/...
 
 # Make sure user nobody and group nogroup is available
 # on the system
@@ -104,6 +104,16 @@ OpenVPN profile for user joe is exported to joe.ovpn file.
 You can simply use this file with OpenVPN to connect to the vpn server from 
 another computer.
 
+
+## Web Interface Binding
+
+**Since v0.2.20**: Use `--web-ip` parameter to specify REST API binding address for enhanced security and reverse proxy support.
+
+```bash
+./ovpmd --web-ip 192.168.0.100  # Bind to specific IP
+./ovpmd --web-ip 127.0.0.1      # Localhost only
+```
+Default: 0.0.0.0 (all interfaces)
 
 # Next Steps
 

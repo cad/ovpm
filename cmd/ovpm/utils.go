@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/GoldenRUS/ovpm/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/cad/ovpm/errors"
 	"github.com/urfave/cli"
 
 	"google.golang.org/grpc"

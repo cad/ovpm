@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/errors"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/errors"
 	"github.com/urfave/cli"
 )
 

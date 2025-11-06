@@ -1,18 +1,20 @@
 package api
 
 import (
-	"go.uber.org/thriftrw/ptr"
 	"os"
 	"time"
+
+	"go.uber.org/thriftrw/ptr"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/api/pb"
-	"github.com/cad/ovpm/permset"
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/api/pb"
+	"github.com/GoldenRUS/ovpm/permset"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AuthService struct {
@@ -92,7 +94,7 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 		return nil, err
 	}
 	for _, user := range users {
-		isConnected, connectedSince, bytesSent, bytesReceived := user.ConnectionStatus()
+		isConnected, connectedSince, bytesSent, bytesReceived, tx, rx := user.ConnectionStatus()
 		ut = append(ut, &pb.UserResponse_User{
 			ServerSerialNumber: user.GetServerSerialNumber(),
 			Username:           user.GetUsername(),
@@ -107,6 +109,8 @@ func (s *UserService) List(ctx context.Context, req *pb.UserListRequest) (*pb.Us
 			BytesReceived:      bytesReceived,
 			ExpiresAt:          user.ExpiresAt().UTC().Format(time.RFC3339),
 			Description:        user.GetDescription(),
+			Tx:                 tx,
+			Rx:                 rx,
 		})
 	}
 
@@ -614,6 +618,139 @@ func (s *NetworkService) Dissociate(ctx context.Context, req *pb.NetworkDissocia
 	return &pb.NetworkDissociateResponse{}, nil
 }
 
+type StatisticService struct {
+	pb.UnimplementedStatisticServiceServer
+}
+
+func (s *StatisticService) List(ctx context.Context, req *pb.EmptyRequest) (*pb.StatisticResponse, error) {
+	logrus.Debugf("rpc call: statistics list")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.ListStatisticPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.ListStatisticPerm is required for this operation.")
+	}
+
+	var Statistic []*pb.StatisticResponse_Statistic
+	res, err := ovpm.GetStatisticList()
+
+	if err != nil {
+		return &pb.StatisticResponse{}, err
+	}
+
+	for _, stat := range res {
+		Statistic = append(Statistic, &pb.StatisticResponse_Statistic{
+			Username:              stat.CommonName,
+			ConnectionCount:       stat.ConnectionCount,
+			TotalBytesReceived:    stat.TotalBytesReceived,
+			TotalBytesSent:        stat.TotalBytesSent,
+			TotalBytes:            stat.TotalBytes,
+			AvgConnectionDuration: int64(stat.AvgConnectionDurationSecs),
+		})
+	}
+
+	return &pb.StatisticResponse{Statistic: Statistic}, nil
+}
+
+func (s *StatisticService) GetSystemStatus(ctx context.Context, req *pb.EmptyRequest) (*pb.SystemStatus, error) {
+	logrus.Debugf("rpc call: system status")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.ListStatisticPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.ListStatisticPerm is required for this operation.")
+	}
+
+	res, err := ovpm.GetSystemStatus()
+
+	if err != nil {
+		return &pb.SystemStatus{}, err
+	}
+
+	var Disks []*pb.DiskUsage
+
+	for _, disk := range res.DiskUsage {
+		Disks = append(Disks, &pb.DiskUsage{
+			Mount:          disk.Mount,
+			Total:          disk.Total,
+			Used:           disk.Used,
+			UsedPercentage: disk.UsedPercentage,
+		})
+	}
+
+	return &pb.SystemStatus{
+		CpuUsage:    res.CPUUsage,
+		MemoryTotal: res.MemoryTotal,
+		MemoryUsed:  res.MemoryUsed,
+		SwapTotal:   res.SwapTotal,
+		SwapUsed:    res.SwapUsed,
+		LoadAverage: res.LoadAverage,
+		DiskUsage:   Disks,
+		Timestamp:   timestamppb.New(res.Timestamp),
+	}, nil
+}
+
+func (s *StatisticService) GetInterfaces(ctx context.Context, req *pb.EmptyRequest) (*pb.NetworkInterfacesResponse, error) {
+	logrus.Debugf("rpc call: system status")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.ListStatisticPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.ListStatisticPerm is required for this operation.")
+	}
+
+	ifaces, err := ovpm.GetNetworkInterfaces()
+	if err != nil {
+		return nil, err
+	}
+
+	var Interfaces []*pb.NetworkInterface
+
+	for _, iface := range ifaces.Interfaces {
+		Interfaces = append(Interfaces, &pb.NetworkInterface{
+			Name: iface.Name,
+			Ip:   iface.IP,
+			Mac:  iface.MAC,
+			IsUp: iface.IsUp,
+		})
+	}
+	return &pb.NetworkInterfacesResponse{Interfaces: Interfaces}, nil
+}
+
+func (s *StatisticService) GetInterfaceStats(ctx context.Context, req *pb.InterfaceStatsRequest) (*pb.InterfaceStatsResponse, error) {
+	logrus.Debugf("rpc call: system status")
+	perms, err := permset.FromContext(ctx)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Can't get permset from context")
+	}
+
+	if !perms.Contains(ovpm.ListStatisticPerm) {
+		return nil, grpc.Errorf(codes.PermissionDenied, "ovpm.ListStatisticPerm is required for this operation.")
+	}
+
+	state, err := ovpm.GetInterfaceStats(req.InterfaceName)
+	if err != nil {
+		return &pb.InterfaceStatsResponse{}, err
+	}
+
+	return &pb.InterfaceStatsResponse{Stats: &pb.InterfaceStats{
+		InterfaceName: state.Stats.InterfaceName,
+		TxBytes:       state.Stats.TXBytes,
+		RxBytes:       state.Stats.RXBytes,
+		TxBytesPerSec: state.Stats.TXBytesPerSec,
+		RxBytesPerSec: state.Stats.RXBytesPerSec,
+		TxPackets:     state.Stats.TXPackets,
+		RxPackets:     state.Stats.RXPackets,
+		Timestamp:     timestamppb.New(state.Stats.Timestamp),
+	}}, nil
+}
+
 // NewRPCServer returns a new gRPC server.
 func NewRPCServer() *grpc.Server {
 	var opts []grpc.ServerOption
@@ -624,5 +761,6 @@ func NewRPCServer() *grpc.Server {
 	pb.RegisterVPNServiceServer(s, &VPNService{})
 	pb.RegisterNetworkServiceServer(s, &NetworkService{})
 	pb.RegisterAuthServiceServer(s, &AuthService{})
+	pb.RegisterStatisticServiceServer(s, &StatisticService{})
 	return s
 }

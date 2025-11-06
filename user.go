@@ -7,11 +7,11 @@ import (
 
 	passlib "gopkg.in/hlandau/passlib.v1"
 
-	"github.com/sirupsen/logrus"
+	"github.com/GoldenRUS/ovpm/pki"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm/pki"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 // dbRevokedModel is a database model for revoked VPN users.
@@ -36,6 +36,7 @@ type dbUserModel struct {
 	Admin              bool
 	AuthToken          string // auth token
 	Description        string
+	Statistic          []dbStatisticModel `gorm:"foreignKey:UserID"`
 }
 
 // User represents a vpn user.
@@ -192,7 +193,7 @@ func CreateNewUser(username, password string, nogw bool, hostid uint32, admin bo
 		NoGW:               nogw,
 		HostID:             hostid,
 		Admin:              admin,
-		Description:		description,
+		Description:        description,
 	}
 	user.setPassword(password)
 
@@ -423,10 +424,12 @@ func (u *User) GetDescription() string {
 }
 
 // ConnectionStatus returns information about user's connection to the VPN server.
-func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, bytesSent uint64, bytesReceived uint64) {
+func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, bytesSent uint64, bytesReceived uint64, tx float32, rx float32) {
 	var found *clEntry
+	var speed *SpeedStat
 
 	svr := TheServer()
+	fw := GetFileWatcher()
 
 	// Open the status log file.
 	f, err := svr.openFunc(_DefaultStatusLogPath)
@@ -435,15 +438,31 @@ func (u *User) ConnectionStatus() (isConnected bool, connectedSince time.Time, b
 	}
 
 	cl, _ := svr.parseStatusLogFunc(f) // client list from OpenVPN status log
+	sp := fw.GetStatistics()
+
+	for _, s := range sp {
+		if s.commonName == u.Username {
+			speed = &s
+		}
+	}
+
+	if speed == nil {
+		speed = &SpeedStat{
+			commonName: u.Username,
+			tx:         0,
+			rx:         0,
+		}
+	}
+
 	for _, c := range cl {
 		if c.CommonName == u.Username {
 			found = &c
 		}
 	}
 	if found == nil {
-		return false, time.Time{}, 0, 0
+		return false, time.Time{}, 0, 0, 0, 0
 	}
-	return true, found.ConnectedSince, found.BytesSent, found.BytesReceived
+	return true, found.ConnectedSince, found.BytesSent, found.BytesReceived, speed.tx, speed.rx
 }
 
 func getStaticHostUsers() []*User {

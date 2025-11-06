@@ -1,6 +1,6 @@
 package ovpm
 
-import "github.com/cad/ovpm/permset"
+import "github.com/GoldenRUS/ovpm/permset"
 
 // OVPM available permissions.
 const (
@@ -29,6 +29,9 @@ const (
 	GetNetworkAssociatedUsersPerm
 	AssociateNetworkUserPerm
 	DissociateNetworkUserPerm
+
+	// Statistic permissions
+	ListStatisticPerm
 )
 
 // AdminPerms returns the list of permissions that admin type user has.
@@ -54,6 +57,7 @@ func AdminPerms() []permset.Perm {
 		GetNetworkAssociatedUsersPerm,
 		AssociateNetworkUserPerm,
 		DissociateNetworkUserPerm,
+		ListStatisticPerm,
 	}
 }
 

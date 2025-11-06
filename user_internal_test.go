@@ -5,7 +5,41 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
+
+func TestUser_Statistic(t *testing.T) {
+
+	// Init:
+	db := CreateDB("sqlite3", ":memory:")
+	defer db.Cease()
+
+	u := User{
+		dbUserModel: dbUserModel{
+			Model:              gorm.Model{},
+			ServerID:           0,
+			Server:             dbServerModel{},
+			Username:           "admin",
+			Cert:               "",
+			ServerSerialNumber: "",
+			Hash:               "",
+			Key:                "",
+			NoGW:               false,
+			HostID:             0,
+			Admin:              false,
+			AuthToken:          "",
+			Description:        "",
+		},
+		isConnected:    false,
+		connectedSince: time.Time{},
+		bytesReceived:  0,
+		bytesSent:      0,
+	}
+
+	gotIsConnected, gotConnectedSince, gotBytesSent, gotBytesReceived := u.ConnectionStatus()
+	t.Log(gotIsConnected, gotConnectedSince, gotBytesSent, gotBytesReceived)
+}
 
 func TestUser_ConnectionStatus(t *testing.T) {
 	// Init:

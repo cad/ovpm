@@ -1,8 +1,8 @@
 package ovpm
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 
 	// We blank import sqlite here because gorm needs it.
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -33,6 +33,7 @@ func CreateDB(dialect string, args ...interface{}) *DB {
 	dbase.AutoMigrate(&dbServerModel{})
 	dbase.AutoMigrate(&dbRevokedModel{})
 	dbase.AutoMigrate(&dbNetworkModel{})
+	dbase.AutoMigrate(&dbStatisticModel{})
 
 	dbPTR := &DB{DB: dbase}
 	db = dbPTR

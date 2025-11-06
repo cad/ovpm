@@ -9,13 +9,14 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
 	"google.golang.org/grpc"
 
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/api"
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/api"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -41,6 +42,10 @@ func main() {
 			Name:  "web-port",
 			Usage: "port number for the REST API daemon",
 		},
+		cli.StringFlag{
+			Name:  "web-ip",
+			Usage: "interface IP addr for bind REST API daemon",
+		},
 	}
 	app.Before = func(c *cli.Context) error {
 		logrus.SetLevel(logrus.InfoLevel)
@@ -65,10 +70,24 @@ func main() {
 			webPort = "8080"
 		}
 
-		s := newServer(port, webPort)
+		webIP := c.String("web-ip")
+		if webIP == "" || !isValidIPv4(webIP) {
+			webIP = "0.0.0.0"
+		}
+
+		if err := ovpm.InitializeFileWatcher(); err != nil {
+			log.Fatal(err)
+		}
+
+		s := newServer(port, webPort, webIP)
 		s.start()
-		s.waitForInterrupt()
+		s.WaitForInterrupt()
 		s.stop()
+
+		// Закрываем FileWatcher при выходе
+		if fw := ovpm.GetFileWatcher(); fw != nil {
+			fw.Close()
+		}
 		return nil
 	}
 	app.Run(os.Args)
@@ -86,7 +105,7 @@ type server struct {
 	done       chan bool
 }
 
-func newServer(port, webPort string) *server {
+func newServer(port, webPort, webIP string) *server {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -108,9 +127,9 @@ func newServer(port, webPort string) *server {
 			logrus.Fatalf("could not listen to port %s: %v", port, err)
 		}
 
-		restLis, err := net.Listen("tcp4", fmt.Sprintf("0.0.0.0:%s", webPort))
+		restLis, err := net.Listen("tcp4", fmt.Sprintf("%s:%s", webIP, webPort))
 		if err != nil {
-			logrus.Fatalf("could not listen to port %s: %v", webPort, err)
+			logrus.Fatalf("could not listen to interface:port %s:%s: %v", webIP, webPort, err)
 		}
 
 		rpcServer := api.NewRPCServer()
@@ -150,7 +169,7 @@ func (s *server) stop() {
 
 }
 
-func (s *server) waitForInterrupt() {
+func (s *server) WaitForInterrupt() {
 	<-s.done
 	go timeout(8 * time.Second)
 }
@@ -178,4 +197,18 @@ func increasePort(p string) string {
 	}
 	i++
 	return fmt.Sprintf("%d", i)
+}
+
+func isValidIPv4(ip string) bool {
+	parts := strings.Split(ip, ".")
+	if len(parts) != 4 {
+		return false
+	}
+	for _, part := range parts {
+		num, err := strconv.Atoi(part)
+		if err != nil || num < 0 || num > 255 {
+			return false
+		}
+	}
+	return true
 }

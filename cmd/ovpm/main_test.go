@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cad/ovpm"
+	"github.com/GoldenRUS/ovpm"
 )
 
 func TestMainCmd(t *testing.T) {

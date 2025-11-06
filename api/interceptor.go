@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/sirupsen/logrus"
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/permset"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/permset"
+	"github.com/sirupsen/logrus"
 	gcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -101,6 +101,17 @@ func AuthUnaryInterceptor(ctx gcontext.Context, req interface{}, info *grpc.Unar
 			return authRequired(ctx, req, handler)
 		case "/pb.NetworkService/Dissociate":
 			return authRequired(ctx, req, handler)
+
+		// StatisticService methods
+		case "/pb.StatisticService/List":
+			return authRequired(ctx, req, handler)
+		case "/pb.StatisticService/GetSystemStatus":
+			return authRequired(ctx, req, handler)
+		case "/pb.StatisticService/GetInterfaces":
+			return authRequired(ctx, req, handler)
+		case "/pb.StatisticService/GetInterfaceStats":
+			return authRequired(ctx, req, handler)
+
 		default:
 			logrus.Debugf("rpc: auth not required for endpoint: '%s'", info.FullMethod)
 		}

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/errors"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/errors"
 	"github.com/urfave/cli"
 )
 
@@ -115,11 +115,13 @@ var userCreateCmd = cli.Command{
 // It has two modes; individual mode and bulk mode.
 //
 // Individual mode (default): In this mode update command acts on a single user
-//   whose name is supplied via `username` flag.
+//
+//	whose name is supplied via `username` flag.
 //
 // Bulk mode: In bulk mode update comand acts on all of the users. In order to
-//   activate this mode one must supply asterisk (*) as the username. Then all
-//   users will be updated after evaluating the rest of the received flags.
+//
+//	activate this mode one must supply asterisk (*) as the username. Then all
+//	users will be updated after evaluating the rest of the received flags.
 var userUpdateCmd = cli.Command{
 	Name:    "update",
 	Usage:   "Update a VPN user.",

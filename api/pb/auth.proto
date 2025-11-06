@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/cad/ovpm/api/pb";
+option go_package = "github.com/GoldenRUS/ovpm/api/pb";
 
 package pb;
 

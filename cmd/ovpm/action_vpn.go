@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/GoldenRUS/ovpm/api/pb"
+	"github.com/GoldenRUS/ovpm/errors"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm/api/pb"
-	"github.com/cad/ovpm/errors"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 )

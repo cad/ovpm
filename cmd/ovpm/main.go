@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/cad/ovpm"
+	"github.com/GoldenRUS/ovpm"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )

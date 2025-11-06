@@ -15,9 +15,9 @@ import (
 
 	"time"
 
+	"github.com/GoldenRUS/ovpm/pki"
+	"github.com/GoldenRUS/ovpm/supervisor"
 	"github.com/asaskevich/govalidator"
-	"github.com/cad/ovpm/pki"
-	"github.com/cad/ovpm/supervisor"
 	"github.com/coreos/go-iptables/iptables"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"

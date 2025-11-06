@@ -8,12 +8,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
-	"github.com/cad/ovpm"
-	"github.com/cad/ovpm/api/pb"
-	"github.com/cad/ovpm/errors"
+	"github.com/GoldenRUS/ovpm"
+	"github.com/GoldenRUS/ovpm/api/pb"
+	"github.com/GoldenRUS/ovpm/errors"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sirupsen/logrus"
 )
 
 // userListAction lists existing VPN users on the terminal.

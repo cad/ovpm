@@ -10,7 +10,7 @@ maintainer: "Mustafa ARICI <mustafa@arici.io>"
 description: |
   OVPM makes all aspects of OpenVPN server administration a breeze.
 vendor: ""
-homepage: "https://github.com/cad/ovpm"
+homepage: "https://github.com/GoldenRUS/ovpm"
 license: "AGPL3"
 overrides:
   rpm:

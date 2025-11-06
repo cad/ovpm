@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package pb;
-option go_package = "github.com/cad/ovpm/api/pb";
+option go_package = "github.com/GoldenRUS/ovpm/api/pb";
 
 import "google/api/annotations.proto";
 
@@ -115,6 +115,8 @@ message UserResponse {
     uint64 bytes_received = 12;
     string expires_at = 13;
     string description = 14;
+    float tx = 15;
+    float rx = 16;
   }
 
   repeated User users = 1;
